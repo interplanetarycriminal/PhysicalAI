@@ -115,7 +115,7 @@ dict(n="MQ-6 LPG/propane", pn="MQ-6", cat="Gas & VOC", sub="MQ analog (heated)",
 
 dict(n="MQ-131 ozone", pn="MQ-131", cat="Gas & VOC", sub="MQ analog (heated)",
  meas="Ozone 10ppb-2ppm", how="MOX element responsive to O3's strong oxidising bite — for watching ozone from purifiers, laser printers and summer smog.",
- iface="Analog", v="5V", usd=8, diff=3, pwr="150mA",
+ iface="Analog", v="5V", usd=30, diff=3, pwr="150mA",
  spec="Cross-sensitive to NOx; trend instrument", buy="AE,DFR,DK",
  brd="MQ-131 module", lib="MQUnifiedsensor",
  use="Purifier ozone audits, print-room air, smog-day tracking.",

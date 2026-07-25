@@ -51,6 +51,7 @@
  "sensor|DS18B20 soil temp spear": "S132",
  "sensor|DS18B20 water temp + flow combo": "S210",
  "sensor|Dissolved oxygen kit": "S136",
+ "sensor|Dissolved oxygen kit (Atlas EZO-DO)": "S239",
  "sensor|Draw-wire (string pot) sensor": "S215",
  "sensor|EC / TDS sensor": "S135",
  "sensor|EMF / RF field probes": "S172",

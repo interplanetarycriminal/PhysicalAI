@@ -58,8 +58,8 @@ dict(n="Photoresistor (LDR)", pn="GL5528", cat="Light & UV", sub="Analog (cheape
 
 dict(n="AS7331 spectral UV", pn="AS7331", cat="Light & UV", sub="UV (lab-grade)",
  meas="UV-A, UV-B and UV-C as separate calibrated channels", how="Three filtered photodiodes split the UV band scientifically — the only hobby-priced way to see UV-C (germicidal) separately from sunlight UV.",
- iface="I2C", v="2.7-3.6V", usd=14, diff=2, pwr="<1mA",
- spec="Irradiance in µW/cm² per band", buy="SF,DK,MO",
+ iface="I2C", v="2.7-3.6V", usd=27.5, diff=2, pwr="<1mA",
+ spec="Irradiance in µW/cm² per band. Genuinely separates UV-C from sunlight UV, which nothing cheaper does.", buy="SF,DK,MO",
  brd="SparkFun Qwiic AS7331", lib="SparkFun AS7331",
  use="Germicidal lamp dosimetry, UV-C safety interlocks, atmospheric UV-B research.",
  spark="UV-C disinfection 'proof of dose' logger for shared lab equipment — proves surfaces got their lethal dose, with timestamped receipts.",

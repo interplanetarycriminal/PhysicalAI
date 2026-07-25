@@ -94,7 +94,7 @@ dict(n="SGP30 eCO2/TVOC (legacy)", pn="SGP30", cat="Gas & VOC", sub="MEMS VOC",
 
 dict(n="Electrochemical gas cells", pn="SPEC/EC-Sense/Alphasense (CO, NO2, O3, SO2, H2S)", cat="Gas & VOC", sub="Electrochemical (specific)",
  meas="ONE specific toxic gas, accurately, in ppb-ppm", how="The target gas reacts at an electrode producing a tiny current proportional to concentration — same tech as professional safety badges; selective and quantitative, unlike MOX.",
- iface="Analog (needs AFE) or UART modules", v="3.3V AFE", usd=35, diff=4, pwr="µA cell, mA AFE",
+ iface="Analog (needs AFE) or UART modules", v="3.3V AFE", usd=80, diff=4, pwr="µA cell, mA AFE",
  spec="ppb-class for O3/NO2 cells; 1-2yr cell life", buy="DK,MO,SS,AE",
  brd="SPEC DGS-CO UART modules, Grove versions, ULPSM analog frontends", lib="UART parse or LMP91000 AFE code",
  use="Real safety-relevant CO logging, ozone near laser printers/purifiers, H2S in plumbing/sewage projects.",

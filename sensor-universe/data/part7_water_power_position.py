@@ -5,7 +5,7 @@ SENSORS = [
 dict(n="Analog pH kit", pn="DFRobot SEN0161 / PH-4502C", cat="Water & Liquid", sub="Water chemistry",
  meas="pH 0-14 of any liquid", how="A glass electrode develops a voltage proportional to hydrogen-ion concentration (59mV per pH unit); an amplifier board shifts it into ADC range. Calibrate with buffer sachets.",
  iface="Analog (BNC probe)", v="3.3-5V", usd=30, diff=3, pwr="<10mA",
- spec="±0.1pH calibrated; probes age (~1yr), keep wet", buy="DFR,AE,AMZ,AT",
+ spec="±0.1pH once calibrated. The glass electrode is a consumable — roughly 12-18 months, and it must never dry out. Two-point calibration with buffer sachets is mandatory, not optional.", buy="DFR,AE,AMZ",
  brd="DFRobot Gravity pH v2, PH-4502C budget", lib="analogRead + 2-point cal",
  use="Aquariums, hydroponics dosing, pool monitoring, fermentation (kombucha/yogurt), soil slurry tests.",
  spark="Hydroponic autopilot: pH + EC + peristaltic pumps hold nutrient chemistry in band 24/7 — the difference between hobby and harvest.",
@@ -20,7 +20,7 @@ dict(n="EC / TDS sensor", pn="DFRobot SEN0244 / Grove TDS", cat="Water & Liquid"
  spark="Water-filter honesty meter: inline TDS before/after cartridge quantifies exactly when the filter stops earning its keep.",
  pair="DS18B20 inline, flow sensor for litres-since-new", tags="Water, Grow, Home"),
 
-dict(n="Dissolved oxygen kit", pn="Atlas EZO-DO / DFRobot SEN0237", cat="Water & Liquid", sub="Water chemistry",
+dict(n="Dissolved oxygen kit (Atlas EZO-DO)", pn="Atlas Scientific EZO-DO + probe", cat="Water & Liquid", sub="Water chemistry",
  meas="Dissolved O2 mg/L (fish & ferment critical)", how="A membrane-capped galvanic probe consumes oxygen, generating current proportional to DO — the number that decides whether fish live and aerobic ferments thrive.",
  iface="UART/I2C (Atlas) / Analog", v="3.3-5V", usd=170, diff=3, pwr="<10mA",
  spec="0-20mg/L, membrane maintenance required", buy="AT,DFR,DK",

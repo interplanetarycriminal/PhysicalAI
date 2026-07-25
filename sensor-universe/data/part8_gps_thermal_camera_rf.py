@@ -22,7 +22,7 @@ dict(n="u-blox M10 GNSS", pn="MAX-M10S / NEO-M9N", cat="GPS & Positioning", sub=
 
 dict(n="ZED-F9P RTK centimetre GNSS", pn="u-blox ZED-F9P", cat="GPS & Positioning", sub="RTK (centimetre!)",
  meas="Position to 1-2 CENTIMETRES with correction stream", how="Dual-band carrier-phase measurement plus a correction feed (your own base station or NTRIP internet stream) collapses GPS error from metres to centimetres.",
- iface="UART/I2C/SPI/USB", v="3.3-5V", usd=190, diff=4, pwr="130mA",
+ iface="UART/I2C/SPI/USB", v="3.3-5V", usd=260, diff=4, pwr="130mA",
  spec="1cm+1ppm RTK, 2 boards = moving baseline heading", buy="SF,DK,MO,AE",
  brd="SparkFun GPS-RTK2, Ardusimple simpleRTK2B", lib="SparkFun u-blox GNSS + NTRIP client",
  use="Robot mowers/tractors, drone surveying/mapping, land boundary measurement, structural monitoring.",
@@ -50,7 +50,7 @@ dict(n="MLX90640 thermal camera", pn="MLX90640 (32x24)", cat="Thermal Imaging", 
 
 dict(n="MLX90641 thermal (16x12)", pn="MLX90641", cat="Thermal Imaging", sub="Thermopile array",
  meas="192-pixel thermal image, lower cost/RAM", how="Smaller sibling of the 90640 — quarter the pixels, kinder to RAM and budget, same physics; ideal when you need 'where is the heat' not 'pretty picture'.",
- iface="I2C", v="3.3V", usd=30, diff=2, pwr="18mA",
+ iface="I2C", v="3.3V", usd=60, diff=2, pwr="18mA",
  spec="16x12, ±1°C, 110° FOV", buy="SF,DK,MO",
  brd="SparkFun Qwiic MLX90641", lib="Melexis API/SparkFun",
  use="Occupancy heat blobs, equipment monitoring, fall-detection helpers, pet locators.",
@@ -68,8 +68,8 @@ dict(n="FLIR Lepton 3.5", pn="Lepton 3.5", cat="Thermal Imaging", sub="Microbolo
 
 dict(n="D6T thermal presence", pn="Omron D6T-44L", cat="Thermal Imaging", sub="Low-res presence",
  meas="4x4 thermal pixels optimised for people-detection", how="Omron tuned this 16-pixel thermopile specifically to distinguish humans from sunlit/warm backgrounds — presence detection that PIR can't fake.",
- iface="I2C", v="4.5-5.5V", usd=25, diff=2, pwr="5mA",
- spec="4x4, ±1.5°C, human-detection app notes", buy="DK,MO,SS",
+ iface="I2C", v="4.5-5.5V", usd=55, diff=2, pwr="5mA",
+ spec="4x4, ±1.5°C, with Omron application notes specifically for distinguishing humans from warm backgrounds", buy="DK,MO,SS",
  brd="Grove/Omron eval", lib="Omron sample code",
  use="HVAC people-counting, desk occupancy (hot-desking), stillness monitoring for elders.",
  spark="Seat-level presence in meeting rooms WITHOUT cameras: thermal blobs = headcount; privacy officers actually approve this one.",
@@ -225,7 +225,7 @@ dict(n="IR flame detector (flicker)", pn="KY-026 / 5-channel IR flame array", ca
 
 dict(n="Time-of-flight gesture radar 60GHz", pn="Seeed MR60BHA2 sibling / Infineon BGT60", cat="Specialty & Exotic", sub="Advanced radar",
  meas="Micro-gestures (finger rubs, swipes) in air via radar", how="60GHz radar resolves millimetre finger motion — Google's Soli concept: invisible controls that work through fabric and in darkness.",
- iface="SPI/UART (dev kits)", v="3.3-5V", usd=40, diff=5, pwr="~150mW",
+ iface="SPI/UART (dev kits)", v="3.3-5V", usd=110, diff=5, pwr="~150mW",
  spec="BGT60TR13C dev ecosystem, ML required", buy="DK,MO,SS",
  brd="Infineon BGT60 shields, Seeed 60GHz kits", lib="Infineon SDK + TinyML",
  use="Through-pocket controls, sterile-environment interfaces, automotive cabin gestures.",

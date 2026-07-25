@@ -147,11 +147,11 @@ dict(n="Leaf wetness sensor", pn="DFRobot SEN0526 class", cat="Weather & Outdoor
  spark="A backyard vineyard 'mildew-hours' tracker that tells you the exact optimal (minimal) spray days — the model pros pay agronomists for.",
  pair="SHT35 + rain gauge = full disease-pressure station", tags="Grow, Wild"),
 
-dict(n="Pyranometer (solar irradiance)", pn="DFRobot SEN0562 / Apogee SP-110", cat="Weather & Outdoor", sub="Solar energy",
+dict(n="Pyranometer (solar irradiance)", pn="DFRobot SEN0562 (Gravity)", cat="Weather & Outdoor", sub="Solar energy",
  meas="Total solar power hitting a surface (W/m²)", how="A thermopile or calibrated silicon cell under a dome integrates ALL sunlight wavelengths — the number solar installers and farmers actually need (lux is not it).",
  iface="Analog/I2C/RS485", v="3.3-5V", usd=60, diff=2, pwr="<5mA",
  spec="0-1800W/m²; silicon-cell class ±5%", buy="DFR,DK,AP",
- brd="DFRobot Gravity, Apogee (research-grade)", lib="analogRead/Modbus",
+ brd="DFRobot Gravity SEN0562. Step up: Apogee SP-110 (~$225) or SP-510 for research-grade work — same measurement, an order of magnitude better traceability.", lib="analogRead/Modbus",
  use="Solar-panel performance auditing, agriculture light integrals (DLI), climate stations.",
  spark="Panel health auditor: compare actual array output vs measured irradiance — quantifies dirt, shading and degradation in dollars per month.",
  pair="INA226 on panel output, weather context sensors", tags="Energy, Grow, Wild"),
