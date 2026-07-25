@@ -32,7 +32,7 @@ dict(n="MCP9808 precision temp", pn="MCP9808", cat="Temperature", sub="Digital c
  spec="±0.25°C typ, 0.0625°C resolution, alert output", buy="AF,DK,MO,AE",
  brd="Adafruit 1782 (STEMMA QT)", lib="Adafruit_MCP9808",
  use="Server-rack monitoring, reptile enclosures, 3D-printer chamber temp, fridge/freezer alarms.",
- spec_note="", spark="Wire the ALERT pin to ESP32 wake — a freezer guard that sleeps at 0.1µA for months and only boots when temp drifts.",
+ spark="Wire the ALERT pin to ESP32 wake — a freezer guard that sleeps at 0.1µA for months and only boots when temp drifts.",
  pair="Deep sleep + alert interrupt, buzzer, Wi-Fi push alerts", tags="Home, MachineHealth, Energy"),
 
 dict(n="MAX31855 thermocouple amp", pn="MAX31855K", cat="Temperature", sub="Thermocouple (extreme)",
@@ -53,7 +53,7 @@ dict(n="MAX31865 RTD amplifier", pn="MAX31865", cat="Temperature", sub="RTD (lab
  spark="Build a 'sensor truth machine' — a PT100 reference rig that auto-characterises the error curves of every cheap temp sensor you own.",
  pair="MAX31855 for hot end + RTD for precision zone, PID + SSR", tags="MachineHealth, Water, Grow"),
 
-dict(n="NTC thermistor 10k", pn="NTC 10k B3950 / 104GT", cat="Temperature", sub="Analog (cheapest)",
+dict(n="NTC thermistor 10k", pn="NTC 10k B3950 (e.g. NTCLE100E3103 / generic 3950 bead)", cat="Temperature", sub="Analog (cheapest)",
  meas="Temperature ~-40 to +125°C (glass bead to +300°C)", how="A resistor whose resistance drops predictably as it warms; you read it with one ADC pin and a fixed resistor as a voltage divider, then apply a simple formula.",
  iface="Analog (ADC)", v="any (divider)", usd=0.3, diff=2, pwr="µA (divider dependent)",
  spec="±1-3% bead tolerance; B-equation or Steinhart-Hart math", buy="AE,DK,MO,AMZ",
@@ -155,7 +155,7 @@ dict(n="BMP390 precision barometer", pn="BMP390 / BMP388", cat="Pressure & Altit
  pair="IMU for dead-reckoning + altitude fusion, GPS for absolute calibration", tags="Wild, Motion, Home"),
 
 dict(n="DPS310 barometer", pn="DPS310", cat="Pressure & Altitude", sub="Barometric",
- meas="Air pressure + temp, ±2cm relative altitude class", how="Capacitive pressure cell (rather than resistive) gives very low noise at low power — Infineon's answer to Bosch, great for fast relative-height tracking.",
+ meas="Air pressure + temp; ~±5cm relative altitude in low-noise modes", how="Capacitive pressure cell (rather than resistive) gives very low noise at low power — Infineon's answer to Bosch, great for fast relative-height tracking.",
  iface="I2C/SPI", v="1.7-3.6V", usd=7, diff=1, pwr="1.7µA @1Hz",
  spec="±0.005hPa precision (~±5cm), 32Hz+ modes", buy="AF,DK,MO",
  brd="Adafruit 4494", lib="Adafruit_DPS310",
@@ -191,7 +191,7 @@ dict(n="SDP810 differential pressure", pn="SDP810 / SDP31", cat="Pressure & Alti
  pair="Fan tach (PCNT) for fan curves, SHT41 for mass-flow correction", tags="Air, MachineHealth, Home"),
 
 dict(n="MPRLS ported pressure", pn="MPRLS0025PA00001A", cat="Pressure & Altitude", sub="Ported/fluid",
- meas="0-25 PSI gauge pressure via a physical port you can tube", how="A silicone-gel-protected MEMS die behind a barbed port — you push a tube on it, so it can measure squeeze bulbs, water columns, vacuum chambers and lungs.",
+ meas="0-25 PSI ABSOLUTE pressure via a physical port you can tube", how="A silicone-gel-protected MEMS die behind a barbed port — you push a tube on it, so it can measure squeeze bulbs, water columns, vacuum chambers and lungs. It reads ABSOLUTE pressure (~14.7 PSI sitting on the bench), so for every gauge measurement you must subtract atmospheric — either by maths or with a second sensor open to air.",
  iface="I2C", v="3.3/5V (Adafruit brd)", usd=15, diff=1, pwr="2mA meas",
  spec="±0.4% FS, 24-bit", buy="AF,DK,MO",
  brd="Adafruit 3965", lib="Adafruit_MPRLS",

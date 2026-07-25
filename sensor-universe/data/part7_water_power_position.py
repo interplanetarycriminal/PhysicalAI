@@ -40,7 +40,7 @@ dict(n="Turbidity sensor", pn="DFRobot SEN0189", cat="Water & Liquid", sub="Wate
 
 dict(n="YF-S201 flow sensor", pn="YF-S201 / FS300A", cat="Water & Liquid", sub="Flow",
  meas="Water flow 1-30 L/min via inline turbine", how="A turbine with a magnet spins in the flow, pulsing a Hall sensor — count pulses per second (PCNT peripheral) and you have litres per minute.",
- iface="Pulse (PCNT)", v="5-18V (divider for echo)", usd=5, diff=1, pwr="15mA",
+ iface="Pulse (PCNT)", v="5-18V supply; pulse output needs a divider or level shift to 3.3V", usd=5, diff=1, pwr="15mA",
  spec="~450 pulses/L, G1/2\" thread", buy="AE,AMZ,DFR,CE",
  brd="Inline threaded body", lib="PCNT / interrupt counting",
  use="Irrigation totals, shower-length feedback, leak detection (flow when nobody home), beer-line metering.",

@@ -74,8 +74,8 @@ dict(n="BioAmp EXG Pill", pn="UpsideDownLabs EXG", cat="Biometric & Health", sub
  spark="Accessibility switch from a blink: EOG blink-detection drives switch-access for people who can only move their eyes — life-changing for tens of dollars.",
  pair="BLE HID keyboard emulation, debounced blink classifier", tags="Health, Robots"),
 
-dict(n="Fingerprint reader R503", pn="R503 / GT-521F52", cat="Biometric & Health", sub="Identification",
- meas="Fingerprint enrolment + 1:N matching onboard", how="A capacitive imaging window with a processor that stores templates and does the matching — your ESP32 just hears 'finger #3 matched' over UART.",
+dict(n="Fingerprint reader R503", pn="R503 (optical, round)", cat="RFID & NFC", sub="Biometric identification",
+ meas="Fingerprint enrolment + 1:N matching onboard", how="An OPTICAL imaging window with a processor that stores templates and does the matching on-module — your ESP32 just hears 'finger #3 matched' over UART. (Capacitive readers such as the GT-521F52 family work differently and are not interchangeable.)",
  iface="UART", v="3.3V", usd=20, diff=2, pwr="20mA (touch-wake ring)",
  spec="R503: round, RGB ring, 200 prints, IP65 face", buy="AE,SF,DFR",
  brd="R503 (round) / GT-521F52", lib="Adafruit_Fingerprint",
@@ -117,7 +117,7 @@ dict(n="AS3935 lightning detector", pn="AS3935", cat="Weather & Outdoor", sub="L
  spec="40km range, leading-edge storm tracking", buy="SF,DFR,AE,DK",
  brd="SparkFun 15441, CJMCU-3935", lib="SparkFun AS3935",
  use="Storm early warning, pool/sports-field safety sirens, photography lightning triggers, drone recall.",
- spark="Camera deadman: AS3935 interrupt fires a DSLR trigger within microseconds — catch the NEXT strike in the same storm cell automatically.",
+ spark="Storm-approach dashboard: log strike rate and estimated distance to watch a cell close in, and drive a pool/sports-field evacuation siren. (For lightning PHOTOGRAPHY the AS3935 is too slow — its interrupt arrives milliseconds after event validation; dedicated optical triggers are what photographers use.) Budget real time for antenna tuning and noise-floor calibration: false triggers from switching supplies and fluorescent lights are the #1 thing that ruins these builds.",
  pair="Optocoupler shutter trigger, siren relay, LoRa to field", tags="Wild, Safety, Play"),
 
 dict(n="ML8511 / VEML6075 UV outdoor", pn="ML8511", cat="Weather & Outdoor", sub="Solar UV",

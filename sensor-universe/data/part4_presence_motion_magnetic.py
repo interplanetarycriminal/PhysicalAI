@@ -115,7 +115,7 @@ dict(n="ADXL355 low-noise accel", pn="ADXL355", cat="Motion & IMU", sub="Precisi
  meas="±2-8g at seismometer-class noise floor", how="A much larger, thermally-stable MEMS structure achieves 25µg/√Hz noise — quiet enough to record earthquakes, structural sway, and footsteps through a building.",
  iface="I2C/SPI", v="2.25-3.6V", usd=38, diff=3, pwr="200µA",
  spec="20-bit, 25µg/√Hz, low drift", buy="AF,DK,MO",
- brd="Adafruit 5417, EVAL-ADXL355", lib="Adafruit_ADXL355",
+ brd="EVAL-ADXL355Z (Analog Devices), Sparkfun/3rd-party ADXL355 boards, CJMCU-355", lib="plasmapper/adxl355-arduino or a datasheet SPI driver (no Adafruit library exists)",
  use="DIY seismometry (Raspberry Shake class), bridge/building monitoring, tilt of dams/retaining walls.",
  spark="A neighbourhood earthquake early-warning mesh: 10 houses × ADXL355 nodes detect P-waves seconds before the shaking arrives.",
  pair="GPS time-sync (PPS), ESP-NOW/MQTT mesh", tags="Wild, MachineHealth, Safety"),

@@ -21,7 +21,7 @@ dict(n="VEML7700 high-accuracy lux", pn="VEML7700", cat="Light & UV", sub="Ambie
  pair="RTC + SD, circadian LED strips (PWM CCT control)", tags="Light, Health, Home"),
 
 dict(n="LTR-390 UV + ambient", pn="LTR-390-UV", cat="Light & UV", sub="UV index",
- meas="UV-A intensity + UV index + ambient light", how="Two photodiodes — one filtered to UV-A — give a real UV index, the same number weather apps publish, plus lux from the same chip.",
+ meas="UV-A intensity + UV index + ambient light", how="Two photodiodes — one filtered to UV-A — give a UV-A irradiance count plus lux from the same chip. Note: the library's 'UV index' is an APPROXIMATION. True UVI is erythemally weighted and dominated by UV-B, which this part cannot see. Excellent for relative dose tracking; not a substitute for a UVI instrument.",
  iface="I2C", v="1.7-3.6V", usd=5, diff=1, pwr="100µA",
  spec="UVI + lux, 18-bit", buy="AF,DK,MO",
  brd="Adafruit 4831", lib="Adafruit_LTR390",
@@ -50,7 +50,7 @@ dict(n="TSL2591 high dynamic lux", pn="TSL2591", cat="Light & UV", sub="Ambient 
 dict(n="Photoresistor (LDR)", pn="GL5528", cat="Light & UV", sub="Analog (cheapest)",
  meas="Light level (relative)", how="Cadmium-sulfide cell whose resistance falls with light; with a fixed resistor it makes a voltage divider any ADC can read. Slow, imprecise, unkillable.",
  iface="Analog", v="any", usd=0.2, diff=1, pwr="divider current",
- spec="~10kΩ dark to ~1kΩ bright; CdS banned in some products (RoHS)", buy="AE,AMZ,SF,CE",
+ spec="~0.5-2MΩ in darkness, ~8-20kΩ at 10 lux, ~1kΩ in bright sun; pick the divider resistor for YOUR light range. CdS is RoHS-restricted in commercial products", buy="AE,AMZ,SF,CE",
  brd="Bare 5mm cells, modules with comparator", lib="analogRead",
  use="Nightlights, laser tripwires, line-following robots' floor contrast, sunrise alarms.",
  spark="A laser-harp or tripwire array: 8 LDRs + 8 laser pointers = musical instrument or perimeter game for under $15.",
@@ -131,7 +131,7 @@ dict(n="JSN-SR04T waterproof ultrasonic", pn="JSN-SR04T / AJ-SR04M", cat="Distan
  pair="LoRa + solar, rain gauge for context", tags="Water, Wild, Safety"),
 
 dict(n="VL53L0X ToF laser", pn="VL53L0X", cat="Distance & Ranging", sub="Laser time-of-flight",
- meas="Distance 30-2000mm, light-based, mm precision", how="Times photons from an invisible 940nm laser pulse to target and back — measures actual flight time of light, immune to target color, in a chip the size of a grain of rice.",
+ meas="Distance 30-2000mm, light-based, mm precision", how="Times photons from an invisible 940nm laser pulse to the target and back — it measures the actual flight time of light, in a chip the size of a grain of rice. Range depends strongly on target reflectivity (ST quotes ~2m on a white target but ~0.8m on dark grey).",
  iface="I2C", v="2.6-3.5V", usd=5, diff=1, pwr="19mA ranging",
  spec="±3% accuracy, narrow beam vs ultrasonic", buy="AF,SF,AE,DK,PI",
  brd="GY-530, Adafruit 3317, Pololu", lib="Adafruit_VL53L0X, Pololu VL53L0X",
