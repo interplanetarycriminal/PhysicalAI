@@ -636,11 +636,14 @@ def sheet_seeds(wb, seeds, records):
     ncols = 10
     ws, row = new_sheet(
         wb, "Invention Seeds", "💡 INVENTION SEEDS — buildable concepts",
-        "Each is real enough to start this weekend. Where a seed lists structured part IDs its "
-        "BOM is COMPUTED from the catalog, so it cannot drift from the real prices.",
+        "Each is real enough to start this weekend. The 'Sensors 1× each' column is COMPUTED "
+        "live from the catalog's real prices — one of every part listed — so it can't drift the "
+        "way v5's hand-typed BOMs did. Where the stated ≈BOM is much higher, the build needs "
+        "several of something, or the non-sensor parts dominate.",
         ncols, tab=S.ACCENT)
-    headers = S.unique_headers(["#", "Invention", "The pitch", "Parts", "Other parts",
-                                "≈BOM", "Computed", "Difficulty", "Themes", "Why it works"])
+    headers = S.unique_headers(["#", "Invention", "The pitch", "Parts from the catalog",
+                                "Other parts", "≈BOM", "Sensors 1× each", "Difficulty",
+                                "Themes", "Why it works"])
     S.table_header(ws, row, headers)
     hdr, row = row, row + 1
     for i, s in enumerate(seeds, 1):
