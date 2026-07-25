@@ -1,0 +1,406 @@
+sensor_id,sensor,usd,category,n_outcomes,outcomes_per_dollar,outcome_keys
+S182,Scale-hacking: NAU7802,12,Force & Weight,16,1.33,consumable-remaining|container-fullness|drift-from-baseline|gait-quality|growth-rate|hive-state|livestock-wellbeing|machine-state|object-count|object-dropped|object-present|occupancy-duration|plant-thirsty|posture|someone-present|tank-level
+S072,MPU-6050 6-axis IMU,2,Motion & Vibration,15,7.5,am-i-level|cycle-complete|door-state|gait-quality|imbalance|machine-duty-cycle|machine-running|machine-state|object-dropped|object-moved|posture|step-count|structure-moved|tamper-detected|tremor-present
+S073,LSM6DSOX ML-core IMU,10,Motion & Vibration,15,1.5,am-i-level|bearing-failing|drift-from-baseline|gait-quality|imbalance|livestock-wellbeing|machine-duty-cycle|machine-running|machine-state|object-dropped|object-moved|posture|step-count|tamper-detected|tremor-present
+S087,INMP441 I2S MEMS mic,3,Sound & Audio,14,4.67,air-leak|bearing-failing|cooking-detected|cycle-complete|device-left-on|glass-broken|intrusion|machine-running|machine-state|person-asleep|someone-present|stove-left-on|unusual-sound|which-appliance
+S091,Piezo contact mic / disc,0.5,Sound & Audio,14,28.0,air-leak|bearing-failing|cycle-complete|drift-from-baseline|glass-broken|intrusion|machine-duty-cycle|machine-running|machine-state|object-dropped|someone-present|tamper-detected|unusual-sound|water-leak
+S098,HX711 + load cell,5,Force & Weight,14,2.8,consumable-remaining|container-fullness|drift-from-baseline|growth-rate|hive-state|livestock-wellbeing|machine-state|object-count|object-dropped|object-present|occupancy-duration|plant-thirsty|someone-present|tank-level
+S169,Grove Vision AI v2,16,Cameras & Vision,14,0.88,container-fullness|crossed-boundary|cycle-complete|entered-or-left|fruit-ripe|how-many-people|machine-state|material-type|object-count|object-identity|object-present|queue-length|someone-present|vehicle-approaching
+S085,Reed switch,0.5,Magnetic & Compass,13,26.0,container-fullness|cycle-complete|door-state|entered-or-left|flow-rate|intrusion|is-raining|object-count|object-present|rotation-speed|tamper-detected|tank-level|water-used-total
+S144,INA219 current/power monitor,2.5,Power & Electrical,13,5.2,abnormal-current|battery-charge|battery-health|cycle-complete|device-left-on|energy-budget-node|machine-duty-cycle|machine-running|machine-state|phantom-load|power-now|solar-performance|which-appliance
+S178,LDC1612 inductive sensing,9,Industrial & Automotive,13,1.44,cycle-complete|door-state|hidden-wiring|machine-state|magnetic-anomaly|material-type|object-count|object-genuine|object-material|object-present|rotation-speed|structure-moved|tamper-detected
+S179,DFRobot Gravity mmWave presence radar,22,Presence & Occupancy,13,0.59,breathing-rate|entered-or-left|intrusion|no-movement-alarm|occupancy-duration|person-asleep|person-fell|routine-broken|sleep-stage-proxy|someone-present|someone-still-present|through-wall-motion|where-in-room
+S207,KX132 low-power accel,6,Motion & Vibration,13,2.17,am-i-level|bearing-failing|cycle-complete|drift-from-baseline|imbalance|machine-running|machine-state|object-dropped|object-moved|person-fell|rotation-speed|structure-moved|tamper-detected
+S007,MLX90614 IR thermometer,8,Temperature,12,1.5,bearing-failing|body-temp-trend|cooking-detected|frost-tonight|livestock-wellbeing|machine-running|object-temperature|overheating|sky-clear|someone-present|stove-left-on|water-hot-enough
+S075,BNO086 high-perf fusion IMU,22,Motion & Vibration,12,0.55,am-i-level|gait-quality|how-far-travelled|joint-angle|object-dropped|object-moved|posture|returned-to-spot|step-count|structure-moved|tremor-present|which-way-facing
+S076,ADXL345 accelerometer,3,Motion & Vibration,12,4.0,am-i-level|bearing-failing|door-state|drift-from-baseline|imbalance|intrusion|machine-duty-cycle|machine-running|object-dropped|object-moved|step-count|tamper-detected
+S185,Weight-in-motion: piezo cable,15,Motion & Vibration,12,0.8,crossed-boundary|entered-or-left|gait-quality|intrusion|machine-duty-cycle|object-count|perimeter-crossed|queue-length|someone-present|step-count|vehicle-approaching|vehicle-speed
+S205,BMI270 wearable IMU,8,Motion & Vibration,12,1.5,am-i-level|gait-quality|how-fast-moving|machine-running|object-dropped|object-moved|person-fell|posture|sleep-stage-proxy|step-count|tamper-detected|tremor-present
+S206,MPU-9250 9-axis (legacy),8,Motion & Vibration,12,1.5,am-i-level|how-fast-moving|machine-running|magnetic-anomaly|object-dropped|object-moved|posture|returned-to-spot|step-count|structure-moved|tremor-present|which-way-facing
+S212,INA3221 triple-channel power,4,Power & Electrical,12,3.0,abnormal-current|battery-charge|battery-health|device-left-on|drift-from-baseline|energy-budget-node|machine-running|machine-state|phantom-load|power-now|solar-performance|which-appliance
+S215,Draw-wire (string pot) sensor,15,Position & Rotation,12,0.8,container-fullness|cycle-complete|door-state|growth-rate|how-far-travelled|joint-angle|machine-state|object-moved|returned-to-spot|snow-depth|structure-moved|tank-level
+S079,ICM-20948 9-axis IMU,15,Motion & Vibration,11,0.73,am-i-level|gait-quality|how-fast-moving|joint-angle|magnetic-anomaly|object-moved|posture|returned-to-spot|step-count|structure-moved|which-way-facing
+S084,A3144 / SS49E Hall switches,0.4,Magnetic & Compass,11,22.0,abnormal-current|cycle-complete|door-state|flow-rate|machine-running|object-count|object-present|rotation-speed|tamper-detected|water-used-total|wind-conditions
+S086,MLX90393 wide-range 3D mag,8,Magnetic & Compass,11,1.38,abnormal-current|door-state|hidden-wiring|machine-state|magnetic-anomaly|object-moved|object-present|rotation-speed|tamper-detected|tank-level|which-way-facing
+S088,ICS-43434 I2S mic,5,Sound & Audio,11,2.2,air-leak|bearing-failing|cooking-detected|drift-from-baseline|glass-broken|intrusion|machine-running|person-asleep|someone-present|unusual-sound|which-appliance
+S096,Geophone SM-24,30,Motion & Vibration,11,0.37,crossed-boundary|drift-from-baseline|intrusion|machine-running|object-count|perimeter-crossed|someone-present|structure-moved|unusual-sound|vehicle-approaching|vehicle-speed
+S100,Velostat pressure sheets,5,Force & Weight,11,2.2,crossed-boundary|gait-quality|no-movement-alarm|object-present|occupancy-duration|person-fell|posture|sleep-stage-proxy|someone-present|step-count|where-in-room
+S168,HuskyLens AI camera,45,Cameras & Vision,11,0.24,colour-match|crossed-boundary|entered-or-left|how-many-people|object-count|object-genuine|object-identity|object-present|obstacle-ahead|someone-present|who-is-it
+S181,Time-of-flight gesture radar 60GHz,110,Presence & Occupancy,11,0.1,breathing-rate|heart-rate|how-fast-moving|how-many-people|map-surroundings|obstacle-ahead|person-fell|someone-present|someone-still-present|tremor-present|where-in-room
+S210,DS18B20 water temp + flow combo,10,Water & Liquid,11,1.1,cycle-complete|energy-cost|filter-clogged|flow-rate|machine-running|pump-dry|solar-performance|thermal-energy-moved|water-hot-enough|water-used-total|which-appliance
+S001,DS18B20 digital temp probe,2.5,Temperature,10,4.0,compost-active|drift-from-baseline|food-fresh|frost-tonight|machine-running|object-temperature|overheating|soil-ready-to-plant|thermal-energy-moved|water-hot-enough
+S062,RPLIDAR / LD19 scanning LiDAR,40,Distance & Ranging,10,0.25,crossed-boundary|how-many-people|intrusion|map-surroundings|object-count|obstacle-ahead|perimeter-crossed|returned-to-spot|someone-present|where-in-room
+S068,LD2450 multi-target tracking radar,12,Presence & Occupancy,10,0.83,crossed-boundary|entered-or-left|how-fast-moving|how-many-people|intrusion|occupancy-duration|perimeter-crossed|queue-length|someone-present|where-in-room
+S069,Seeed MR60BHA2 vital-sign radar,25,Presence & Occupancy,10,0.4,breathing-rate|breathing-stopped|heart-rate|no-movement-alarm|occupancy-duration|person-asleep|person-fell|sleep-stage-proxy|someone-present|someone-still-present
+S071,Grid-EYE AMG8833 thermal array,35,Presence & Occupancy,10,0.29,entered-or-left|how-many-people|machine-running|object-temperature|overheating|person-fell|someone-present|someone-still-present|stove-left-on|where-in-room
+S074,BNO055 fusion IMU,25,Motion & Vibration,10,0.4,am-i-level|gait-quality|how-fast-moving|joint-angle|object-moved|posture|returned-to-spot|structure-moved|tremor-present|which-way-facing
+S077,ADXL355 low-noise accel,38,Motion & Vibration,10,0.26,am-i-level|bearing-failing|crossed-boundary|drift-from-baseline|imbalance|machine-state|object-moved|someone-present|structure-moved|vehicle-approaching
+S078,LIS3DH budget accel,3,Motion & Vibration,10,3.33,am-i-level|door-state|drift-from-baseline|intrusion|machine-duty-cycle|machine-running|object-dropped|object-moved|step-count|tamper-detected
+S082,MMC5603 precision magnetometer,6,Magnetic & Compass,10,1.67,door-state|hidden-wiring|magnetic-anomaly|object-present|returned-to-spot|rotation-speed|tamper-detected|vehicle-approaching|where-in-room|which-way-facing
+S103,Capacitive liquid/force FDC1004,9,Force & Weight,10,1.11,consumable-remaining|container-fullness|hidden-wiring|material-type|moisture-content|object-present|pump-dry|someone-present|tank-level|water-leak
+S173,SI4432/CC1101 sub-GHz sniffer,4,RF & Electromagnetic,10,2.5,door-state|drift-from-baseline|intrusion|is-raining|machine-running|rf-activity|someone-present|tamper-detected|tank-level|wind-conditions
+S197,US-100 ultrasonic w/ temp comp,4,Distance & Ranging,10,2.5,consumable-remaining|container-fullness|crossed-boundary|flood-rising|object-count|object-present|obstacle-ahead|snow-depth|someone-present|tank-level
+S204,LD1125H 24GHz respiration radar,9,Presence & Occupancy,10,1.11,entered-or-left|intrusion|livestock-wellbeing|no-movement-alarm|occupancy-duration|routine-broken|someone-present|someone-still-present|through-wall-motion|where-in-room
+S023,BME688 gas + climate AI,15,Gas & VOC,9,0.6,air-stuffy|cooking-detected|mould-risk|smell-signature|smoke-present|storm-approaching|too-dry|ventilation-adequate|voc-event
+S060,VL53L5CX 8x8 ToF array,20,Distance & Ranging,9,0.45,container-fullness|entered-or-left|how-many-people|object-count|obstacle-ahead|person-fell|posture|someone-present|where-in-room
+S061,TF-Luna LiDAR,25,Distance & Ranging,9,0.36,crossed-boundary|how-fast-moving|how-high|object-count|object-present|obstacle-ahead|tank-level|vehicle-approaching|vehicle-speed
+S067,LD2410 mmWave presence,5,Presence & Occupancy,9,1.8,intrusion|no-movement-alarm|occupancy-duration|person-asleep|routine-broken|someone-present|someone-still-present|through-wall-motion|where-in-room
+S081,QMC5883L compass,2,Magnetic & Compass,9,4.5,door-state|hidden-wiring|magnetic-anomaly|object-moved|object-present|rotation-speed|tamper-detected|vehicle-approaching|which-way-facing
+S083,TLV493D 3D magnetic,6,Magnetic & Compass,9,1.5,container-fullness|cycle-complete|door-state|machine-state|object-moved|object-present|rotation-speed|tamper-detected|tank-level
+S089,MAX9814 AGC mic amp,7,Sound & Audio,9,1.29,cooking-detected|cycle-complete|device-left-on|glass-broken|intrusion|machine-running|someone-present|unusual-sound|which-appliance
+S090,SPH0645 I2S mic,7,Sound & Audio,9,1.29,cooking-detected|device-left-on|glass-broken|intrusion|machine-running|someone-present|unusual-sound|where-in-room|which-appliance
+S095,801S vibration sensor,3,Motion & Vibration,9,3.0,bearing-failing|cycle-complete|drift-from-baseline|imbalance|machine-duty-cycle|machine-running|machine-state|object-moved|tamper-detected
+S097,Piezo shock/knock element,3,Motion & Vibration,9,3.0,cycle-complete|glass-broken|intrusion|machine-running|object-count|object-dropped|object-moved|tamper-detected|unusual-sound
+S102,Nano33-style 1kg beam scale kit,8,Force & Weight,9,1.12,consumable-remaining|container-fullness|cycle-complete|drift-from-baseline|flow-rate|growth-rate|object-count|object-present|water-used-total
+S175,PN532 NFC controller,6,Identity & Tags,9,1.5,asset-location|authorised-to-use|entered-or-left|object-count|object-genuine|object-identity|object-present|occupancy-duration|who-is-it
+S203,Panasonic EKMC PIR (quality),12,Presence & Occupancy,9,0.75,crossed-boundary|entered-or-left|intrusion|livestock-wellbeing|no-movement-alarm|occupancy-duration|routine-broken|someone-present|vehicle-approaching
+S214,AS5048A 14-bit angle,12,Position & Rotation,9,0.75,cycle-complete|door-state|how-far-travelled|joint-angle|machine-state|object-moved|returned-to-spot|rotation-speed|which-way-facing
+S230,Time-of-flight spectroscopy: AS7263 trick,35,Frontier Sensing,9,0.26,colour-match|concentration-liquid|contamination|food-fresh|fruit-ripe|material-type|moisture-content|object-genuine|object-material
+S232,Acoustic emission (ultrasonic contact),10,Frontier Sensing,9,0.9,air-leak|arc-or-discharge|bearing-failing|drift-from-baseline|imbalance|lubrication-failing|machine-state|ultrasonic-activity|water-leak
+S235,Scent delivery + e-nose loop,60,Frontier Sensing,9,0.15,air-stuffy|contamination|cooking-detected|drift-from-baseline|food-fresh|gas-leak|mould-risk|smell-signature|voc-event
+S002,TMP117 ultra-precise temp,11,Temperature,8,0.73,body-temp-trend|drift-from-baseline|food-fresh|frost-tonight|object-temperature|occupancy-duration|overheating|water-hot-enough
+S004,MAX31855 thermocouple amp,15,Temperature,8,0.53,coating-cured|cycle-complete|drift-from-baseline|fire-present|machine-duty-cycle|machine-state|object-temperature|overheating
+S010,Thermocouple multiplexer board,13,Temperature,8,0.62,coating-cured|cycle-complete|drift-from-baseline|food-fresh|machine-duty-cycle|machine-state|object-temperature|overheating
+S011,DHT22 / AM2302,4,Humidity & Moisture,8,2.0,compost-active|cooking-detected|disease-pressure|frost-tonight|livestock-wellbeing|mould-risk|too-dry|ventilation-adequate
+S012,SHT41 humidity + temp,6,Humidity & Moisture,8,1.33,coating-cured|cooking-detected|disease-pressure|drift-from-baseline|frost-tonight|mould-risk|too-dry|ventilation-adequate
+S013,BME280 climate combo,6,Humidity & Moisture,8,1.33,disease-pressure|drift-from-baseline|frost-tonight|how-high|mould-risk|storm-approaching|too-dry|ventilation-adequate
+S015,SHT31 weatherproof probe,12,Humidity & Moisture,8,0.67,compost-active|disease-pressure|frost-tonight|growth-rate|livestock-wellbeing|mould-risk|too-dry|ventilation-adequate
+S021,MPRLS ported pressure,15,Pressure & Altitude,8,0.53,consumable-remaining|container-fullness|flood-rising|plant-thirsty|pump-dry|soil-tension|tank-level|water-leak
+S036,SCD41 true CO2,25,CO2,8,0.32,air-stuffy|cycle-complete|how-many-people|mould-risk|occupancy-duration|someone-present|too-dry|ventilation-adequate
+S037,SCD30 NDIR CO2,40,CO2,8,0.2,air-stuffy|compost-active|cycle-complete|how-many-people|mould-risk|occupancy-duration|someone-present|ventilation-adequate
+S056,HC-SR04 ultrasonic,1.5,Distance & Ranging,8,5.33,consumable-remaining|container-fullness|crossed-boundary|object-count|object-present|obstacle-ahead|someone-present|tank-level
+S058,VL53L0X ToF laser,5,Distance & Ranging,8,1.6,consumable-remaining|container-fullness|crossed-boundary|object-count|object-present|obstacle-ahead|someone-present|tank-level
+S059,VL53L1X long-range ToF,12,Distance & Ranging,8,0.67,container-fullness|crossed-boundary|entered-or-left|how-many-people|object-count|obstacle-ahead|occupancy-duration|someone-present
+S080,High-g accel ADXL375,18,Motion & Vibration,8,0.44,drift-from-baseline|imbalance|machine-state|object-dropped|object-moved|person-fell|tamper-detected|vehicle-speed
+S092,DFRobot dB meter,37,Sound & Audio,8,0.22,bearing-failing|drift-from-baseline|machine-duty-cycle|machine-running|occupancy-duration|queue-length|someone-present|unusual-sound
+S093,Ultrasonic mic experiments,6,Sound & Audio,8,1.33,air-leak|arc-or-discharge|bearing-failing|livestock-wellbeing|lubrication-failing|machine-state|ultrasonic-activity|unusual-sound
+S094,SW-420 vibration switch,1,Motion & Vibration,8,8.0,cycle-complete|drift-from-baseline|intrusion|machine-duty-cycle|machine-running|object-dropped|object-moved|tamper-detected
+S099,FSR402 force resistor,7,Force & Weight,8,1.14,door-state|muscle-effort|object-count|object-moved|object-present|occupancy-duration|posture|someone-present
+S101,Strain gauge + amp,4,Force & Weight,8,2.0,consumable-remaining|cycle-complete|drift-from-baseline|imbalance|machine-state|object-present|structure-moved|tamper-detected
+S112,MAX30102 pulse oximeter,6,Biometric & Health,8,1.33,blood-oxygen|breathing-rate|heart-rate|heart-variability|object-present|sleep-stage-proxy|someone-present|stress-arousal
+S119,BioAmp EXG Pill,25,Biometric & Health,8,0.32,blink-or-eye-move|breathing-rate|heart-rate|heart-variability|muscle-effort|posture|stress-arousal|tremor-present
+S126,Snow/level laser (outdoor ToF),70,Weather & Outdoor,8,0.11,consumable-remaining|container-fullness|crossed-boundary|flood-rising|obstacle-ahead|snow-depth|tank-level|vehicle-approaching
+S138,YF-S201 flow sensor,5,Water & Liquid,8,1.6,cycle-complete|flow-rate|pump-dry|routine-broken|someone-present|water-leak|water-used-total|which-appliance
+S145,INA226/INA228 precision power,6,Power & Electrical,8,1.33,abnormal-current|battery-charge|device-left-on|energy-budget-node|energy-cost|machine-running|power-now|solar-performance
+S146,ACS712 Hall current,3,Power & Electrical,8,2.67,abnormal-current|bearing-failing|cycle-complete|device-left-on|machine-duty-cycle|machine-running|machine-state|power-now
+S148,PZEM-004T AC power module,11,Power & Electrical,8,0.73,device-left-on|energy-cost|machine-duty-cycle|machine-running|phantom-load|power-now|power-quality|which-appliance
+S161,MLX90640 thermal camera,45,Thermal Imaging,8,0.18,bearing-failing|how-many-people|machine-state|mould-risk|overheating|person-fell|someone-present|stove-left-on
+S167,Person Sensor (Useful Sensors),10,Cameras & Vision,8,0.8,are-they-looking|authorised-to-use|entered-or-left|how-many-people|occupancy-duration|someone-present|where-in-room|who-is-it
+S174,RC522 RFID reader,2,Identity & Tags,8,4.0,asset-location|authorised-to-use|entered-or-left|object-count|object-identity|object-present|occupancy-duration|who-is-it
+S176,125kHz RDM6300 RFID,3,Identity & Tags,8,2.67,asset-location|authorised-to-use|entered-or-left|livestock-wellbeing|object-count|object-identity|object-present|who-is-it
+S177,FS3000 air velocity,26,Weather & Outdoor,8,0.31,air-leak|air-stuffy|cycle-complete|drift-from-baseline|filter-clogged|machine-running|overheating|ventilation-adequate
+S183,Thermal flow: SDP + thermistor DIY,40,Frontier Sensing,8,0.2,air-leak|breathing-rate|cycle-complete|drift-from-baseline|filter-clogged|growth-rate|machine-running|ventilation-adequate
+S189,AHT20 temp/humidity,2,Humidity & Moisture,8,4.0,air-stuffy|coating-cured|disease-pressure|drift-from-baseline|frost-tonight|heat-island|mould-risk|too-dry
+S191,SHTC3 tiny low-power RH/T,4,Humidity & Moisture,8,2.0,air-stuffy|drift-from-baseline|energy-budget-node|frost-tonight|livestock-wellbeing|mould-risk|someone-present|too-dry
+S216,Inclinometer SCL3300,35,Position & Rotation,8,0.23,am-i-level|drift-from-baseline|machine-state|object-moved|returned-to-spot|solar-performance|structure-moved|tamper-detected
+S234,Transit-time ultrasonic flow (clamp-on),85,Water & Liquid,8,0.09,drift-from-baseline|flow-rate|machine-duty-cycle|machine-running|pump-dry|thermal-energy-moved|water-leak|water-used-total
+S236,Bat/dolphin: 40kHz ranging array,8,Frontier Sensing,8,1.0,crossed-boundary|map-surroundings|object-count|object-present|obstacle-ahead|someone-present|tank-level|where-in-room
+S238,Ground vibration fence: fiber + photodiode,10,Frontier Sensing,8,0.8,crossed-boundary|intrusion|livestock-wellbeing|object-moved|perimeter-crossed|structure-moved|tamper-detected|wind-conditions
+S003,MCP9808 precision temp,5,Temperature,7,1.4,device-left-on|drift-from-baseline|food-fresh|frost-tonight|machine-running|object-temperature|overheating
+S005,MAX31865 RTD amplifier,15,Temperature,7,0.47,coating-cured|cycle-complete|drift-from-baseline|object-temperature|overheating|thermal-energy-moved|water-hot-enough
+S006,NTC thermistor 10k,0.3,Temperature,7,14.0,drift-from-baseline|frost-tonight|machine-running|object-temperature|overheating|someone-present|water-hot-enough
+S014,HDC3022 humidity + temp,7,Humidity & Moisture,7,1.0,disease-pressure|drift-from-baseline|mould-risk|tamper-detected|too-dry|ventilation-adequate|water-leak
+S020,SDP810 differential pressure,35,Pressure & Altitude,7,0.2,air-leak|breathing-rate|cycle-complete|filter-clogged|machine-duty-cycle|machine-state|ventilation-adequate
+S025,ENS160 air quality,9,Gas & VOC,7,0.78,air-stuffy|coating-cured|cooking-detected|smell-signature|someone-present|ventilation-adequate|voc-event
+S031,MiCS-6814 tri-gas,20,Gas & VOC,7,0.35,co-present|cooking-detected|gas-leak|livestock-wellbeing|smell-signature|ventilation-adequate|voc-event
+S032,SGP30 eCO2/TVOC (legacy),10,Gas & VOC,7,0.7,air-stuffy|coating-cured|cooking-detected|smell-signature|someone-present|ventilation-adequate|voc-event
+S049,Photoresistor (LDR),0.2,Light & UV,7,14.0,crossed-boundary|device-left-on|door-state|light-dose-daily|machine-running|object-count|sky-clear
+S064,A02YYUW waterproof ultrasonic,9,Distance & Ranging,7,0.78,consumable-remaining|container-fullness|flood-rising|object-present|pump-dry|snow-depth|tank-level
+S110,Conductive rubber stretch cord,10,Flex & Stretch,7,0.7,breathing-rate|breathing-stopped|door-state|gait-quality|joint-angle|object-moved|posture
+S111,Bend Labs digital flex (1-axis),70,Flex & Stretch,7,0.1,breathing-rate|gait-quality|joint-angle|object-moved|posture|structure-moved|tremor-present
+S120,Fingerprint reader R503,20,Identity & Tags,7,0.35,authorised-to-use|entered-or-left|object-identity|occupancy-duration|someone-present|tamper-detected|who-is-it
+S147,SCT-013 CT clamp,10,Power & Electrical,7,0.7,abnormal-current|device-left-on|machine-running|machine-state|phantom-load|power-now|which-appliance
+S163,FLIR Lepton 3.5,240,Thermal Imaging,7,0.03,bearing-failing|fire-present|how-many-people|machine-state|overheating|person-fell|someone-present
+S165,OV2640 camera (ESP32-CAM),8,Cameras & Vision,7,0.88,growth-rate|intrusion|machine-state|object-count|object-identity|object-present|someone-present
+S172,EMF / RF field probes,12,RF & Electromagnetic,7,0.58,arc-or-discharge|device-left-on|drift-from-baseline|hidden-wiring|machine-running|magnetic-anomaly|rf-activity
+S190,Si7021 humidity/temp,4,Humidity & Moisture,7,1.75,air-stuffy|coating-cured|disease-pressure|drift-from-baseline|frost-tonight|mould-risk|too-dry
+S192,BMP280 budget barometer,1.5,Pressure & Altitude,7,4.67,door-state|drift-from-baseline|how-high|machine-state|returned-to-spot|sky-clear|storm-approaching
+S196,VCNL4040 proximity + lux,6,Distance & Ranging,7,1.17,container-fullness|crossed-boundary|door-state|light-dose-daily|object-count|object-present|someone-present
+S198,MaxBotix MB7389 weather LV,110,Distance & Ranging,7,0.06,consumable-remaining|container-fullness|crossed-boundary|flood-rising|object-present|snow-depth|tank-level
+S202,AGS02MA TVOC budget,4,Gas & VOC,7,1.75,air-stuffy|coating-cured|cooking-detected|smell-signature|someone-present|ventilation-adequate|voc-event
+S208,MAX4466 adjustable mic amp,6,Sound & Audio,7,1.17,bearing-failing|cycle-complete|glass-broken|machine-running|machine-state|someone-present|unusual-sound
+S211,Optical infrared water-in-fuel,18,Water & Liquid,7,0.39,consumable-remaining|container-fullness|flood-rising|object-present|pump-dry|tank-level|water-leak
+S258,OBD-II port as a sensor bus,6.0,Industrial & Automotive,7,1.17,abnormal-current|drift-from-baseline|how-fast-moving|machine-duty-cycle|machine-running|overheating|rotation-speed
+S333,VL53L8CX 8x8 depth zone array,25.0,Distance & Ranging,7,0.28,entered-or-left|how-many-people|object-count|obstacle-ahead|person-fell|posture|where-in-room
+S337,Benewake TF03 long-range industrial LiDAR,180.0,Distance & Ranging,7,0.04,container-fullness|flood-rising|how-high|obstacle-ahead|snow-depth|tank-level|vehicle-approaching
+S379,ATM90E32AS polyphase energy metering AFE,4.0,Power & Electrical,7,1.75,abnormal-current|energy-cost|phantom-load|power-now|power-quality|solar-performance|which-appliance
+S381,BL0940 calibration-free mains metering IC,1.5,Power & Electrical,7,4.67,device-left-on|energy-cost|machine-duty-cycle|overheating|phantom-load|power-now|which-appliance
+S019,LPS22HB pressure sensor,6,Pressure & Altitude,6,1.0,door-state|flood-rising|how-fast-moving|how-high|storm-approaching|tank-level
+S024,SGP40 VOC index,12,Gas & VOC,6,0.5,air-stuffy|cooking-detected|smell-signature|smoke-present|ventilation-adequate|voc-event
+S029,MQ-135 air quality,2.5,Gas & VOC,6,2.4,air-stuffy|cooking-detected|livestock-wellbeing|smell-signature|ventilation-adequate|voc-event
+S030,MiCS-5524 CO/VOC,14,Gas & VOC,6,0.43,air-stuffy|co-present|cooking-detected|gas-leak|smell-signature|voc-event
+S033,Electrochemical gas cells,80,Gas & VOC,6,0.07,co-present|contamination|gas-leak|ozone-present|smell-signature|ventilation-adequate
+S034,ZE08-CH2O formaldehyde,22,Gas & VOC,6,0.27,air-stuffy|coating-cured|contamination|formaldehyde-level|ventilation-adequate|voc-event
+S045,VEML7700 high-accuracy lux,5,Light & UV,6,1.2,device-left-on|door-state|light-dose-daily|machine-running|person-asleep|sky-clear
+S048,TSL2591 high dynamic lux,7,Light & UV,6,0.86,device-left-on|door-state|light-dose-daily|machine-running|sky-clear|water-clarity
+S051,TCS34725 RGB color,7,Colour & Spectral,6,0.86,colour-match|concentration-liquid|fruit-ripe|object-material|water-nutrients|water-ph
+S052,AS7341 11-channel spectral,14,Colour & Spectral,6,0.43,colour-match|concentration-liquid|drift-from-baseline|fruit-ripe|light-dose-daily|material-type
+S053,AS7263 NIR spectral,27,Colour & Spectral,6,0.22,food-fresh|fruit-ripe|material-type|moisture-content|object-genuine|plant-thirsty
+S057,JSN-SR04T waterproof ultrasonic,6,Distance & Ranging,6,1.0,consumable-remaining|container-fullness|flood-rising|object-present|snow-depth|tank-level
+S063,Sharp GP2Y0A21 IR distance,8,Distance & Ranging,6,0.75,container-fullness|crossed-boundary|object-count|object-present|obstacle-ahead|someone-present
+S065,HC-SR501 PIR motion,1.5,Presence & Occupancy,6,4.0,crossed-boundary|intrusion|no-movement-alarm|occupancy-duration|routine-broken|someone-present
+S070,RCWL-0516 doppler radar,1.2,Presence & Occupancy,6,5.0,crossed-boundary|intrusion|machine-running|object-moved|someone-present|through-wall-motion
+S104,MPR121 12-pad cap touch,6,Touch & Capacitive,6,1.0,door-state|object-moved|object-present|someone-present|tamper-detected|tank-level
+S106,ESP32 native touch pins,0,Touch & Capacitive,6,12.0,door-state|object-moved|object-present|someone-present|tamper-detected|tank-level
+S108,Water level capacitive strip,7,Touch & Capacitive,6,0.86,consumable-remaining|container-fullness|flood-rising|pump-dry|tank-level|water-leak
+S109,"Flex sensor 2.2""",8,Flex & Stretch,6,0.75,breathing-rate|door-state|gait-quality|joint-angle|object-moved|posture
+S113,AD8232 ECG front-end,10,Biometric & Health,6,0.6,breathing-rate|heart-rate|heart-variability|person-asleep|someone-present|stress-arousal
+S115,MyoWare 2.0 EMG,40,Biometric & Health,6,0.15,gait-quality|joint-angle|muscle-effort|posture|stress-arousal|tremor-present
+S130,RS-485 soil NPK/EC probe,40,Soil & Agriculture,6,0.15,contamination|moisture-content|plant-thirsty|soil-fertility|soil-ready-to-plant|water-nutrients
+S131,Chirp! plant sensor,10,Soil & Agriculture,6,0.6,drift-from-baseline|growth-rate|light-dose-daily|moisture-content|plant-thirsty|soil-ready-to-plant
+S134,Analog pH kit,30,Water & Liquid,6,0.2,concentration-liquid|contamination|food-fresh|soil-fertility|water-ph|water-sanitised
+S135,EC / TDS sensor,12,Water & Liquid,6,0.5,concentration-liquid|contamination|drift-from-baseline|filter-clogged|soil-fertility|water-nutrients
+S139,Non-contact liquid level XKC-Y26,8,Water & Liquid,6,0.75,consumable-remaining|container-fullness|flood-rising|pump-dry|tank-level|water-leak
+S140,eTape liquid level,40,Water & Liquid,6,0.15,consumable-remaining|container-fullness|flood-rising|pump-dry|tank-level|water-leak
+S143,ORP (redox) probe,110,Water & Liquid,6,0.05,concentration-liquid|contamination|cycle-complete|drift-from-baseline|water-oxygen|water-sanitised
+S157,NEO-6M GPS,8,GNSS & Positioning,6,0.75,asset-location|crossed-boundary|how-far-travelled|how-fast-moving|vehicle-speed|where-am-i
+S158,u-blox M10 GNSS,20,GNSS & Positioning,6,0.3,asset-location|crossed-boundary|heat-island|how-far-travelled|how-fast-moving|where-am-i
+S159,ZED-F9P RTK centimetre GNSS,260,GNSS & Positioning,6,0.02,asset-location|how-far-travelled|returned-to-spot|structure-moved|where-am-i|which-way-facing
+S180,IR flame detector (flicker),2,Light & UV,6,3.0,cooking-detected|device-left-on|fire-present|machine-running|overheating|stove-left-on
+S186,Watermark granular-matrix soil water sensor,45,Soil & Agriculture,6,0.13,disease-pressure|drift-from-baseline|growth-rate|moisture-content|plant-thirsty|soil-tension
+S188,Scintillating gamma spectrometer,150,Radiation & Nuclear,6,0.04,contamination|material-type|object-genuine|object-material|radiation-dose|which-isotope
+S193,TSL2561 lux sensor,4,Light & UV,6,1.5,device-left-on|light-dose-daily|machine-running|occupancy-duration|sky-clear|someone-present
+S194,MAX44009 ultra-low-power lux,3,Light & UV,6,2.0,device-left-on|energy-budget-node|light-dose-daily|machine-running|sky-clear|someone-present
+S195,SI1145 UV/IR/visible,8,Light & UV,6,0.75,device-left-on|light-dose-daily|object-present|sky-clear|someone-present|uv-exposure
+S209,KY-037/038 sound modules,1,Sound & Audio,6,6.0,cycle-complete|glass-broken|machine-running|machine-state|someone-present|unusual-sound
+S213,ADS1115 16-bit ADC (the analog fixer),3,Power & Electrical,6,2.0,battery-charge|drift-from-baseline|object-temperature|power-now|water-nutrients|water-ph
+S219,Inductive proximity switch M12/M18,2.5,Industrial & Automotive,6,2.4,cycle-complete|door-state|machine-running|object-count|object-present|rotation-speed
+S220,Photoelectric beam sensor E18-D80NK,3,Industrial & Automotive,6,2.0,container-fullness|crossed-boundary|object-count|object-present|perimeter-crossed|vehicle-approaching
+S231,Capacitive rain/condensation plate,3,Frontier Sensing,6,2.0,disease-pressure|drift-from-baseline|frost-tonight|is-raining|mould-risk|water-leak
+S257,Eastron SDM120-Modbus DIN energy meter,38.0,Industrial & Automotive,6,0.16,abnormal-current|device-left-on|energy-cost|power-now|power-quality|which-appliance
+S261,Through-beam photoelectric pair,95.0,Industrial & Automotive,6,0.06,crossed-boundary|intrusion|object-count|object-present|perimeter-crossed|vehicle-approaching
+S267,M6E-Nano UHF RAIN RFID reader,275.0,Identity & Tags,6,0.02,asset-location|consumable-remaining|crossed-boundary|object-count|object-identity|object-present
+S275,nRF52 BLE beacon tag,8.0,Identity & Tags,6,0.75,asset-location|entered-or-left|occupancy-duration|someone-present|where-in-room|who-is-it
+S277,SEN55 all-in-one air node,50.0,Particulate,6,0.12,air-stuffy|cooking-detected|mould-risk|particulate-level|smoke-present|voc-event
+S278,SEN66 six-in-one air module,70.0,CO2,6,0.09,air-stuffy|cooking-detected|how-many-people|particulate-level|ventilation-adequate|voc-event
+S285,BME690 gas + climate,22.0,Gas & VOC,6,0.27,air-stuffy|cooking-detected|food-fresh|mould-risk|smell-signature|voc-event
+S332,VL53L4CX multi-target ToF,15.0,Distance & Ranging,6,0.4,crossed-boundary|entered-or-left|how-many-people|object-present|obstacle-ahead|tank-level
+S336,RPLIDAR A1 360 degree triangulation LiDAR,99.0,Distance & Ranging,6,0.06,how-many-people|intrusion|map-surroundings|object-count|obstacle-ahead|where-in-room
+S338,Livox Mid-360 3D LiDAR,749.0,Distance & Ranging,6,0.01,asset-location|growth-rate|map-surroundings|obstacle-ahead|structure-moved|where-in-room
+S339,Acconeer XM125 pulsed coherent radar,70.0,Distance & Ranging,6,0.09,breathing-rate|container-fullness|object-present|someone-still-present|tank-level|through-wall-motion
+S340,RD-03D 24GHz multi-target tracking radar,9.0,Presence & Occupancy,6,0.67,entered-or-left|how-many-people|occupancy-duration|queue-length|someone-present|where-in-room
+S341,HLK-LD2412 24GHz presence radar,7.0,Presence & Occupancy,6,0.86,device-left-on|no-movement-alarm|occupancy-duration|someone-present|someone-still-present|through-wall-motion
+S342,HLK-LD6001A 60GHz fall-detection radar,35.0,Presence & Occupancy,6,0.17,how-many-people|no-movement-alarm|person-fell|posture|someone-still-present|where-in-room
+S343,Omron D6T-32L 1024-pixel thermopile array,200.0,Presence & Occupancy,6,0.03,how-many-people|occupancy-duration|overheating|person-fell|someone-still-present|where-in-room
+S344,FDC2214 capacitive proximity front-end,15.0,Presence & Occupancy,6,0.4,door-state|material-type|moisture-content|object-present|someone-present|tank-level
+S345,TI AWR1642 77GHz automotive radar EVM,299.0,Distance & Ranging,6,0.02,how-fast-moving|map-surroundings|object-count|obstacle-ahead|vehicle-approaching|vehicle-speed
+S378,INA700 power monitor with on-die shunt,4.0,Power & Electrical,6,1.5,abnormal-current|battery-charge|energy-budget-node|machine-running|phantom-load|power-now
+S380,ADE7953 dual-channel single-phase energy meter,3.5,Power & Electrical,6,1.71,device-left-on|energy-cost|phantom-load|power-now|solar-performance|which-appliance
+S008,MLX90632 miniature IR temp,14,Temperature,5,0.36,body-temp-trend|machine-running|object-temperature|overheating|someone-present
+S016,BMP390 precision barometer,10,Pressure & Altitude,5,0.5,door-state|how-high|storm-approaching|structure-moved|ventilation-adequate
+S022,XGZP6897D low-range diff pressure,6,Pressure & Altitude,5,0.83,air-leak|door-state|filter-clogged|machine-state|ventilation-adequate
+S026,MQ-2 smoke/LPG gas,2,Gas & VOC,5,2.5,cooking-detected|gas-leak|smoke-present|stove-left-on|voc-event
+S038,MH-Z19C budget NDIR CO2,18,CO2,5,0.28,air-stuffy|how-many-people|occupancy-duration|someone-present|ventilation-adequate
+S039,SenseAir S8 CO2,25,CO2,5,0.2,air-stuffy|how-many-people|occupancy-duration|someone-present|ventilation-adequate
+S040,PMS5003 particulate,15,Particulate,5,0.33,cooking-detected|filter-clogged|particulate-level|smoke-present|ventilation-adequate
+S041,SPS30 premium PM,45,Particulate,5,0.11,cooking-detected|filter-clogged|particulate-level|smoke-present|ventilation-adequate
+S044,BH1750 lux sensor,2.5,Light & UV,5,2.0,device-left-on|door-state|light-dose-daily|machine-running|sky-clear
+S046,LTR-390 UV + ambient,5,Light & UV,5,1.0,device-left-on|light-dose-daily|machine-running|sky-clear|uv-exposure
+S047,GUVA-S12SD UV analog,4,Light & UV,5,1.25,coating-cured|device-left-on|machine-running|sky-clear|uv-exposure
+S050,AS7331 spectral UV,27.5,Light & UV,5,0.18,device-left-on|drift-from-baseline|machine-running|uv-exposure|water-sanitised
+S054,APDS-9960 gesture/color/prox,6,Colour & Spectral,5,0.83,colour-match|crossed-boundary|object-count|object-present|someone-present
+S066,AM312 mini PIR,2,Presence & Occupancy,5,2.5,crossed-boundary|intrusion|no-movement-alarm|occupancy-duration|someone-present
+S114,MAX30205 clinical body temp,9,Biometric & Health,5,0.56,body-temp-trend|drift-from-baseline|object-temperature|overheating|someone-present
+S117,MLX90614 forehead mode,25,Biometric & Health,5,0.2,body-temp-trend|fire-present|object-temperature|overheating|someone-present
+S118,Pulse sensor (PPG classic),5,Biometric & Health,5,1.0,heart-rate|heart-variability|object-present|someone-present|stress-arousal
+S128,Pyranometer (solar irradiance),60,Weather & Outdoor,5,0.08,energy-budget-node|light-dose-daily|sky-clear|solar-performance|solar-resource
+S129,Capacitive soil moisture v2,2,Soil & Agriculture,5,2.5,drift-from-baseline|growth-rate|moisture-content|plant-thirsty|water-leak
+S133,Compost / hay temp lance,15,Soil & Agriculture,5,0.33,compost-active|cycle-complete|drift-from-baseline|fire-present|overheating
+S155,VL6180X short-range ToF,8,Position & Rotation,5,0.62,container-fullness|object-present|obstacle-ahead|someone-present|tank-level
+S162,MLX90641 thermal (16x12),60,Thermal Imaging,5,0.08,how-many-people|machine-state|overheating|someone-present|stove-left-on
+S166,OV5640 5MP autofocus cam,15,Cameras & Vision,5,0.33,colour-match|growth-rate|object-genuine|object-identity|object-present
+S170,Geiger counter kit,25,Radiation & Nuclear,5,0.2,contamination|cosmic-flux|drift-from-baseline|object-material|radiation-dose
+S217,MAX86150 ECG+PPG combo,23,Biometric & Health,5,0.22,blood-oxygen|breathing-rate|heart-rate|heart-variability|stress-arousal
+S221,Through-beam slot / photo-interrupter,1,Industrial & Automotive,5,5.0,crossed-boundary|cycle-complete|flow-rate|object-count|rotation-speed
+S227,Color-changing material readers,10,Materials & Textiles,5,0.5,colour-match|contamination|food-fresh|water-nutrients|water-ph
+S228,Wi-Fi CSI sensing (the router IS the sensor),0,Frontier Sensing,5,10.0,breathing-rate|how-many-people|person-fell|someone-present|through-wall-motion
+S240,DW1000 UWB two-way ranging radio,40.0,GNSS & Positioning,5,0.12,asset-location|how-far-travelled|object-present|returned-to-spot|where-in-room
+S241,DW3000 UWB ranging radio (FiRa generation),48.0,GNSS & Positioning,5,0.1,asset-location|authorised-to-use|returned-to-spot|where-in-room|who-is-it
+S242,DWM1001C UWB module with ready-made RTLS firmware,22.0,GNSS & Positioning,5,0.23,asset-location|how-far-travelled|object-moved|occupancy-duration|where-in-room
+S243,SAM-M10Q GNSS with integrated patch antenna,40.0,GNSS & Positioning,5,0.12,asset-location|how-far-travelled|how-fast-moving|how-high|where-am-i
+S244,ZED-F9R dead-reckoning GNSS,280.0,GNSS & Positioning,5,0.02,asset-location|how-far-travelled|how-fast-moving|where-am-i|which-way-facing
+S245,ZED-X20P all-band centimetre GNSS,90.0,GNSS & Positioning,5,0.06,am-i-level|how-far-travelled|returned-to-spot|structure-moved|where-am-i
+S246,LC29H(DA) low-cost L1+L5 RTK rover,55.0,GNSS & Positioning,5,0.09,asset-location|how-fast-moving|returned-to-spot|structure-moved|where-am-i
+S247,UM980 triple-band RTK receiver,200.0,GNSS & Positioning,5,0.03,am-i-level|how-far-travelled|returned-to-spot|structure-moved|where-am-i
+S248,UM982 dual-antenna RTK with true heading,260.0,GNSS & Positioning,5,0.02,am-i-level|how-fast-moving|structure-moved|where-am-i|which-way-facing
+S249,BN-880 GNSS module with on-board compass,20.0,GNSS & Positioning,5,0.25,asset-location|how-far-travelled|how-fast-moving|where-am-i|which-way-facing
+S252,ANT-B10 Bluetooth angle-of-arrival anchor,90.0,GNSS & Positioning,5,0.06,asset-location|entered-or-left|occupancy-duration|where-in-room|who-is-it
+S253,Wi-Fi and magnetic fingerprint positioning,5.0,GNSS & Positioning,5,1.0,asset-location|how-high|magnetic-anomaly|returned-to-spot|where-in-room
+S254,4-20mA loop pressure transmitter,150.0,Industrial & Automotive,5,0.03,drift-from-baseline|filter-clogged|machine-state|pump-dry|tank-level
+S255,Submersible hydrostatic level transmitter,70.0,Industrial & Automotive,5,0.07,container-fullness|flood-rising|pump-dry|tank-level|water-used-total
+S259,Capacitive proximity switch M18,7.0,Industrial & Automotive,5,0.71,container-fullness|material-type|object-count|object-present|tank-level
+S260,Retro-reflective photoelectric sensor,70.0,Industrial & Automotive,5,0.07,crossed-boundary|door-state|object-count|object-present|vehicle-approaching
+S262,Type 4 safety light curtain,800.0,Industrial & Automotive,5,0.01,crossed-boundary|cycle-complete|machine-state|perimeter-crossed|someone-present
+S263,4-wire PT100 RTD probe with thermowell,25.0,Industrial & Automotive,5,0.2,drift-from-baseline|machine-state|overheating|thermal-energy-moved|water-hot-enough
+S264,Vibrating-fork level switch,90.0,Industrial & Automotive,5,0.06,container-fullness|cycle-complete|pump-dry|tank-level|water-leak
+S265,Stainless vertical float level switch,5.0,Industrial & Automotive,5,1.0,container-fullness|flood-rising|pump-dry|tank-level|water-leak
+S266,Paddle flow switch,12.0,Industrial & Automotive,5,0.42,filter-clogged|flow-rate|machine-running|pump-dry|water-leak
+S269,PN5180 long-range NFC / ISO15693 reader,12.0,Identity & Tags,5,0.42,authorised-to-use|object-genuine|object-identity|object-present|who-is-it
+S286,Alphasense PID-AH2 photoionisation VOC,320.0,Gas & VOC,5,0.02,air-leak|contamination|formaldehyde-level|smell-signature|voc-event
+S294,PMS7003 laser particle counter,20.0,Particulate,5,0.25,cooking-detected|filter-clogged|fire-present|particulate-level|smoke-present
+S296,Alphasense OPC-N3 optical particle counter,500.0,Particulate,5,0.01,contamination|disease-pressure|heat-island|particulate-level|smoke-present
+S298,BMI323 6-axis IMU,8.0,Motion & Vibration,5,0.62,machine-running|object-moved|posture|step-count|tamper-detected
+S299,BMA400 ultra-low-power accelerometer,13.0,Motion & Vibration,5,0.38,door-state|machine-running|object-moved|step-count|tamper-detected
+S300,BMM350 TMR magnetometer,7.0,Magnetic & Compass,5,0.71,door-state|hidden-wiring|magnetic-anomaly|object-moved|which-way-facing
+S301,LSM6DSV16X IMU with on-chip fusion,20.0,Motion & Vibration,5,0.25,gait-quality|object-moved|posture|step-count|which-way-facing
+S302,LSM6DSO32 high-range IMU,13.0,Motion & Vibration,5,0.38,how-fast-moving|machine-state|object-dropped|object-moved|which-way-facing
+S303,LIS2DW12 nanoamp accelerometer,6.0,Motion & Vibration,5,0.83,door-state|object-moved|person-fell|step-count|tamper-detected
+S304,ISM330DHCX industrial IMU,20.0,Motion & Vibration,5,0.25,drift-from-baseline|imbalance|machine-duty-cycle|machine-state|object-moved
+S305,IIS3DWB wideband vibration sensor,45.0,Motion & Vibration,5,0.11,bearing-failing|belt-slipping|drift-from-baseline|imbalance|lubrication-failing
+S306,ICM-42688-P low-noise IMU,10.0,Motion & Vibration,5,0.5,how-fast-moving|imbalance|object-moved|rotation-speed|which-way-facing
+S307,ICM-45686 premium 6-axis IMU,12.0,Motion & Vibration,5,0.42,drift-from-baseline|how-fast-moving|machine-state|object-dropped|which-way-facing
+S308,ADXL1002 wideband analog vibration sensor,95.0,Motion & Vibration,5,0.05,bearing-failing|drift-from-baseline|imbalance|lubrication-failing|machine-state
+S309,ADXL1005 ultra-wideband analog accelerometer,110.0,Motion & Vibration,5,0.05,air-leak|arc-or-discharge|bearing-failing|drift-from-baseline|imbalance
+S310,ADIS16505-2 tactical-grade IMU,825.0,Motion & Vibration,5,0.01,how-far-travelled|how-fast-moving|returned-to-spot|structure-moved|which-way-facing
+S311,352C33 IEPE piezoelectric accelerometer,450.0,Motion & Vibration,5,0.01,bearing-failing|drift-from-baseline|imbalance|lubrication-failing|machine-state
+S312,SCA3300 industrial inclinometer/accelerometer,50.0,Motion & Vibration,5,0.1,am-i-level|machine-state|object-moved|posture|structure-moved
+S314,L3GD20H gyro-only 3-axis,20.0,Motion & Vibration,5,0.25,imbalance|machine-state|rotation-speed|tremor-present|which-way-facing
+S315,AS7265x 18-channel spectral triad,69.95,Colour & Spectral,5,0.07,colour-match|contamination|fruit-ripe|material-type|object-material
+S317,Hamamatsu C12880MA micro-spectrometer,330.0,Colour & Spectral,5,0.02,colour-match|concentration-liquid|contamination|material-type|object-genuine
+S325,MLX90621 16x4 fast thermal array,60.0,Thermal Imaging,5,0.08,crossed-boundary|machine-state|object-temperature|overheating|someone-present
+S326,Heimann HTPA32x32d thermopile array,140.0,Thermal Imaging,5,0.04,how-many-people|object-temperature|overheating|someone-still-present|where-in-room
+S327,Heimann HTPA80x64d thermopile array,350.0,Thermal Imaging,5,0.01,how-many-people|object-temperature|overheating|person-fell|where-in-room
+S328,SenXor MI0801 CMOS thermal imager,95.0,Thermal Imaging,5,0.05,how-many-people|object-temperature|overheating|person-fell|someone-still-present
+S329,FLIR Lepton 3.1R radiometric thermal module,180.0,Thermal Imaging,5,0.03,drift-from-baseline|fire-present|how-many-people|object-temperature|overheating
+S330,InfiRay P2 Pro USB-C thermal camera,270.0,Thermal Imaging,5,0.02,drift-from-baseline|filter-clogged|object-temperature|overheating|someone-present
+S331,VL53L4CD short-range precision ToF,12.0,Distance & Ranging,5,0.42,consumable-remaining|container-fullness|crossed-boundary|object-present|obstacle-ahead
+S334,PMW3901 optical flow,25.0,Distance & Ranging,5,0.2,how-far-travelled|how-fast-moving|object-moved|returned-to-spot|structure-moved
+S335,PAA5100JE near-field optical flow,25.0,Distance & Ranging,5,0.2,how-far-travelled|how-fast-moving|machine-state|object-moved|returned-to-spot
+S362,MAX30001 ECG + bioimpedance AFE,45.0,Biometric & Health,5,0.11,breathing-rate|breathing-stopped|heart-rate|heart-variability|sleep-stage-proxy
+S367,OpenBCI Cyton 8-channel biosensing board,499.0,Biometric & Health,5,0.01,blink-or-eye-move|heart-rate|muscle-effort|sleep-stage-proxy|stress-arousal
+S373,Ferroelectret bed sensor (ballistocardiography),130.0,Biometric & Health,5,0.04,breathing-rate|breathing-stopped|heart-rate|no-movement-alarm|person-asleep
+S395,Tactile pressure array,25.0,Force & Weight,5,0.2,gait-quality|object-identity|object-present|posture|someone-present
+S009,TMP36 analog temp,1.5,Temperature,4,2.67,drift-from-baseline|frost-tonight|object-temperature|overheating
+S017,DPS310 barometer,7,Pressure & Altitude,4,0.57,door-state|how-high|storm-approaching|ventilation-adequate
+S018,MS5611 high-res altimeter,6,Pressure & Altitude,4,0.67,door-state|how-fast-moving|how-high|storm-approaching
+S027,MQ-3 alcohol sensor,2.5,Gas & VOC,4,1.6,cycle-complete|food-fresh|smell-signature|voc-event
+S028,MQ-7 carbon monoxide,2.5,Gas & VOC,4,1.6,co-present|gas-leak|machine-running|smoke-present
+S055,OPT4048 tristimulus color,9,Colour & Spectral,4,0.44,colour-match|drift-from-baseline|light-dose-daily|sky-clear
+S105,TTP223 single touch,0.5,Touch & Capacitive,4,8.0,door-state|object-present|someone-present|tamper-detected
+S107,Trill flexible touch sliders,20,Touch & Capacitive,4,0.2,object-moved|object-present|someone-present|tank-level
+S116,GSR / EDA sensor,10,Biometric & Health,4,0.4,hydration-proxy|sleep-stage-proxy|someone-present|stress-arousal
+S123,Tipping bucket rain gauge,12,Weather & Outdoor,4,0.33,disease-pressure|flood-rising|is-raining|plant-thirsty
+S125,ML8511 / VEML6075 UV outdoor,6,Weather & Outdoor,4,0.67,coating-cured|sky-clear|solar-resource|uv-exposure
+S127,Leaf wetness sensor,15,Weather & Outdoor,4,0.27,disease-pressure|frost-tonight|is-raining|mould-risk
+S132,DS18B20 soil temp spear,5,Soil & Agriculture,4,0.8,compost-active|frost-tonight|growth-rate|soil-ready-to-plant
+S239,Dissolved oxygen kit (Atlas EZO-DO),170,Water & Liquid,4,0.02,compost-active|contamination|livestock-wellbeing|water-oxygen
+S137,Turbidity sensor,12,Water & Liquid,4,0.33,contamination|cycle-complete|filter-clogged|water-clarity
+S141,Water leak rope sensor,10,Water & Liquid,4,0.4,flood-rising|mould-risk|perimeter-crossed|water-leak
+S142,Ultrasonic liquid (through-wall),25,Water & Liquid,4,0.16,consumable-remaining|container-fullness|pump-dry|tank-level
+S150,MAX471 / shunt + ADS1115,3,Power & Electrical,4,1.33,abnormal-current|battery-charge|machine-running|power-now
+S152,AS5600 magnetic angle,3,Position & Rotation,4,1.33,am-i-level|object-moved|rotation-speed|which-way-facing
+S153,600/1024PPR optical encoder,12,Position & Rotation,4,0.33,how-far-travelled|machine-duty-cycle|machine-running|rotation-speed
+S164,D6T thermal presence,55,Thermal Imaging,4,0.07,how-many-people|no-movement-alarm|occupancy-duration|someone-present
+S171,RD200 radon sensor,180,Radiation & Nuclear,4,0.02,drift-from-baseline|radon-level|routine-broken|ventilation-adequate
+S184,MQ-8 hydrogen sensor,4,Gas & VOC,4,1.0,battery-health|drift-from-baseline|gas-leak|voc-event
+S187,Muon detector (CosmicWatch),100,Radiation & Nuclear,4,0.04,cosmic-flux|drift-from-baseline|how-high|radiation-dose
+S199,MQ-4 methane / natural gas,2.5,Gas & VOC,4,1.6,cooking-detected|gas-leak|stove-left-on|voc-event
+S201,MQ-131 ozone,30,Gas & VOC,4,0.13,air-stuffy|ozone-present|particulate-level|voc-event
+S223,Tire pressure TPMS receivers,10,Industrial & Automotive,4,0.4,drift-from-baseline|machine-state|object-identity|overheating
+S224,Oil/quality dielectric probe,12,Industrial & Automotive,4,0.33,contamination|drift-from-baseline|lubrication-failing|moisture-content
+S225,Conductive thread + fabric pads,8,Materials & Textiles,4,0.5,object-moved|object-present|posture|someone-present
+S229,ESP32 internal sensors (free!),0,Frontier Sensing,4,8.0,object-present|overheating|someone-present|who-is-it
+S233,Soil/water nitrate ion-selective,90,Water & Liquid,4,0.04,concentration-liquid|contamination|soil-fertility|water-nutrients
+S237,Atmospheric electricity (field mill lite),15,Frontier Sensing,4,0.27,atmospheric-charge|drift-from-baseline|someone-present|storm-approaching
+S256,XY-MD02 Modbus RTU temperature & humidity transmitter,11.0,Industrial & Automotive,4,0.36,drift-from-baseline|mould-risk|too-dry|ventilation-adequate
+S268,YRM100 low-cost UHF reader module,32.0,Identity & Tags,4,0.12,asset-location|object-count|object-identity|object-present
+S270,ST25DV64K dual-interface NFC tag,8.0,Identity & Tags,4,0.5,authorised-to-use|object-genuine|object-identity|tamper-detected
+S272,134.2kHz FDX-B animal microchip reader,35.0,Identity & Tags,4,0.11,entered-or-left|livestock-wellbeing|object-identity|who-is-it
+S273,Wiegand-26 access control reader,20.0,Identity & Tags,4,0.2,authorised-to-use|entered-or-left|intrusion|who-is-it
+S279,STC31 percent-level CO2,28.0,CO2,4,0.14,compost-active|drift-from-baseline|gas-leak|ventilation-adequate
+S280,STCC4 low-cost percent CO2,18.0,CO2,4,0.22,compost-active|container-fullness|gas-leak|ventilation-adequate
+S281,SprintIR-W fast wide-range NDIR CO2,190.0,CO2,4,0.02,breathing-rate|compost-active|gas-leak|ventilation-adequate
+S282,SenseAir K30 NDIR CO2,95.0,CO2,4,0.04,air-stuffy|how-many-people|someone-present|ventilation-adequate
+S283,Telaire T6713 I2C CO2,80.0,CO2,4,0.05,air-stuffy|how-many-people|occupancy-duration|ventilation-adequate
+S284,Cubic CM1107N dual-beam CO2,30.0,CO2,4,0.13,air-stuffy|how-many-people|someone-present|ventilation-adequate
+S287,MPS flammable gas and refrigerant sensor,85.0,Gas & VOC,4,0.05,air-leak|contamination|drift-from-baseline|gas-leak
+S290,Alphasense NO2-B43F electrochemical cell,120.0,Gas & VOC,4,0.03,contamination|heat-island|particulate-level|vehicle-approaching
+S292,Winsen ZE03-NH3 ammonia module,40.0,Gas & VOC,4,0.1,compost-active|contamination|livestock-wellbeing|smell-signature
+S295,Honeywell HPM particulate sensor,40.0,Particulate,4,0.1,cooking-detected|filter-clogged|particulate-level|smoke-present
+S297,Piera IPS-7100 ultrafine particle sensor,70.0,Particulate,4,0.06,cooking-detected|particulate-level|smoke-present|voc-event
+S313,SW-520D ball tilt switch,0.5,Motion & Vibration,4,8.0,am-i-level|door-state|object-moved|tamper-detected
+S316,AS7343 14-channel spectral sensor,19.95,Colour & Spectral,4,0.2,colour-match|light-dose-daily|material-type|which-appliance
+S318,TCS3200 frequency-output colour sensor,4.0,Colour & Spectral,4,1.0,colour-match|fruit-ripe|object-material|water-clarity
+S319,OPT3001 photometric lux sensor,8.0,Light & UV,4,0.5,device-left-on|light-dose-daily|occupancy-duration|sky-clear
+S320,VEML6030 ambient light sensor,6.0,Light & UV,4,0.67,device-left-on|light-dose-daily|sky-clear|someone-present
+S321,TSOP38238 38kHz IR receiver,1.0,Light & UV,4,4.0,crossed-boundary|entered-or-left|object-count|object-present
+S324,Apogee SQ-500 full-spectrum quantum (PAR) sensor,400.0,Light & UV,4,0.01,growth-rate|light-dose-daily|solar-performance|solar-resource
+S346,Ammonium ion-selective electrode,189.0,Water & Liquid,4,0.02,concentration-liquid|contamination|soil-fertility|water-nutrients
+S349,High-range EC probe for salinity (K=10),70.0,Water & Liquid,4,0.06,concentration-liquid|contamination|drift-from-baseline|water-nutrients
+S350,Paddlewheel insertion flow sensor,320.0,Water & Liquid,4,0.01,flow-rate|machine-running|pump-dry|water-used-total
+S353,Vertical float level switch (reed),4.0,Water & Liquid,4,1.0,container-fullness|pump-dry|tank-level|water-leak
+S355,"METER TEROS 12 soil moisture, EC and temperature",220.0,Soil & Agriculture,4,0.02,moisture-content|plant-thirsty|soil-fertility|soil-ready-to-plant
+S358,True TDR soil water content probe,395.0,Soil & Agriculture,4,0.01,moisture-content|plant-thirsty|soil-fertility|soil-ready-to-plant
+S363,AD5941 bioimpedance / EIS analyser,95.0,Biometric & Health,4,0.04,breathing-rate|drift-from-baseline|hydration-proxy|stress-arousal
+S364,ADS1292R 2-channel ECG + respiration front end,70.0,Biometric & Health,4,0.06,breathing-rate|breathing-stopped|heart-rate|heart-variability
+S366,ADS1299 8-channel EEG front end,45.0,Biometric & Health,4,0.09,blink-or-eye-move|muscle-effort|sleep-stage-proxy|stress-arousal
+S368,AFE4490 transmissive pulse-oximetry front end,55.0,Biometric & Health,4,0.07,blood-oxygen|breathing-rate|heart-rate|heart-variability
+S369,MAXM86161 reflective PPG module,120.0,Biometric & Health,4,0.03,blood-oxygen|heart-rate|heart-variability|stress-arousal
+S377,BQ27441-G1 Impedance Track fuel gauge,18.0,Power & Electrical,4,0.22,battery-charge|battery-health|drift-from-baseline|energy-budget-node
+S382,LEM LA 55-P closed-loop Hall current transducer,35.0,Power & Electrical,4,0.11,abnormal-current|machine-running|machine-state|power-now
+S384,Flexible Rogowski coil with integrator,150.0,Power & Electrical,4,0.03,abnormal-current|arc-or-discharge|machine-state|power-now
+S386,AMC1311 reinforced isolated voltage-sense amplifier,5.0,Power & Electrical,4,0.8,drift-from-baseline|overheating|power-now|power-quality
+S392,S-type load cell,35.0,Force & Weight,4,0.11,consumable-remaining|container-fullness|hive-state|object-present
+S393,Button / pancake load cell,25.0,Force & Weight,4,0.16,consumable-remaining|object-present|posture|someone-present
+S396,EeonTex piezoresistive fabric,15.0,Flex & Stretch,4,0.27,breathing-rate|object-present|posture|someone-present
+S397,Capacitive stretch sensor,90.0,Flex & Stretch,4,0.04,breathing-rate|gait-quality|joint-angle|posture
+S398,Conductive fabric and tape electrodes,12.0,Materials & Textiles,4,0.33,heart-rate|muscle-effort|object-present|someone-present
+S400,PDM MEMS microphone,3.0,Sound & Audio,4,1.33,glass-broken|machine-state|someone-present|unusual-sound
+S401,Hydrophone,45.0,Sound & Audio,4,0.09,livestock-wellbeing|machine-state|unusual-sound|water-leak
+S402,40kHz ultrasonic transducer pair,3.0,Sound & Audio,4,1.33,air-leak|arc-or-discharge|object-present|obstacle-ahead
+S403,MEMS ultrasonic ToF (Chirp),15.0,Sound & Audio,4,0.27,container-fullness|object-present|obstacle-ahead|someone-present
+S404,RTL-SDR receiver,30.0,RF & Electromagnetic,4,0.13,asset-location|object-identity|rf-activity|which-appliance
+S035,NDIR methane / hydrocarbon module,45,Gas & VOC,3,0.07,compost-active|gas-leak|ventilation-adequate
+S042,SDS011 particulate,20,Particulate,3,0.15,cooking-detected|particulate-level|smoke-present
+S043,Ikea VINDRIKTNING hack,13,Particulate,3,0.23,cooking-detected|particulate-level|smoke-present
+S121,Anemometer cup sensor,12,Weather & Outdoor,3,0.25,frost-tonight|storm-approaching|wind-conditions
+S122,Wind vane,12,Weather & Outdoor,3,0.25,storm-approaching|which-way-facing|wind-conditions
+S124,AS3935 lightning detector,20,Weather & Outdoor,3,0.15,lightning-distance|rf-activity|storm-approaching
+S149,ZMPT101B voltage sensor,3,Power & Electrical,3,1.0,device-left-on|power-now|power-quality
+S154,Linear potentiometer / softpot,6,Position & Rotation,3,0.5,container-fullness|how-far-travelled|object-moved
+S200,MQ-6 LPG/propane,2.5,Gas & VOC,3,1.2,cooking-detected|gas-leak|voc-event
+S218,Thermistor airflow (nasal) kit,3,Biometric & Health,3,1.0,breathing-rate|breathing-stopped|sleep-stage-proxy
+S222,Narrowband O2 sensor (HEGO),15,Industrial & Automotive,3,0.2,abnormal-current|machine-state|overheating
+S226,Frustration-free moisture: plant leaf clip,5,Materials & Textiles,3,0.6,drift-from-baseline|growth-rate|plant-thirsty
+S250,NEO-F10T dual-band GNSS timing receiver,120.0,GNSS & Positioning,3,0.03,drift-from-baseline|how-high|where-am-i
+S271,NTAG I2C Plus 2K dual-interface tag,6.0,Identity & Tags,3,0.5,authorised-to-use|object-genuine|object-identity
+S274,ID809 capacitive fingerprint module,32.0,Identity & Tags,3,0.09,authorised-to-use|someone-present|who-is-it
+S276,ATECC608B secure element,6.0,Identity & Tags,3,0.5,authorised-to-use|object-genuine|tamper-detected
+S288,Figaro TGS6812 catalytic pellistor,35.0,Gas & VOC,3,0.09,air-leak|fire-present|gas-leak
+S289,INIR NDIR methane module,130.0,Gas & VOC,3,0.02,air-leak|compost-active|gas-leak
+S291,Winsen ZE25-O3 ozone module,30.0,Gas & VOC,3,0.1,air-leak|contamination|ozone-present
+S293,Alphasense CL2-A1 chlorine cell,130.0,Gas & VOC,3,0.02,contamination|gas-leak|water-sanitised
+S322,BPW34 PIN photodiode,1.0,Light & UV,3,3.0,crossed-boundary|object-present|radiation-dose
+S323,ALS-PT19 ambient light phototransistor,3.0,Light & UV,3,1.0,device-left-on|sky-clear|someone-present
+S348,Free-chlorine amperometric membrane probe,390.0,Water & Liquid,3,0.01,concentration-liquid|contamination|water-sanitised
+S351,Thermal microflow sensor for liquids,150.0,Water & Liquid,3,0.02,consumable-remaining|cycle-complete|flow-rate
+S352,Electromagnetic (mag) flowmeter,300.0,Water & Liquid,3,0.01,flow-rate|machine-duty-cycle|water-used-total
+S354,Guided-wave radar level transmitter,290.0,Water & Liquid,3,0.01,consumable-remaining|container-fullness|tank-level
+S356,METER TEROS 21 soil water potential,290.0,Soil & Agriculture,3,0.01,drift-from-baseline|plant-thirsty|soil-tension
+S359,Soil CO2 flux chamber (closed dynamic),95.0,Soil & Agriculture,3,0.03,compost-active|drift-from-baseline|soil-fertility
+S360,Sap flow probe (heat-ratio method),620.0,Soil & Agriculture,3,0.0,disease-pressure|growth-rate|plant-thirsty
+S361,Point dendrometer (stem diameter),70.0,Soil & Agriculture,3,0.04,drift-from-baseline|growth-rate|plant-thirsty
+S365,ADS1298 8-channel clinical ECG front end,160.0,Biometric & Health,3,0.02,heart-rate|heart-variability|muscle-effort
+S370,MAX30208 clinical-accuracy skin temperature,10.0,Biometric & Health,3,0.3,body-temp-trend|drift-from-baseline|person-asleep
+S372,EDA done properly - constant-voltage skin conductance,8.0,Biometric & Health,3,0.38,drift-from-baseline|sleep-stage-proxy|stress-arousal
+S375,MAX17260 ModelGauge m5 fuel gauge,4.0,Power & Electrical,3,0.75,battery-charge|battery-health|energy-budget-node
+S383,LEM IT 60-S ULTRASTAB fluxgate current transducer,900.0,Power & Electrical,3,0.0,abnormal-current|drift-from-baseline|power-now
+S385,RV4145A ground-fault / residual current detector,2.0,Power & Electrical,3,1.5,abnormal-current|arc-or-discharge|drift-from-baseline
+S391,Azoteq IQS7211 / IQS263 proximity + touch,6.0,Touch & Capacitive,3,0.5,are-they-looking|object-present|someone-present
+S394,Rotary torque sensor,180.0,Force & Weight,3,0.02,abnormal-current|lubrication-failing|machine-state
+S406,SiPM photodetector module,60.0,Radiation & Nuclear,3,0.05,cosmic-flux|radiation-dose|which-isotope
+S151,KY-040 rotary encoder,1,Position & Rotation,2,2.0,object-moved|rotation-speed
+S251,10MHz GPSDO — GNSS-disciplined oscillator,130.0,GNSS & Positioning,2,0.02,drift-from-baseline|rf-activity
+S347,Fluoride ion-selective electrode (LaF3 crystal),320.0,Water & Liquid,2,0.01,concentration-liquid|contamination
+S357,Gypsum soil moisture block,10.0,Soil & Agriculture,2,0.2,plant-thirsty|soil-tension
+S371,"Oscillometric blood-pressure module (cuff, pump, valve)",60.0,Biometric & Health,2,0.03,drift-from-baseline|heart-rate
+S374,MAX17048 ModelGauge fuel gauge,6.0,Power & Electrical,2,0.33,battery-charge|energy-budget-node
+S376,LC709203F fuel gauge (end of life),8.0,Power & Electrical,2,0.25,battery-charge|energy-budget-node
+S388,CAP1188 8-channel capacitive touch,8.0,Touch & Capacitive,2,0.25,object-present|someone-present
+S399,Embroidered / fabric antenna,10.0,Materials & Textiles,2,0.2,asset-location|object-identity
+S405,SX1262 sub-GHz transceiver,8.0,RF & Electromagnetic,2,0.25,asset-location|rf-activity
+S407,PIN photodiode radiation detector,2.0,Radiation & Nuclear,2,1.0,cosmic-flux|radiation-dose
+S156,Joystick module,1.5,Position & Rotation,1,0.67,object-moved
+S160,GPS PPS time source,10,GNSS & Positioning,1,0.1,where-am-i
+S389,AT42QT1070 / QT1010 touch controller,4.0,Touch & Capacitive,1,0.25,object-present
+S390,GT911 / FT6236 touchscreen controller,6.0,Touch & Capacitive,1,0.17,object-present

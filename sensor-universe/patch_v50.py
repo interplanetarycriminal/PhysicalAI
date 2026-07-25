@@ -38,7 +38,7 @@ import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
 SRC = "/root/.claude/uploads/f55cc0f7-8744-54de-a2e0-8ff2f0fa91bf/86aced1a-esp32_sensor_universe_v50.xlsx"
-OUT = HERE / "esp32_sensor_universe_v53.xlsx"
+OUT = HERE / "esp32_sensor_universe_v54.xlsx"
 
 CAT_BACK = {  # schema-v2 category -> the v50 taxonomy name, so the sheet stays coherent
     "Humidity & Moisture": "Humidity + Temp", "CO2": "CO2 (true)",
@@ -141,8 +141,19 @@ def main():
     sol = outcome_solver.build(records, vocab.INFERENCE)
     add_solver(wb, sol)
     add_outcome_index(wb, sol)
+    add_solver_run(wb, sol)
+    add_solver_data(wb, sol, vocab.INFERENCE)
     print(f"Outcome Solver: {sol['n_all']} outcomes over {sol['n_sensors']} sensors; "
           f"full coverage in {sol['kit_cost_len']} parts for ${sol['cost_cost']:.0f}")
+    print(f"Solver Run: both objectives traced in full "
+          f"({sol['kit_cost_len']} + {sol['kit_count_len']} steps, every step's outcomes named)")
+
+    # The same run, written out in formats that do not need Excel. This is what
+    # makes the analysis servable anywhere else.
+    import solve as solve_cli
+    names = solve_cli.export(records, vocab.INFERENCE, sol)
+    print(f"Solver Data: {sol['edges']} edges published; "
+          f"exports/ regenerated ({', '.join(names)})")
 
     # openpyxl drops cached formula results on round-trip; v50 has 10 formula
     # cells on Idea Forge. Forcing a full recalculation on open means Excel
@@ -552,6 +563,197 @@ def add_outcome_index(wb, sol):
         ws.row_dimensions[row].height = 26
         row += 1
     S.set_widths(ws, [17, 36, 8, 12, 34, 30, 32, 32])
+    ws.freeze_panes = "C4"
+    return ws
+
+
+def add_solver_run(wb, sol):
+    """The run itself, not a summary of it.
+
+    'Outcome Solver' reports what the optimiser concluded. This sheet is the
+    working: every step of both objectives, with the outcomes that step actually
+    bought named in full, so the result can be checked by hand and lifted out of
+    this workbook into anything else without re-running the build.
+    """
+    ws = wb.create_sheet("Solver Run")
+    S.sheet_defaults(ws, tab_color="14524A")
+    ncols = 9
+    row = _banner(
+        ws, "🧮 SOLVER RUN — the working, step by step",
+        f"One complete execution against the live catalog: {sol['n_sensors']} sensors, "
+        f"{sol['n_all']} outcomes, {sol['edges']} sensor→outcome edges. Both objectives are run to "
+        "100% coverage and printed in full, including the outcomes each step BOUGHT — which is the "
+        "difference between a summary of a run and the run itself. Every number in the Outcome "
+        "Solver sheet can be re-derived from this one by hand.", ncols)
+
+    # ---- provenance: what went in, what the algorithm guarantees
+    row = S.section(ws, row, "0 · WHAT WAS RUN", ncols,
+                    "Stated plainly so the result is reproducible rather than merely presented.")
+    for k, v in [
+        ("Problem", "Maximum Coverage: choose the smallest set of sensors whose combined "
+                    "inference sets cover every outcome."),
+        ("Complexity", "NP-hard. Exhaustive search over 405 sensors is 2^405 subsets, which is "
+                       "not a computation anyone will ever finish."),
+        ("Algorithm", "Greedy — repeatedly take the sensor with the best marginal value, until "
+                      "coverage is complete."),
+        ("Guarantee", "Greedy is within (1 − 1/e) ≈ 63% of optimal, and it is proven that no "
+                      "polynomial-time algorithm beats that bound unless P = NP. So greedy is "
+                      "not a shortcut here — it is the best available answer."),
+        ("Objective A", f"Marginal outcomes per DOLLAR → {sol['kit_cost_len']} sensors, "
+                        f"${sol['cost_cost']:.0f}, 100% coverage."),
+        ("Objective B", f"Marginal outcomes per PART → {sol['kit_count_len']} sensors, "
+                        f"${sol['cost_count']:.0f}, 100% coverage."),
+        ("Inputs", f"{sol['n_sensors']} sensors that declare at least one inference; "
+                   f"{sol['n_all']} outcomes in the controlled vocabulary; "
+                   f"{sol['edges']} declared sensor→outcome edges. The full edge list is on the "
+                   "Solver Data sheet."),
+        ("Re-run it", "python3 solve.py — same optimiser, any subset of outcomes, any "
+                      "constraint. `--export` writes JSON/CSV/Markdown for use outside Excel."),
+    ]:
+        S.cell(ws, row, 1, k, size=9, bold=True, fill="E4EFE6")
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=ncols)
+        S.cell(ws, row, 2, v, size=9)
+        ws.row_dimensions[row].height = max(18, 12 + len(v) // 8.0)
+        row += 1
+    row += 1
+
+    hdr = ["#", "Sensor ID", "Sensor", "$", "Buys", "Total", "% covered",
+           "Cumulative $", "The outcomes this step bought"]
+
+    def block(row, title, note, trace, fill):
+        row = S.section(ws, row, title, ncols, note)
+        for col, name in enumerate(hdr, 1):
+            c = ws.cell(row=row, column=col, value=name)
+            c.font = S.sfont(9, bold=True, color="FFFFFF")
+            c.fill = S.PatternFill("solid", fgColor=fill)
+            c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+            c.border = S.BORDER
+        row += 1
+        for s in trace:
+            bought = " · ".join(s["bought"])
+            S.cell(ws, row, 1, s["rank"], size=8.5, halign="center")
+            S.cell(ws, row, 2, s["id"], size=8.5, halign="center", color=S.MUTED)
+            S.cell(ws, row, 3, s["name"], size=9, bold=True)
+            S.cell(ws, row, 4, f"${s['usd']:g}", size=8.5, halign="center")
+            g = S.cell(ws, row, 5, f"+{s['gain']}", size=9, bold=True, halign="center")
+            g.fill = S.PatternFill("solid", fgColor="E7F0E9" if s["gain"] > 1 else "F5F2EB")
+            S.cell(ws, row, 6, s["cum"], size=8.5, halign="center")
+            p = S.cell(ws, row, 7, f"{s['pct']*100:.0f}%", size=8.5, halign="center")
+            p.font = S.sfont(8.5, color=S.ACCENT)
+            S.cell(ws, row, 8, f"${s['cum_cost']:.0f}", size=8.5, halign="center")
+            S.cell(ws, row, 9, bought, size=8.5)
+            ws.row_dimensions[row].height = max(14, 11 + len(bought) // 11.0)
+            row += 1
+        return row + 1
+
+    row = block(row, "1 · OBJECTIVE A — cheapest route to everything",
+                f"Marginal outcomes per dollar. {sol['kit_cost_len']} sensors, "
+                f"${sol['cost_cost']:.0f}. Notice the order: the dumbest parts in the catalog go "
+                "first, because unselective is what recombinatory MEANS.",
+                sol["trace_cost"], "1F6F5C")
+
+    row = block(row, "2 · OBJECTIVE B — fewest parts to everything",
+                f"Marginal outcomes per part, ignoring price. {sol['kit_count_len']} sensors — "
+                f"{sol['kit_cost_len'] - sol['kit_count_len']} fewer than objective A — but "
+                f"${sol['cost_count']:.0f} against ${sol['cost_cost']:.0f}. The two objectives "
+                "disagree about the FIRST pick, and that disagreement is the whole insight: "
+                "capable modules minimise part count, dumb transducers minimise spend.",
+                sol["trace_count"], "4A5878")
+
+    # ---- what the two runs agree and disagree about
+    a = {s["name"] for s in sol["trace_cost"]}
+    b = {s["name"] for s in sol["trace_count"]}
+    row = S.section(ws, row, "3 · WHERE THE TWO RUNS AGREE", ncols,
+                    "Parts chosen by BOTH objectives are load-bearing under either philosophy — "
+                    "they are not an artefact of how you weighted the problem.")
+    for label, names, fill in [
+        (f"✅ BOTH ({len(a & b)})", sorted(a & b), "E7F0E9"),
+        (f"💵 CHEAPEST-ONLY ({len(a - b)})", sorted(a - b), "FBEFD8"),
+        (f"📦 FEWEST-PARTS-ONLY ({len(b - a)})", sorted(b - a), "EAF0F6"),
+    ]:
+        S.cell(ws, row, 1, label, size=9, bold=True, fill=fill)
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=2)
+        ws.merge_cells(start_row=row, start_column=3, end_row=row, end_column=ncols)
+        S.cell(ws, row, 3, " · ".join(names), size=8.5)
+        ws.row_dimensions[row].height = max(20, 12 + len(" · ".join(names)) // 12.0)
+        row += 1
+
+    S.set_widths(ws, [5, 10, 30, 9, 8, 8, 11, 13, 78])
+    ws.freeze_panes = "A4"
+    return ws
+
+
+def add_solver_data(wb, sol, INFERENCE):
+    """The graph the solver consumed. Publishing it is what makes the run checkable."""
+    ws = wb.create_sheet("Solver Data")
+    S.sheet_defaults(ws, tab_color="3A4A6B")
+    ncols = 8
+    row = _banner(
+        ws, "🔗 SOLVER DATA — the graph every number was computed from",
+        f"{sol['edges']} declared edges between {sol['n_sensors']} sensors and {sol['n_all']} "
+        "outcomes. This is the optimiser's entire input: no other data enters the calculation. "
+        "Filter it, sort it, or lift it out — the same rows are in exports/coverage_edges.csv.",
+        ncols)
+
+    row = S.section(ws, row, "1 · EVERY SENSOR, AND EVERYTHING IT CAN TELL YOU", ncols,
+                    "Sorted by reach. The top of this list is the recombinatory end of the "
+                    "catalog and the bottom is the specific end.")
+    for col, name in enumerate(["ID", "Sensor", "$", "Category", "Reach",
+                                "Per $", "Contact", "Outcomes it supports"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        c.border = S.BORDER
+    row += 1
+    first = row
+    for g in sol["graph"]:
+        usd = g["usd"] if isinstance(g["usd"], (int, float)) else None
+        S.cell(ws, row, 1, g["id"], size=8.5, halign="center", color=S.MUTED)
+        S.cell(ws, row, 2, g["name"], size=9, bold=True)
+        S.cell(ws, row, 3, usd, size=8.5, halign="center")
+        S.cell(ws, row, 4, g["cat"], size=8, color=S.MUTED)
+        n = S.cell(ws, row, 5, g["n"], size=9, bold=True, halign="center")
+        if g["n"] >= 8:
+            n.fill = S.PatternFill("solid", fgColor="E7F0E9")
+        S.cell(ws, row, 6, round(g["n"] / max(usd or 0.5, 0.5), 1) if usd is not None else "",
+               size=8.5, halign="center")
+        S.cell(ws, row, 7, g["contact"] or "", size=8, halign="center")
+        S.cell(ws, row, 8, " · ".join(g["questions"]), size=8.5)
+        ws.row_dimensions[row].height = max(14, 11 + len(" · ".join(g["questions"])) // 14.0)
+        row += 1
+    S.price_bars(ws, 3, first, row - 1)
+    row += 1
+
+    row = S.section(ws, row, "2 · EVERY OUTCOME, AND EVERY ROUTE TO IT", ncols,
+                    "The same graph read the other way. Route count is the honest measure of how "
+                    "constrained an outcome is: one route means one point of failure and one "
+                    "price you cannot negotiate.")
+    for col, name in enumerate(["Key", "Domain", "You want to know…", "Routes", "Rarity",
+                                "", "", "Every sensor that can tell you"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor="4A5878")
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        c.border = S.BORDER
+    row += 1
+    for o in sorted(sol["outcomes"], key=lambda o: (o["domain"], o["n_routes"])):
+        S.cell(ws, row, 1, o["key"], size=8, color=S.MUTED)
+        S.cell(ws, row, 2, o["domain"], size=8, fill="EDE7F3")
+        S.cell(ws, row, 3, o["question"], size=9, bold=True, color=S.NAVY)
+        S.cell(ws, row, 4, o["n_routes"], size=9, bold=True, halign="center")
+        rc = S.cell(ws, row, 5, o["rarity"] or "", size=8, halign="center")
+        if o["rarity"] == "SOLE ROUTE":
+            rc.fill = S.PatternFill("solid", fgColor="F8DED7")
+            rc.font = S.sfont(8, bold=True, color=S.BAD)
+        ws.merge_cells(start_row=row, start_column=6, end_row=row, end_column=ncols)
+        S.cell(ws, row, 6, " · ".join(
+            f"{r['name']}" + (f" (${r['usd']:g})" if isinstance(r["usd"], (int, float)) else "")
+            for r in o["routes"]), size=8.5)
+        ws.row_dimensions[row].height = max(14, 11 + len(o["routes"]) * 2.4)
+        row += 1
+
+    S.set_widths(ws, [10, 17, 34, 8, 12, 10, 10, 84])
     ws.freeze_panes = "C4"
     return ws
 

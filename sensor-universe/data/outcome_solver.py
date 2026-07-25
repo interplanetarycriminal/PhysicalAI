@@ -20,35 +20,96 @@ Grammar, Fusion Patterns). Nothing computes what to BUY. That is this.
 from collections import defaultdict
 
 
+def index(records, INFERENCE):
+    """The bipartite graph: sensor id -> (record, set of outcomes it supports)."""
+    return {r["id"]: (r, set(i for i in r.get("inferences") or [] if i in INFERENCE))
+            for r in records if r.get("catalog") == "sensor" and r.get("inferences")}
+
+
+def greedy_cover(S, target, pool=None, by_cost=True):
+    """Greedy maximum coverage. Returns (kit, covered).
+
+    kit is a list of (sensor_id, record, marginal_gain) in selection order.
+    `pool` restricts what may be SELECTED; coverage is always scored against S,
+    which is the same set unless a constraint is filtering the pool.
+    """
+    pool = pool if pool is not None else S
+    cov, kit, used = set(), [], set()
+    while cov != target:
+        best, bv = None, 0
+        for sid, (r, inf) in pool.items():
+            if sid in used:
+                continue
+            g = len((inf & target) - cov)
+            if not g:
+                continue
+            v = g / max(r.get("usd") or 1, 1) if by_cost else g
+            if v > bv:
+                bv, best = v, (sid, r, g)
+        if best is None:
+            break
+        used.add(best[0])
+        kit.append(best)
+        cov |= (S[best[0]][1] & target)
+    return kit, cov
+
+
+def trace_kit(S, kit, INFERENCE, target):
+    """Replay a kit step by step, recording exactly which outcomes each step BOUGHT.
+
+    The curve says how many. This says which — which is the difference between a
+    summary of a run and the run itself, and it is what makes the result
+    auditable by hand and portable to anything that is not Excel.
+    """
+    out, cov, spend = [], set(), 0.0
+    for rank, (sid, r, _g) in enumerate(kit, 1):
+        gained = sorted((S[sid][1] & target) - cov)
+        cov |= (S[sid][1] & target)
+        spend += r.get("usd") or 0
+        out.append(dict(
+            rank=rank, id=sid, name=r["n"], usd=r.get("usd") or 0,
+            cat=r.get("cat", ""), gain=len(gained), cum=len(cov),
+            pct=len(cov) / max(len(target), 1), cum_cost=spend,
+            bought=[INFERENCE[k][0] for k in gained], bought_keys=gained,
+            # what this step cost per outcome it actually bought
+            per_outcome=((r.get("usd") or 0) / len(gained)) if gained else None))
+    return out
+
+
+def solve(records, INFERENCE, keys=None, by_cost=True, predicate=None):
+    """Run the solver against ANY subset of outcomes. The public entry point.
+
+    keys      — outcome keys you want; None means all of them
+    by_cost   — optimise outcomes per pound (True) or per part (False)
+    predicate — optional filter over sensor records, e.g. a privacy or budget rule
+
+    Returns dict(target, trace, covered, missed, n_sensors, cost).
+    """
+    S = index(records, INFERENCE)
+    target = set(keys) if keys else set(INFERENCE)
+    unknown = sorted(target - set(INFERENCE))
+    target &= set(INFERENCE)
+    pool = {k: v for k, v in S.items() if predicate(v[0])} if predicate else S
+    kit, cov = greedy_cover(S, target, pool=pool, by_cost=by_cost)
+    tr = trace_kit(S, kit, INFERENCE, target)
+    return dict(target=sorted(target), unknown=unknown, trace=tr,
+                covered=sorted(cov), missed=sorted(target - cov),
+                n_sensors=len(kit), cost=sum(s["usd"] for s in tr),
+                pct=len(cov) / max(len(target), 1))
+
+
 def build(records, INFERENCE):
     ALL = set(INFERENCE)
-    S = {r["id"]: (r, set(i for i in r.get("inferences") or [] if i in INFERENCE))
-         for r in records if r.get("catalog") == "sensor" and r.get("inferences")}
+    S = index(records, INFERENCE)
 
     def greedy(target, pool=None, by_cost=True):
-        pool = pool if pool is not None else S
-        cov, kit, used = set(), [], set()
-        while cov != target:
-            best, bv = None, 0
-            for sid, (r, inf) in pool.items():
-                if sid in used:
-                    continue
-                g = len((inf & target) - cov)
-                if not g:
-                    continue
-                v = g / max(r.get("usd") or 1, 1) if by_cost else g
-                if v > bv:
-                    bv, best = v, (sid, r, g)
-            if best is None:
-                break
-            used.add(best[0])
-            kit.append(best)
-            cov |= (S[best[0]][1] & target)
-        return kit, cov
+        return greedy_cover(S, target, pool=pool, by_cost=by_cost)
 
     # ---------------------------------------------------------------- the curve
     kit_cost, _ = greedy(ALL, by_cost=True)
     kit_count, _ = greedy(ALL, by_cost=False)
+    trace_cost = trace_kit(S, kit_cost, INFERENCE, ALL)
+    trace_count = trace_kit(S, kit_count, INFERENCE, ALL)
 
     curve, run, spend = [], set(), 0.0
     for sid, r, g in kit_cost:
@@ -102,7 +163,10 @@ def build(records, INFERENCE):
         priv = [a for a in alts if a.get("privacy") in ("None", "Aggregate")]
         pv = min(priv, key=lambda a: a.get("usd") or 1e9) if priv else None
         outcomes.append(dict(
-            domain=domain, question=question, n_routes=len(alts),
+            key=key, domain=domain, question=question, n_routes=len(alts),
+            routes=[dict(id=a["id"], name=a["n"], usd=a.get("usd"),
+                         contact=a.get("contact"), privacy=a.get("privacy"))
+                    for a in sorted(alts, key=lambda a: (a.get("usd") if isinstance(a.get("usd"), (int, float)) else 1e9))],
             cheap=f"{cheap['n']} (${cheap['usd']:g})" if cheap else "—",
             best=f"{best['n']}" if best else "—",
             nocontact=f"{nc['n']} (${nc['usd']:g})" if nc else "— none",
@@ -165,12 +229,32 @@ def build(records, INFERENCE):
          ((v[0], v[1]) for v in S.values()) if len(inf) >= 4],
         key=lambda x: -x[0])
 
+    # ---------------------------------------------------------------- raw graph
+    # The bipartite graph the solver actually consumes. Publishing it is what
+    # makes every number above reproducible somewhere other than this workbook.
+    graph = []
+    for sid, (r, inf) in sorted(S.items(), key=lambda kv: -len(kv[1][1])):
+        graph.append(dict(
+            id=sid, name=r["n"], usd=r.get("usd"), cat=r.get("cat", ""),
+            contact=r.get("contact"), privacy=r.get("privacy"),
+            diff=r.get("diff"), n=len(inf),
+            keys=sorted(inf), questions=[INFERENCE[k][0] for k in sorted(inf)]))
+    edges = sum(len(g["keys"]) for g in graph)
+
     return dict(curve=curve, tiers=tiers, outcomes=outcomes, domain_kits=domain_kits,
                 constraint_kits=constraint_kits, irreplaceable=irr[:18],
                 recomb=recomb[:18], n_all=len(ALL), n_sensors=len(S),
                 kit_count_len=len(kit_count), kit_cost_len=len(kit_cost),
                 cost_count=sum((r.get("usd") or 0) for _, r, _ in kit_count),
-                cost_cost=sum((r.get("usd") or 0) for _, r, _ in kit_cost))
+                cost_cost=sum((r.get("usd") or 0) for _, r, _ in kit_cost),
+                trace_cost=trace_cost, trace_count=trace_count,
+                graph=graph, edges=edges,
+                irreplaceable_full=[dict(id=r["id"], name=r["n"], usd=r.get("usd"),
+                                         score=round(sc, 3), n=n, sole=solo)
+                                    for sc, r, solo, n in irr],
+                recomb_full=[dict(id=r["id"], name=r["n"], usd=r.get("usd"),
+                                  n=n, per_dollar=round(per, 2))
+                             for per, r, n in recomb])
 
 
 FINDINGS = [
