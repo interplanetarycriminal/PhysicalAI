@@ -30,11 +30,13 @@ sys.path.insert(0, str(HERE))
 import schema      # noqa: E402
 from v50_columns import V50_COLS  # noqa: E402
 from physics_codes_ii import CODES_II, CORRECTIONS as PHYS_FIX  # noqa: E402
+from derived_instruments import INSTRUMENTS, METHOD  # noqa: E402
+from anti_catalog_ii import WALLS  # noqa: E402
 import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
 SRC = "/root/.claude/uploads/f55cc0f7-8744-54de-a2e0-8ff2f0fa91bf/86aced1a-esp32_sensor_universe_v50.xlsx"
-OUT = HERE / "esp32_sensor_universe_v51.xlsx"
+OUT = HERE / "esp32_sensor_universe_v52.xlsx"
 
 CAT_BACK = {  # schema-v2 category -> the v50 taxonomy name, so the sheet stays coherent
     "Humidity & Moisture": "Humidity + Temp", "CO2": "CO2 (true)",
@@ -129,6 +131,11 @@ def main():
     n = fix_physics_codes(wb)
     add_physics_ii(wb)
     print(f"Physics Cheat Codes: {n} numerical errors corrected; 12 codes added as II")
+    add_derived(wb)
+    add_anti_ii(wb)
+    print(f"Derived Instruments: {len(INSTRUMENTS)} worked from first principles "
+          f"({sum(1 for i in INSTRUMENTS if i[0]=='DEAD')} killed by arithmetic); "
+          f"Anti-Catalog II: {len(WALLS)} walls")
 
     # openpyxl drops cached formula results on round-trip; v50 has 10 formula
     # cells on Idea Forge. Forcing a full recalculation on open means Excel
@@ -282,6 +289,87 @@ def add_physics_ii(wb):
         row += 1
     S.set_widths(ws, [30, 62, 44, 52, 50])
     ws.freeze_panes = "A4"
+    return ws
+
+
+def add_derived(wb):
+    """Instruments derived here rather than catalogued from elsewhere."""
+    ws = wb.create_sheet("Derived Instruments")
+    S.sheet_defaults(ws, tab_color="C8853A")
+    ncols = 7
+    row = _banner(
+        ws, "🔬 DERIVED INSTRUMENTS — sensing methods worked out here, with the arithmetic",
+        "Everything else in this atlas is synthesis. This is not. Each entry is an instrument "
+        "DERIVED by applying the transduction grid and the cheat codes to a measurement problem, "
+        "then tested with numbers before anything was bought. Three come out DEAD, killed by their "
+        "own arithmetic — kept deliberately, because a notebook of only successes is a marketing "
+        "document, and a calculation that kills an idea in ten minutes saves a season.", ncols)
+
+    for label, text in METHOD:
+        S.cell(ws, row, 1, label, size=9, bold=True, fill="F5F2EB")
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=ncols)
+        S.cell(ws, row, 2, text, size=9)
+        ws.row_dimensions[row].height = max(26, 12 + len(text) // 4.2)
+        row += 1
+    row += 1
+
+    for col, name in enumerate(["Verdict", "The instrument", "What it measures that nothing cheap does",
+                                "The physics", "The arithmetic — does it actually work?",
+                                "Parts & cost", "What kills it · why it doesn't exist"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, vertical="center", horizontal="center")
+        c.border = S.BORDER
+    ws.row_dimensions[row].height = 22
+    row += 1
+    vfill = {"BUILD": "E7F0E9", "MARGINAL": "FBEFD8", "DEAD": "F8DED7"}
+    vcolor = {"BUILD": "2F6B45", "MARGINAL": "9A6A00", "DEAD": "A8412F"}
+    for verdict, name, meas, phys, arith, parts, kills, why in INSTRUMENTS:
+        c = S.cell(ws, row, 1, verdict, size=10, bold=True, halign="center",
+                   fill=vfill[verdict], color=vcolor[verdict])
+        S.cell(ws, row, 2, name, size=10, bold=True, color=S.NAVY)
+        S.cell(ws, row, 3, meas, size=9)
+        S.cell(ws, row, 4, phys, size=9)
+        S.cell(ws, row, 5, arith, size=9, fill="EAF0F6")
+        S.cell(ws, row, 6, parts, size=9)
+        S.cell(ws, row, 7, f"KILLS IT: {kills}\n\nWHY IT DOESN'T EXIST: {why}", size=9,
+               fill="FBE9E4" if verdict == "DEAD" else None)
+        ws.row_dimensions[row].height = max(110, 12 + len(arith) // 2.4)
+        row += 1
+    S.set_widths(ws, [11, 26, 40, 56, 60, 30, 62])
+    ws.freeze_panes = "C4"
+    return ws
+
+
+def add_anti_ii(wb):
+    """More walls. Knowing what is impossible is worth more than knowing what is possible."""
+    ws = wb.create_sheet("The Anti-Catalog II")
+    S.sheet_defaults(ws, tab_color="8A4A3A")
+    ncols = 4
+    row = _banner(
+        ws, "🧱 THE ANTI-CATALOG II — twelve more walls, and what each one teaches",
+        "The original Anti-Catalog is the best sheet in this atlas and one of the smallest, which "
+        "is backwards. Every wall here is a genuine physical limit rather than an engineering "
+        "inconvenience — stated with the number that makes it a wall, what it teaches, and the "
+        "nearest honest thing you CAN measure instead.", ncols)
+    for col, name in enumerate(["The wall", "The physics of the wall",
+                                "What the wall teaches", "The nearest honest route"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, vertical="center", horizontal="center")
+        c.border = S.BORDER
+    row += 1
+    for wall, phys, teaches, route in WALLS:
+        S.cell(ws, row, 1, wall, size=10, bold=True, color=S.NAVY, fill="F8DED7")
+        S.cell(ws, row, 2, phys, size=9)
+        S.cell(ws, row, 3, teaches, size=9, fill="FBEFD8")
+        S.cell(ws, row, 4, route, size=9, fill="E7F0E9")
+        ws.row_dimensions[row].height = max(76, 12 + len(phys) // 2.6)
+        row += 1
+    S.set_widths(ws, [34, 66, 56, 58])
+    ws.freeze_panes = "B4"
     return ws
 
 
