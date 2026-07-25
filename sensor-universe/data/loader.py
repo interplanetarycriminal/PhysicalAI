@@ -25,7 +25,8 @@ SENSOR_PARTS = [
     # schema-v2 expansion files (added in phase B); absent files are skipped
     "part11_expansion", "part12_expansion", "part13_expansion",
 ]
-OTHER_CATALOGS = [("actuators", "actuator"), ("glue", "glue"), ("boards", "board")]
+OTHER_CATALOGS = [("actuators", "actuator"), ("glue", "glue"), ("glue_core", "glue"),
+                  ("boards", "board")]
 
 # ---------------------------------------------------------------- migration maps
 
