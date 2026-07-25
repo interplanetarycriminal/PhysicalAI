@@ -231,15 +231,18 @@ def load_all(persist_ids=True):
 
     assign_ids(records, persist=persist_ids)
 
-    # enrichment overlay, keyed by stable id
-    enrich = _import("enrich")
-    if enrich is not None:
-        overlay = getattr(enrich, "ENRICH", {})
-        for r in records:
-            extra = overlay.get(r["id"])
-            if extra:
-                for k, v in extra.items():
-                    r[k] = v
+    # enrichment overlays, keyed by stable id. Hand-authored core first, then the
+    # agent-authored overlay, so the latter refines rather than being shadowed.
+    overlay = {}
+    for mod_name, var in (("enrich_core", "ENRICH_CORE"), ("enrich", "ENRICH")):
+        mod = _import(mod_name)
+        if mod is None:
+            continue
+        for pid, extra in getattr(mod, var, {}).items():
+            overlay.setdefault(pid, {}).update(extra)
+    for r in records:
+        for k, v in (overlay.get(r["id"]) or {}).items():
+            r[k] = v
 
     # derived — computed, never authored
     for r in records:
