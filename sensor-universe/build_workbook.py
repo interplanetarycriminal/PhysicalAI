@@ -85,7 +85,8 @@ CATALOG_COLS = [
 ]
 
 
-def sheet_catalog(wb, records, kind, name, title, subtitle, tab):
+def sheet_catalog(wb, records, kind, name, title, subtitle, tab, card_rows=None):
+    card_rows = card_rows or {}
     items = [r for r in records if r.get("catalog") == kind]
     headers = S.unique_headers([h for h, _ in CATALOG_COLS])
     ws, row = new_sheet(wb, name, title, subtitle, len(headers), tab)
@@ -108,7 +109,9 @@ def sheet_catalog(wb, records, kind, name, title, subtitle, tab):
             S.cell(ws, rr, c, v, size=9,
                    halign="center" if c in (1, 12, 13, 14) else "left")
         ws.cell(row=rr, column=1).font = S.sfont(9, bold=True, color=S.MUTED)
-        S.link_to(ws.cell(row=rr, column=1), "Sensor Cards", f"A{rr}", tooltip=rec["n"])
+        if rec["id"] in card_rows:
+            S.link_to(ws.cell(row=rr, column=1), "Sensor Cards",
+                      f"A{card_rows[rec['id']]}", tooltip=f"Open the full card for {rec['n']}")
         ws.cell(row=rr, column=2).font = S.sfont(10, bold=True)
         ws.cell(row=rr, column=5).fill = S.PatternFill("solid", fgColor=mfill)
         pv = rec.get("privacy")
@@ -132,8 +135,13 @@ def sheet_catalog(wb, records, kind, name, title, subtitle, tab):
 
 def sheet_cards(wb, records):
     """One part per block, laid out to be READ. v5 buried 500-char prose in a
-    20-column grid at 86pt row height, which nobody can read."""
-    sensors = [r for r in records if r.get("catalog") == "sensor"]
+    20-column grid at 86pt row height, which nobody can read.
+
+    Returns {part_id: anchor_row} so catalog IDs can hyperlink to the right card.
+    Each card's body is an outline group, so the whole sheet collapses to a list
+    of headers and expands only where you're looking."""
+    sensors = list(records)
+    card_rows = {}
     ncols = 8
     ws, row = new_sheet(
         wb, "Sensor Cards", "🔍 SENSOR CARDS — the full detail, laid out to be read",
@@ -144,6 +152,8 @@ def sheet_cards(wb, records):
 
     for rec in sensors:
         mfill = schema.MODALITY_COLOR.get(rec.get("modality"), "EFEFEF")
+        card_rows[rec["id"]] = row
+        body_start = row + 1
         # header strip
         ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=ncols)
         S.cell(ws, row, 1, rec["id"], size=10, bold=True, halign="center",
@@ -243,9 +253,13 @@ def sheet_cards(wb, records):
             ws.row_dimensions[row].height = max(15, min(45, 12 + len(infs) * 6))
             row += 1
 
+        # collapse the body, keep the header visible
+        for rr in range(body_start, row):
+            ws.row_dimensions[rr].outlineLevel = 1
         row += 1  # gap between cards
+    ws.sheet_properties.outlinePr.summaryBelow = False
     ws.freeze_panes = "A4"
-    return ws
+    return card_rows
 
 
 # ============================================================ query sheets
@@ -1258,22 +1272,22 @@ def main(out_path):
 
     sheet_start(wb, records, seeds)
     sheet_dashboard(wb, records, seeds)
+    card_rows = sheet_cards(wb, records)
     sheet_catalog(wb, records, "sensor", "Sensor Catalog",
                   "🌐 SENSOR CATALOG — everything that measures the world",
                   "Scannable by design. Click an ID for the full card. Filter by category, "
-                  "modality, contact class, privacy, hazard, price or difficulty.", S.ACCENT)
-    sheet_cards(wb, records)
+                  "modality, contact class, privacy, hazard, price or difficulty.", S.ACCENT, card_rows)
     sheet_catalog(wb, records, "actuator", "Actuators",
                   "⚙ ACTUATORS & OUTPUTS — everything that changes the world",
-                  "You cannot invent with inputs alone. Sense → decide → ACT.", "8C3B2E")
+                  "You cannot invent with inputs alone. Sense → decide → ACT.", "8C3B2E", card_rows)
     sheet_catalog(wb, records, "glue", "Glue & Signal Chain",
                   "🔧 GLUE & SIGNAL CHAIN — the parts that make the others work",
                   "ADCs, amplifiers, multiplexers, isolators, power. Unglamorous and decisive.",
-                  "4A5878")
+                  "4A5878", card_rows)
     sheet_catalog(wb, records, "board", "Boards & Compute",
                   "🧠 BOARDS & COMPUTE — which ESP32, and why",
                   "The variants differ more than people expect: C3/C6/H2 have no touch peripheral "
-                  "and no DAC, and only S2/S3/P4 realistically drive cameras.", "2F5D50")
+                  "and no DAC, and only S2/S3/P4 realistically drive cameras.", "2F5D50", card_rows)
     sheet_phenomenon(wb, records)
     sheet_inference(wb, records)
     sheet_constraints(wb, records)
