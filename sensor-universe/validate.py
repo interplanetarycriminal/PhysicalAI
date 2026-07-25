@@ -22,6 +22,7 @@ import vocab   # noqa: E402
 from loader import load_all  # noqa: E402
 
 ERRORS, WARNINGS = [], []
+STRICT = "--strict" in sys.argv
 
 
 def err(part_id, msg):
@@ -49,14 +50,18 @@ HAZARD_TRIGGERS = [
 def validate_record(r, seen_ids, seen_pns):
     pid = r.get("id", r.get("n", "<no id>"))
 
-    # unknown fields — catches typos like v5's spec_note=""
+    # unknown fields — catches typos like v5's spec_note="".
+    # Leading-underscore keys are loader-computed derived values, not authored.
     for k in r:
-        if k not in schema.FIELDS:
+        if not k.startswith("_") and k not in schema.FIELDS:
             err(pid, f"unknown field {k!r}")
 
-    for f in schema.REQUIRED:
+    for f in schema.REQUIRED_CORE:
         if f not in r or r[f] in (None, "", []):
             err(pid, f"missing required field {f!r}")
+    for f in schema.REQUIRED_SEMANTIC:
+        if f not in r or r[f] in (None, "", []):
+            (err if STRICT else warn)(pid, f"not yet enriched: {f!r}")
 
     if r.get("id") in seen_ids:
         err(pid, f"duplicate id (also {seen_ids[r['id']]!r})")
@@ -161,7 +166,8 @@ def main():
 
     collisions = validate_i2c(records)
 
-    print(f"Validated {len(records)} parts, {len(seeds)} seeds")
+    print(f"Validated {len(records)} parts, {len(seeds)} seeds"
+          + ("  [STRICT]" if STRICT else ""))
     by_cat = Counter(r["cat"] for r in records)
     print(f"  {len(by_cat)} categories, "
           f"{len({m for r in records for m in [r.get('modality')] if m})} modalities in use")

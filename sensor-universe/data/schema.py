@@ -208,9 +208,20 @@ FIELDS = {
     "confidence":(False, "enum:CONFIDENCE", "How much to trust the price/specs"),
     "as_of":     (False, "str",   "Date the price/spec was last checked"),
     "note":      (False, "text",  "Anything else worth knowing"),
+
+    # legacy — v5's catch-all "key specs & gotchas" column. Real content, being
+    # progressively split into range/accuracy/resolution/fools/consumable. Kept
+    # so nothing is lost in the migration; not required on new records.
+    "spec":      (False, "text",  "LEGACY free-text specs and gotchas"),
 }
 
 REQUIRED = [k for k, v in FIELDS.items() if v[0]]
+
+# The semantic spine is required for a record to be fully useful, but records
+# migrated from v5 acquire it via the enrichment overlay rather than at authoring
+# time. The validator reports these as warnings unless run with --strict.
+REQUIRED_SEMANTIC = ["modality", "phenomena", "contact", "privacy"]
+REQUIRED_CORE = [k for k in REQUIRED if k not in REQUIRED_SEMANTIC]
 
 # v5 had no rubric: a $45 NPU camera was rated 1 and a 400V Geiger kit was rated 2.
 DIFFICULTY_RUBRIC = {

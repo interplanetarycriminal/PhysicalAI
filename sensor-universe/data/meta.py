@@ -24,6 +24,7 @@ VENDORS = {
  "TIN": ("Tindie", "tindie.com", "Global", "Indie maker hardware — unique sensors you'll find nowhere else", "$$"),
  "IK":  ("IKEA", "ikea.com", "Global", "Hackable consumer devices (VINDRIKTNING etc.)", "$"),
  "PCB": ("JLCPCB / PCBWay", "jlcpcb.com", "CN/Global", "Custom sensor PCBs — 5 boards for $10 in a week", "$"),
+ "INC": ("Already in your ESP32", "—", "Your parts bin", "No purchase needed — this capability is built into the SoC or the radio you already own", "$"),
  "DIY": ("Self-build", "—", "Your bench", "Some of the best sensors are made, not bought", "$"),
 }
 

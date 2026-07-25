@@ -179,7 +179,7 @@ dict(n="TTP223 single touch", pn="TTP223", cat="Touch & Capacitive", sub="Single
 dict(n="ESP32 native touch pins", pn="ESP32 touch peripheral (T0-T9)", cat="Touch & Capacitive", sub="Built-in (free!)",
  meas="Up to 10 capacitive touch channels with NO extra hardware", how="The ESP32 itself measures pin capacitance — wire, foil or PCB pad straight to a touch pin. Can even wake the chip from deep sleep on touch.",
  iface="Built-in", v="—", usd=0, diff=1, pwr="touch wake ~µA",
- spec="10 channels (classic), wake-from-sleep, water-tolerant tuning", buy="—",
+ spec="10 channels (classic), wake-from-sleep, water-tolerant tuning", buy="INC",
  brd="Any ESP32 board", lib="touchRead(), touchAttachInterrupt()",
  use="Free buttons on any project, fruit pianos, water-level sensing (capacitance up a tube), wake-on-touch gadgets.",
  spark="The zero-BOM interface: a bare screw head on your enclosure becomes a wake/touch button. Ten of them. For free. Most people never use this.",
