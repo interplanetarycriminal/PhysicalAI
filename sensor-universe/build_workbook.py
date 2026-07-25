@@ -193,6 +193,7 @@ def sheet_cards(wb, records):
             ("REQUIRES (hard dependencies)", rec.get("requires", ""), None),
             ("SUBSTITUTES", rec.get("substitutes", ""), None),
             ("PAIRS WELL WITH", rec.get("pair", ""), None),
+            ("KEY SPECS & GOTCHAS", rec.get("spec", ""), None),
         ]
         for label, text, fill in blocks:
             if not text:
@@ -1068,6 +1069,30 @@ def sheet_dashboard(wb, records, seeds):
     r1 = bars(row, 1, "BY PRIVACY PROFILE", Counter(r["privacy"] for r in records if r.get("privacy")))
     r2 = bars(row, 5, "BY POWER CLASS", Counter(r["_power_class"] for r in records if r.get("_power_class")))
     row = max(r1, r2) + 2
+
+    # native charts, anchored clear of the text blocks
+    from openpyxl.chart import BarChart, Reference
+    chart_anchor = row
+    cat_counts = Counter(r["cat"] for r in sensors)
+    cstart = row + 1
+    S.cell(ws, row, 1, "chart data (kept for the charts below)", size=8,
+           italic=True, color=S.MUTED, border=False)
+    row += 1
+    for k, v in sorted(cat_counts.items(), key=lambda kv: -kv[1]):
+        S.cell(ws, row, 1, k, size=8, border=False)
+        S.cell(ws, row, 2, v, size=8, border=False)
+        ws.row_dimensions[row].outlineLevel = 1
+        row += 1
+    cend = row - 1
+    ch = BarChart()
+    ch.type = "bar"
+    ch.title = "Sensors by category"
+    ch.height, ch.width = 12, 14
+    ch.legend = None
+    ch.add_data(Reference(ws, min_col=2, min_row=cstart, max_row=cend))
+    ch.set_categories(Reference(ws, min_col=1, min_row=cstart, max_row=cend))
+    ws.add_chart(ch, f"E{chart_anchor}")
+    row = max(row, chart_anchor + 24)
 
     row = S.section(ws, row, "CURATED KITS", ncols, "If you want to stop reading and start buying.")
     kits = [
