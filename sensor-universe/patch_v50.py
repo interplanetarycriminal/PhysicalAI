@@ -32,11 +32,13 @@ from v50_columns import V50_COLS  # noqa: E402
 from physics_codes_ii import CODES_II, CORRECTIONS as PHYS_FIX  # noqa: E402
 from derived_instruments import INSTRUMENTS, METHOD  # noqa: E402
 from anti_catalog_ii import WALLS  # noqa: E402
+import outcome_solver  # noqa: E402
+import vocab  # noqa: E402
 import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
 SRC = "/root/.claude/uploads/f55cc0f7-8744-54de-a2e0-8ff2f0fa91bf/86aced1a-esp32_sensor_universe_v50.xlsx"
-OUT = HERE / "esp32_sensor_universe_v52.xlsx"
+OUT = HERE / "esp32_sensor_universe_v53.xlsx"
 
 CAT_BACK = {  # schema-v2 category -> the v50 taxonomy name, so the sheet stays coherent
     "Humidity & Moisture": "Humidity + Temp", "CO2": "CO2 (true)",
@@ -136,6 +138,11 @@ def main():
     print(f"Derived Instruments: {len(INSTRUMENTS)} worked from first principles "
           f"({sum(1 for i in INSTRUMENTS if i[0]=='DEAD')} killed by arithmetic); "
           f"Anti-Catalog II: {len(WALLS)} walls")
+    sol = outcome_solver.build(records, vocab.INFERENCE)
+    add_solver(wb, sol)
+    add_outcome_index(wb, sol)
+    print(f"Outcome Solver: {sol['n_all']} outcomes over {sol['n_sensors']} sensors; "
+          f"full coverage in {sol['kit_cost_len']} parts for ${sol['cost_cost']:.0f}")
 
     # openpyxl drops cached formula results on round-trip; v50 has 10 formula
     # cells on Idea Forge. Forcing a full recalculation on open means Excel
@@ -370,6 +377,182 @@ def add_anti_ii(wb):
         row += 1
     S.set_widths(ws, [34, 66, 56, 58])
     ws.freeze_panes = "B4"
+    return ws
+
+
+def add_solver(wb, sol):
+    """The optimiser: which sensors buy the most outcomes."""
+    ws = wb.create_sheet("Outcome Solver")
+    S.sheet_defaults(ws, tab_color="1F6F5C")
+    ncols = 7
+    row = _banner(
+        ws, "🎯 OUTCOME SOLVER — which sensors buy the most of everything",
+        f"{sol['n_all']} things you might want to KNOW, {sol['n_sensors']} sensors that might tell "
+        "you. Which small set buys the most? That is the Maximum Coverage Problem — NP-hard, but "
+        "greedy is provably within 63% of optimal and nothing polynomial does better, so greedy is "
+        "the right answer rather than a compromise. Everything below is COMPUTED from the live "
+        "catalog at build time, so it cannot go stale.", ncols)
+
+    for label, text in outcome_solver.FINDINGS:
+        S.cell(ws, row, 1, label, size=9.5, bold=True, fill="FBEFD8")
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=ncols)
+        S.cell(ws, row, 2, text, size=9.5)
+        ws.row_dimensions[row].height = max(30, 12 + len(text) // 4.4)
+        row += 1
+    row += 1
+
+    # ---- tiers
+    row = S.section(ws, row, "1 · THE FOUR KITS", ncols,
+                    "Cost-optimal greedy. Each tier is the previous one plus the parts that buy "
+                    "the next block of outcomes most cheaply.")
+    for col, name in enumerate(["Tier", "Sensors", "Outcomes", "% of all", "Total cost",
+                                "What it is", "What this tier adds"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF"); c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        c.border = S.BORDER
+    row += 1
+    for t in sol["tiers"]:
+        S.cell(ws, row, 1, t["name"], size=11, bold=True, color=S.NAVY, fill="E4EFE6", halign="center")
+        S.cell(ws, row, 2, t["n"], size=11, bold=True, halign="center")
+        S.cell(ws, row, 3, t["cov"], size=10, halign="center")
+        S.cell(ws, row, 4, f"{t['pct']*100:.0f}%", size=11, bold=True, halign="center", fill="EAF0F6")
+        S.cell(ws, row, 5, f"${t['cost']:.0f}", size=11, bold=True, halign="center")
+        S.cell(ws, row, 6, t["blurb"], size=9)
+        S.cell(ws, row, 7, " · ".join(t["added"]), size=8.5)
+        ws.row_dimensions[row].height = max(46, 12 + len(" · ".join(t["added"])) // 5.5)
+        row += 1
+    row += 1
+
+    # ---- curve
+    row = S.section(ws, row, "2 · THE CURVE — every step, and where it stops being worth it", ncols,
+                    "Read down until the bar stops growing. That is your kit.")
+    for col, name in enumerate(["#", "Sensor", "$", "Buys", "Running total", "% of all outcomes", "Cumulative $"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF"); c.fill = S.PatternFill("solid", fgColor="4A5878")
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center"); c.border = S.BORDER
+    row += 1
+    for i, (name, usd, gain, cum, pct, spend) in enumerate(sol["curve"], 1):
+        S.cell(ws, row, 1, i, size=9, halign="center")
+        S.cell(ws, row, 2, name, size=9, bold=(i <= 12))
+        S.cell(ws, row, 3, f"${usd:g}", size=9, halign="center")
+        S.cell(ws, row, 4, f"+{gain}", size=9, halign="center", bold=True)
+        S.cell(ws, row, 5, cum, size=9, halign="center")
+        b = S.cell(ws, row, 6, "█" * max(1, round(pct * 34)) + f"  {pct*100:.0f}%", size=9)
+        b.font = S.sfont(9, color=S.ACCENT)
+        S.cell(ws, row, 7, f"${spend:.0f}", size=9, halign="center")
+        ws.row_dimensions[row].height = 14
+        row += 1
+    row += 1
+
+    # ---- domains
+    row = S.section(ws, row, "3 · IF YOU ONLY WANT ONE DOMAIN", ncols,
+                    "The minimum cost-optimal kit that covers EVERY outcome in that domain.")
+    for col, name in enumerate(["Domain", "Outcomes", "Sensors", "Cost", "The kit", "", ""], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF"); c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center"); c.border = S.BORDER
+    row += 1
+    for d in sol["domain_kits"]:
+        S.cell(ws, row, 1, d["domain"], size=10, bold=True, fill="F5F2EB")
+        S.cell(ws, row, 2, d["n_out"], size=10, halign="center")
+        S.cell(ws, row, 3, d["n_sens"], size=10, halign="center", bold=True)
+        S.cell(ws, row, 4, f"${d['cost']:.0f}", size=10, halign="center", bold=True, fill="EAF0F6")
+        ws.merge_cells(start_row=row, start_column=5, end_row=row, end_column=ncols)
+        S.cell(ws, row, 5, d["kit"], size=8.5)
+        ws.row_dimensions[row].height = max(30, 12 + len(d["kit"]) // 6.5)
+        row += 1
+    row += 1
+
+    # ---- constraints
+    row = S.section(ws, row, "4 · WHAT A CONSTRAINT COSTS YOU, IN OUTCOMES", ncols,
+                    "The only place in this atlas that prices a design decision in capability "
+                    "rather than money. Decide BEFORE you commit.")
+    for col, name in enumerate(["Constraint", "Eligible parts", "Reachable", "%", "Kit / cost",
+                                "What you lose entirely", ""], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF"); c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center"); c.border = S.BORDER
+    row += 1
+    for c_ in sol["constraint_kits"]:
+        S.cell(ws, row, 1, c_["name"], size=10, bold=True, fill="F5F2EB")
+        S.cell(ws, row, 2, c_["eligible"], size=9, halign="center")
+        S.cell(ws, row, 3, f"{c_['covered']}/{sol['n_all']}", size=9, halign="center")
+        pc = S.cell(ws, row, 4, f"{c_['pct']*100:.0f}%", size=11, bold=True, halign="center")
+        pc.fill = S.PatternFill("solid", fgColor="E7F0E9" if c_["pct"] > 0.85 else "FBEFD8")
+        S.cell(ws, row, 5, f"{c_['n_sens']} parts, ${c_['cost']:.0f}", size=9, halign="center")
+        ws.merge_cells(start_row=row, start_column=6, end_row=row, end_column=ncols)
+        S.cell(ws, row, 6, f"{c_['why']}\n\nUNREACHABLE: {c_['lost']}", size=9, fill="FBE9E4")
+        ws.row_dimensions[row].height = 54
+        row += 1
+    row += 1
+
+    # ---- irreplaceable + recombinatory
+    row = S.section(ws, row, "5 · THE TWO OPPOSITE RANKINGS", ncols,
+                    "Hubs cover many outcomes and are replaceable. Keys cover few and are the ONLY "
+                    "route. A good kit needs both, and they anti-correlate.")
+    S.cell(ws, row, 1, "🔑 IRREPLACEABLE — buy these for INTENT", size=10, bold=True, fill="F8DED7")
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+    S.cell(ws, row, 4, "🧲 RECOMBINATORY — buy these for BREADTH", size=10, bold=True, fill="E4EFE6")
+    ws.merge_cells(start_row=row, start_column=4, end_row=row, end_column=ncols)
+    row += 1
+    for i in range(max(len(sol["irreplaceable"]), len(sol["recomb"]))):
+        if i < len(sol["irreplaceable"]):
+            sc, r, solo, n = sol["irreplaceable"][i]
+            S.cell(ws, row, 1, r["n"][:38], size=8.5, bold=True)
+            S.cell(ws, row, 2, f"${r.get('usd')}", size=8.5, halign="center")
+            S.cell(ws, row, 3, ("SOLE: " + solo[0][:40]) if solo else f"{n} outcomes", size=8.5,
+                   color=S.BAD if solo else S.MUTED)
+        if i < len(sol["recomb"]):
+            per, r, n = sol["recomb"][i]
+            S.cell(ws, row, 4, r["n"][:38], size=8.5, bold=True)
+            S.cell(ws, row, 5, f"${r.get('usd')}", size=8.5, halign="center")
+            S.cell(ws, row, 6, f"{n} outcomes", size=8.5, halign="center")
+            S.cell(ws, row, 7, f"{per:.1f} outcomes per $", size=8.5, color=S.MUTED)
+        ws.row_dimensions[row].height = 14
+        row += 1
+    S.set_widths(ws, [30, 15, 13, 13, 22, 46, 30])
+    ws.freeze_panes = "A4"
+    return ws
+
+
+def add_outcome_index(wb, sol):
+    """Pick ANY outcome, read the kit."""
+    ws = wb.create_sheet("Outcome → Kit")
+    S.sheet_defaults(ws, tab_color="2F6B45")
+    ncols = 8
+    row = _banner(
+        ws, "🗺 OUTCOME → KIT — pick any outcome, read what buys it",
+        f"All {sol['n_all']} outcomes, each with its cheapest route, its most capable route, its "
+        "no-contact route and its privacy-safe route — plus how many alternatives exist and which "
+        "tier first reaches it. Rows marked SOLE ROUTE have exactly one sensor in the entire "
+        "catalog that provides them.", ncols)
+    for col, name in enumerate(["Domain", "You want to know…", "Routes", "Rarity",
+                                "💵 Cheapest route", "🎯 Most capable route",
+                                "🚫 No-contact route", "🔒 Privacy-safe route"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF"); c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        c.border = S.BORDER
+    ws.row_dimensions[row].height = 24
+    row += 1
+    for o in sol["outcomes"]:
+        S.cell(ws, row, 1, o["domain"], size=8.5, fill="EDE7F3")
+        S.cell(ws, row, 2, o["question"], size=9.5, bold=True, color=S.NAVY)
+        S.cell(ws, row, 3, o["n_routes"], size=9, halign="center")
+        rc = S.cell(ws, row, 4, o["rarity"] or "—", size=8.5, halign="center", bold=bool(o["rarity"]))
+        if o["rarity"] == "SOLE ROUTE":
+            rc.fill = S.PatternFill("solid", fgColor="F8DED7"); rc.font = S.sfont(8.5, bold=True, color=S.BAD)
+        elif o["rarity"]:
+            rc.fill = S.PatternFill("solid", fgColor="FBEFD8")
+        S.cell(ws, row, 5, o["cheap"], size=8.5, fill="E7F0E9")
+        S.cell(ws, row, 6, o["best"], size=8.5)
+        S.cell(ws, row, 7, o["nocontact"], size=8.5)
+        S.cell(ws, row, 8, o["privacy"], size=8.5, fill="EAF0F6")
+        ws.row_dimensions[row].height = 26
+        row += 1
+    S.set_widths(ws, [17, 36, 8, 12, 34, 30, 32, 32])
+    ws.freeze_panes = "C4"
     return ws
 
 
