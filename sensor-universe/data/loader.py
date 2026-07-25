@@ -23,8 +23,7 @@ SENSOR_PARTS = [
     "part8_gps_thermal_camera_rf", "part9_classics_and_gaps",
     "part10_industrial_exotic",
     # schema-v2 expansion files (added in phase B); absent files are skipped
-    "part11_gaps_positioning_industrial", "part12_gaps_sensing_families",
-    "part13_gaps_frontier_and_new",
+    "part11_expansion", "part12_expansion", "part13_expansion",
 ]
 OTHER_CATALOGS = [("actuators", "actuator"), ("glue", "glue"), ("boards", "board")]
 

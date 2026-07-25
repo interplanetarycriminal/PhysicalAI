@@ -95,7 +95,8 @@ def ingest_records(src, dest, varname):
             dropped += 1
             continue
         problems = check(rec, rec.get("n", "?"))
-        missing = [f for f in schema.REQUIRED_CORE if not rec.get(f)]
+        # `id` is assigned by the loader from ids.json, never authored
+        missing = [f for f in schema.REQUIRED_CORE if f != "id" and not rec.get(f)]
         if missing:
             print(f"  ✗ {rec.get('n','?')[:44]:44} missing {missing}")
             dropped += 1
