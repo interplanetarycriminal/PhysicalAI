@@ -233,7 +233,8 @@ def load_all(persist_ids=True):
     # enrichment overlays, keyed by stable id. Hand-authored core first, then the
     # agent-authored overlay, so the latter refines rather than being shadowed.
     overlay = {}
-    for mod_name, var in (("enrich_core", "ENRICH_CORE"), ("enrich", "ENRICH")):
+    for mod_name, var in (("enrich_core", "ENRICH_CORE"), ("enrich", "ENRICH"),
+                          ("enrich_manual", "ENRICH_MANUAL")):
         mod = _import(mod_name)
         if mod is None:
             continue
