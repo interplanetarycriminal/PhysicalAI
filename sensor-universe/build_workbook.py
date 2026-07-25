@@ -32,6 +32,10 @@ import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
 try:
+    import physics  # noqa: E402
+except ModuleNotFoundError:
+    physics = None
+try:
     import archetypes  # noqa: E402
     ARCHETYPES = archetypes.ARCHETYPES
 except ModuleNotFoundError:
@@ -44,7 +48,7 @@ except ModuleNotFoundError:
 
 # Sheet order and the short labels used in the nav bar.
 SHEETS = [
-    ("START HERE", "START"), ("Dashboard", "Dash"), ("Sensor Catalog", "Sensors"),
+    ("START HERE", "START"), ("Physics Cheatsheet", "Physics"), ("Dashboard", "Dash"), ("Sensor Catalog", "Sensors"),
     ("Sensor Cards", "Cards"), ("Actuators", "Actuators"), ("Glue & Signal Chain", "Glue"),
     ("Boards & Compute", "Boards"), ("Phenomenon Index", "Measure…"),
     ("Inference Atlas", "Know…"), ("Constraint Navigator", "Constraints"),
@@ -891,6 +895,218 @@ def sheet_archetypes(wb):
     return ws
 
 
+# ============================================================ physics cheatsheet
+
+# The six energy domains, in the order used across the grid.
+DOMAINS = ["Mechanical", "Thermal", "Electrical", "Magnetic", "Radiant", "Chemical"]
+
+
+def sheet_physics(wb):
+    """The intuition sheet. Not a formula reference — a way of seeing.
+
+    Organised so the reader can go from 'I do not know physics' to 'I can derive
+    a sensor I have never met' by reading top to bottom once, then using the grid
+    and the moves as working tools thereafter.
+    """
+    if physics is None:
+        return None
+    ncols = 8
+    ws, row = new_sheet(
+        wb, "Physics Cheatsheet", "🔭 PHYSICS CHEATSHEET — how to derive any sensor from first principles",
+        "There are only six kinds of energy, and every sensor is a door between two of them. "
+        "Learn the doors and the dozen tricks for opening them, and a part you have never met "
+        "becomes obvious in ten seconds — and a door nobody has built becomes visible.",
+        ncols, tab="4E6E5D")
+    S.set_widths(ws, [26, 20, 30, 30, 26, 24, 22, 22])
+
+    def para(label, text, fill=None, size=9.5, label_fill="F5F2EB"):
+        nonlocal row
+        S.cell(ws, row, 1, label, size=9, bold=True, fill=label_fill)
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=ncols)
+        S.cell(ws, row, 2, text, size=size, fill=fill)
+        ws.row_dimensions[row].height = max(20, 11 + len(text) // 5.0)
+        row += 1
+
+    def banner_quip(text):
+        nonlocal row
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
+        c = S.cell(ws, row, 1, "\u201c" + text + "\u201d", size=12, bold=True,
+                   color=S.NAVY, fill="FBEFD8", halign="center")
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        ws.row_dimensions[row].height = max(28, 14 + len(text) // 6.0)
+        row += 1
+
+    # ---------------- 1. the one idea
+    row = S.section(ws, row, "1 · THE ONE IDEA", ncols,
+                    "If you remember nothing else on this sheet, remember this section.")
+    for label, text in physics.THE_ONE_IDEA:
+        para(label, text)
+    banner_quip(physics.MNEMONIC_PRIME)
+    row += 1
+
+    # ---------------- 2. the grid
+    row = S.section(ws, row, "2 · THE TRANSDUCTION GRID — the thirty-six doors", ncols,
+                    "Rows are what you are sensing; columns are what you convert it into. Almost "
+                    "everything ends at ELECTRICAL, because that is what a microcontroller can count.")
+    # matrix view
+    grid = {}
+    for f, t, effect, _why, _ex in physics.TRANSDUCTION:
+        grid.setdefault((f, t), []).append(effect)
+    S.cell(ws, row, 1, "FROM ↓   TO →", size=8, bold=True, color="FFFFFF", fill=S.NAVY,
+           halign="center")
+    for j, d in enumerate(DOMAINS):
+        c = S.cell(ws, row, 2 + j, d, size=8, bold=True, color="FFFFFF", fill=S.NAVY,
+                   halign="center", valign="center")
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+    ws.row_dimensions[row].height = 24
+    row += 1
+    for i, fd in enumerate(DOMAINS):
+        S.cell(ws, row, 1, fd, size=8, bold=True, color="FFFFFF", fill=S.NAVY, valign="center")
+        for j, td in enumerate(DOMAINS):
+            cell = ws.cell(row=row, column=2 + j)
+            cell.border = S.BORDER
+            cell.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+            if fd == td:
+                cell.value = "—"
+                cell.fill = S.PatternFill("solid", fgColor="DDD9CE")
+                cell.font = S.sfont(8, color=S.MUTED)
+                continue
+            effects = grid.get((fd, td))
+            if effects:
+                cell.value = " / ".join(sorted(set(effects)))
+                cell.font = S.sfont(8, bold=True, color=S.NAVY)
+                cell.fill = S.PatternFill("solid", fgColor="E4EFE6")
+            else:
+                cell.value = "open"
+                cell.font = S.sfont(8, italic=True, color="B0A99C")
+        ws.row_dimensions[row].height = 30
+        row += 1
+    row += 1
+    para("Reading the grid",
+         "A filled cell is a named effect with parts you can buy. A cell marked 'open' is not "
+         "necessarily impossible — it is either rare, indirect, or genuinely unexplored. Two of the "
+         "most interesting sensors in this catalogue are TWO hops: a thermopile is radiant → thermal "
+         "→ electrical, and the SCD41 CO\u2082 sensor is radiant → thermal → mechanical → electrical.",
+         fill="EAF0F6")
+    banner_quip(physics.MNEMONIC_GRID)
+    row += 1
+
+    # detailed effects table
+    S.table_header(ws, row, S.unique_headers(
+        ["From", "To", "Effect", "What is physically happening", "Where you have already met it",
+         "", "", ""]))
+    hdr = row
+    row += 1
+    for f, t, effect, why, ex in physics.TRANSDUCTION:
+        S.cell(ws, row, 1, f, size=9, bold=True, fill=schema.MODALITY_COLOR.get(
+            {"Mechanical": "Mechanical", "Thermal": "Thermal", "Electrical": "Electrical",
+             "Magnetic": "Magnetic", "Radiant": "Optical", "Chemical": "Chemical",
+             "Nuclear": "Nuclear"}.get(f, "Electrical"), "EFEFEF"))
+        S.cell(ws, row, 2, t, size=9)
+        S.cell(ws, row, 3, effect, size=9, bold=True, color=S.NAVY)
+        ws.merge_cells(start_row=row, start_column=4, end_row=row, end_column=6)
+        S.cell(ws, row, 4, why, size=9)
+        ws.merge_cells(start_row=row, start_column=7, end_row=row, end_column=ncols)
+        S.cell(ws, row, 7, ex, size=8, color=S.MUTED)
+        ws.row_dimensions[row].height = max(30, 12 + len(why) // 8.0)
+        row += 1
+    row += 1
+
+    # ---------------- 3. the moves
+    row = S.section(ws, row, "3 · THE TWELVE MOVES — tricks that recur everywhere", ncols,
+                    "Each is a mnemonic you can memorise, the physics underneath it, and — most "
+                    "importantly — what it lets you INVENT once you hold it.")
+    for quip, means, why, seen, invents, breaks in physics.MOVES:
+        banner_quip(quip)
+        para("what it means", means)
+        para("the physics", why, fill="EAF0F6")
+        para("you have met it in", seen, size=9)
+        para("what it INVENTS", invents, fill="FDF3E3")
+        para("where it breaks", breaks, fill="FBE9E4")
+        row += 1
+
+    # ---------------- 4. limits
+    row = S.section(ws, row, "4 · THE CEILING — laws that decide what is possible", ncols,
+                    "You cannot design past these. Knowing them tells you when to stop trying to "
+                    "improve a circuit and start changing the approach.")
+    S.table_header(ws, row, S.unique_headers(
+        ["The rule", "Name", "What it means", "What to do about it", "", "", "", ""]))
+    row += 1
+    for rule, name, means, action in physics.LIMITS:
+        S.cell(ws, row, 1, rule, size=9, bold=True, color=S.NAVY, fill="FBEFD8")
+        S.cell(ws, row, 2, name, size=8, color=S.MUTED)
+        ws.merge_cells(start_row=row, start_column=3, end_row=row, end_column=5)
+        S.cell(ws, row, 3, means, size=9)
+        ws.merge_cells(start_row=row, start_column=6, end_row=row, end_column=ncols)
+        S.cell(ws, row, 6, action, size=9, fill="EAF0F6")
+        ws.row_dimensions[row].height = max(32, 12 + len(means) // 5.5)
+        row += 1
+    row += 1
+
+    # ---------------- 5. anchors
+    row = S.section(ws, row, "5 · NUMBERS TO KNOW BY HEART", ncols,
+                    "Intuition is mostly calibrated estimation. Memorise these and you can sanity-"
+                    "check almost any sensing idea in your head, before spending anything.")
+    S.table_header(ws, row, S.unique_headers(
+        ["Quantity", "Value", "Why it is worth knowing", "", "", "", "", ""]))
+    row += 1
+    for q, v, why in physics.ANCHORS:
+        S.cell(ws, row, 1, q, size=9, bold=True)
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=3)
+        S.cell(ws, row, 2, v, size=9, bold=True, color=S.NAVY, fill="EAF0F6")
+        ws.merge_cells(start_row=row, start_column=4, end_row=row, end_column=ncols)
+        S.cell(ws, row, 4, why, size=9)
+        ws.row_dimensions[row].height = max(24, 12 + len(why) // 7.0)
+        row += 1
+    row += 1
+
+    # ---------------- 6. reciprocity
+    row = S.section(ws, row, "6 · EVERYTHING RUNS BACKWARDS", ncols,
+                    "Transduction is symmetric far more often than people expect. This is the "
+                    "cheapest source of 'free' sensors you will ever find.")
+    S.table_header(ws, row, S.unique_headers(
+        ["Part", "Forwards ⟷ backwards", "What that gives you", "", "", "", "", ""]))
+    row += 1
+    for part, both, gives in physics.RECIPROCITY:
+        S.cell(ws, row, 1, part, size=9, bold=True)
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=4)
+        S.cell(ws, row, 2, both, size=9, color=S.NAVY, fill="E4EFE6")
+        ws.merge_cells(start_row=row, start_column=5, end_row=row, end_column=ncols)
+        S.cell(ws, row, 5, gives, size=9)
+        ws.row_dimensions[row].height = max(24, 12 + len(gives) // 7.0)
+        row += 1
+    banner_quip(physics.MNEMONIC_RECIPROCITY)
+    row += 1
+
+    # ---------------- 7. protocol
+    row = S.section(ws, row, "7 · THE DERIVATION PROTOCOL — how to invent a sensor you have never seen", ncols,
+                    "Run this in order. It works for anything, and steps 4 and 5 will save you more "
+                    "money than any other page in this workbook.")
+    for step, text in physics.PROTOCOL:
+        para(step, text, label_fill="FDF3E3")
+    row += 1
+
+    # ---------------- 8. traps
+    row = S.section(ws, row, "8 · WHERE INTUITION LIES TO YOU", ncols,
+                    "Each of these has cost someone weeks. They are not exotic — they are the "
+                    "default failure modes of measuring anything.")
+    for title, text in physics.TRAPS:
+        para(title, text, fill="FBE9E4")
+    row += 1
+
+    # ---------------- closing
+    row = S.section(ws, row, "THE WHOLE SHEET IN ONE PARAGRAPH", ncols)
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
+    c = S.cell(ws, row, 1, physics.CLOSING, size=10.5, color=S.NAVY, fill="FBEFD8")
+    c.alignment = S.Alignment(wrap_text=True, vertical="center", horizontal="left", indent=1)
+    ws.row_dimensions[row].height = 96
+    row += 1
+
+    ws.freeze_panes = "A4"
+    S.print_ready(ws, ncols, repeat_rows="1:3")
+    return ws
+
+
 # ============================================================ orient sheets
 
 def sheet_start(wb, records, seeds):
@@ -1296,6 +1512,7 @@ def main(out_path):
     wb.remove(wb.active)
 
     sheet_start(wb, records, seeds)
+    sheet_physics(wb)
     sheet_dashboard(wb, records, seeds)
     card_rows = sheet_cards(wb, records)
     sheet_catalog(wb, records, "sensor", "Sensor Catalog",
