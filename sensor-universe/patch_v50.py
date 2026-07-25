@@ -29,6 +29,7 @@ sys.path.insert(0, str(HERE))
 
 import schema      # noqa: E402
 from v50_columns import V50_COLS  # noqa: E402
+from physics_codes_ii import CODES_II, CORRECTIONS as PHYS_FIX  # noqa: E402
 import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
@@ -125,6 +126,9 @@ def main():
                 "The variants differ more than people expect. C3/C6/H2 have NO capacitive touch "
                 "peripheral and NO DAC — a fact that invalidates several recommendations elsewhere.")
     add_wiring(wb, records)
+    n = fix_physics_codes(wb)
+    add_physics_ii(wb)
+    print(f"Physics Cheat Codes: {n} numerical errors corrected; 12 codes added as II")
 
     # openpyxl drops cached formula results on round-trip; v50 has 10 formula
     # cells on Idea Forge. Forcing a full recalculation on open means Excel
@@ -212,6 +216,73 @@ def append_new_sensors(wb, ws, hdr, records):
         ws.row_dimensions[row].height = ws.row_dimensions[5].height
         row += 1
     return len(new)
+
+
+def fix_physics_codes(wb):
+    """Correct the two numerical errors in the original ninety, in place."""
+    if "Physics Cheat Codes" not in wb.sheetnames:
+        return 0
+    ws = wb["Physics Cheat Codes"]
+    fixed = 0
+    for _code, wrong, right, _why in PHYS_FIX:
+        for row in ws.iter_rows():
+            for cell in row:
+                if isinstance(cell.value, str) and wrong in cell.value:
+                    cell.value = cell.value.replace(wrong, right)
+                    fixed += 1
+    return fixed
+
+
+def add_physics_ii(wb):
+    """Twelve codes the original ninety do not cover, in the same five columns."""
+    ws = wb.create_sheet("Physics Cheat Codes II")
+    S.sheet_defaults(ws, tab_color="4E6E5D")
+    ncols = 5
+    row = _banner(
+        ws, "🧪 PHYSICS CHEAT CODES II — twelve the first ninety do not cover",
+        "The original ninety are excellent, which is not the same as complete. Auditing them for "
+        "COVERAGE rather than quality turns up two of the most powerful moves in instrumentation "
+        "(synchronous detection and matched filtering), a whole physical domain (nuclear "
+        "attenuation), a whole chemistry (biological selectivity), and the one thinking tool that "
+        "predicts answers before you solve anything (dimensional analysis).", ncols)
+
+    # corrections banner first — errors before additions
+    ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=ncols)
+    S.cell(ws, row, 1, "FIRST: two numerical errors in the original ninety, now corrected in place",
+           size=11, bold=True, color="FFFFFF", fill="A8412F")
+    ws.row_dimensions[row].height = 22
+    row += 1
+    for code, wrong, right, why in PHYS_FIX:
+        S.cell(ws, row, 1, code, size=9, bold=True, fill="FBE9E4")
+        S.cell(ws, row, 2, wrong, size=9, fill="FBE9E4")
+        S.cell(ws, row, 3, right, size=9, bold=True, fill="E7F0E9")
+        ws.merge_cells(start_row=row, start_column=4, end_row=row, end_column=ncols)
+        S.cell(ws, row, 4, why, size=9)
+        ws.row_dimensions[row].height = max(40, 12 + len(why) // 3.2)
+        row += 1
+    row += 1
+
+    for col, name in enumerate(["Cheat Code", "The physics (one line)", "Catalog exploits",
+                                "Build it this weekend", "How to spot the next one"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, vertical="center", horizontal="center")
+        c.border = S.BORDER
+    ws.row_dimensions[row].height = 20
+    row += 1
+    for i, (code, phys, exploits, weekend, spot) in enumerate(CODES_II):
+        n = 91 + i
+        S.cell(ws, row, 1, f"{n}. {code}", size=10, bold=True, color=S.NAVY, fill="FBEFD8")
+        S.cell(ws, row, 2, phys, size=9)
+        S.cell(ws, row, 3, exploits, size=9, color=S.MUTED)
+        S.cell(ws, row, 4, weekend, size=9, fill="EAF0F6")
+        S.cell(ws, row, 5, spot, size=9, fill="E4EFE6")
+        ws.row_dimensions[row].height = max(78, 12 + len(phys) // 3.0)
+        row += 1
+    S.set_widths(ws, [30, 62, 44, 52, 50])
+    ws.freeze_panes = "A4"
+    return ws
 
 
 def add_corrections_log(wb, changes, added=0):
