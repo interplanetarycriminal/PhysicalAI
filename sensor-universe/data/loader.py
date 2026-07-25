@@ -253,5 +253,30 @@ def load_all(persist_ids=True):
         r.setdefault("confidence", "High")
 
     seeds_mod = _import("seeds")
-    seeds = getattr(seeds_mod, "SEEDS", []) if seeds_mod else []
+    seeds = list(getattr(seeds_mod, "SEEDS", []) if seeds_mod else [])
+    extra_mod = _import("seeds_extra")
+    seeds += list(getattr(extra_mod, "SEEDS_EXTRA", []) if extra_mod else [])
+    resolve_seed_ids(seeds, records)
     return records, seeds
+
+
+def resolve_seed_ids(seeds, records):
+    """Resolve a seed's free-text part names to stable IDs at load time.
+
+    Seeds authored against part NAMES stay readable and keep resolving as the
+    catalog grows — a reference that is unresolvable today (because the part
+    isn't catalogued yet) starts working the moment that part is added.
+    """
+    import difflib
+    by_name = {r["n"]: r["id"] for r in records}
+    names = list(by_name)
+    for s in seeds:
+        if s.get("sensor_ids"):
+            continue
+        ids, missing = [], []
+        for token in [t.strip() for t in str(s.get("sensors", "")).split("·") if t.strip()]:
+            m = difflib.get_close_matches(token, names, n=1, cutoff=0.6)
+            (ids.append(by_name[m[0]]) if m else missing.append(token))
+        s["sensor_ids"] = sorted(set(ids))
+        if missing:
+            s["_unresolved"] = missing
