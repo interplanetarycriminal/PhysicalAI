@@ -28,11 +28,22 @@ sys.path.insert(0, str(HERE / "data"))
 sys.path.insert(0, str(HERE))
 
 import schema      # noqa: E402
+from v50_columns import V50_COLS  # noqa: E402
 import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
 SRC = "/root/.claude/uploads/f55cc0f7-8744-54de-a2e0-8ff2f0fa91bf/86aced1a-esp32_sensor_universe_v50.xlsx"
 OUT = HERE / "esp32_sensor_universe_v51.xlsx"
+
+CAT_BACK = {  # schema-v2 category -> the v50 taxonomy name, so the sheet stays coherent
+    "Humidity & Moisture": "Humidity + Temp", "CO2": "CO2 (true)",
+    "Particulate": "Particulate (PM)", "Colour & Spectral": "Color & Spectral",
+    "Motion & Vibration": "Motion & IMU", "Power & Electrical": "Power & Energy",
+    "GNSS & Positioning": "GPS & Positioning", "Identity & Tags": "RFID & NFC",
+    "Industrial & Automotive": "Industrial Sensing",
+    "Materials & Textiles": "E-Textile & Materials",
+    "Radiation & Nuclear": "Radiation & EM", "RF & Electromagnetic": "Radiation & EM",
+}
 
 # v50 names that I renamed because the name itself was factually wrong.
 RENAMED = {
@@ -101,8 +112,10 @@ def main():
     if unmatched:
         print(f"  ! {len(unmatched)} v50 rows had no counterpart: {unmatched[:5]}")
 
-    add_corrections_log(wb, changes)
-    add_expansion(wb, records)
+    added = append_new_sensors(wb, ws, hdr, records)
+    print(f"Sensor Catalog: {added} new sensors appended -> "
+          f"{len([r for r in records if r.get('catalog') == 'sensor'])} rows total")
+    add_corrections_log(wb, changes, added)
     add_catalog(wb, records, "glue", "Glue & Signal Chain",
                 "🔧 GLUE & SIGNAL CHAIN — the parts that make the others work",
                 "v50 has no equivalent sheet. These decide whether an analog sensor gives you "
@@ -142,7 +155,66 @@ def _banner(ws, title, subtitle, ncols):
     return 3
 
 
-def add_corrections_log(wb, changes):
+def append_new_sensors(wb, ws, hdr, records):
+    """Merge the sensors v50 lacks into its own Sensor Catalog, in its own format.
+
+    A separate expansion sheet would leave the catalog in two tiers. Merging keeps
+    one catalog — which is only honest if the new rows carry v50's own two
+    signature columns too, hence data/v50_columns.py.
+    """
+    existing = {ws.cell(row=r, column=hdr["Sensor"]).value
+                for r in range(4, ws.max_row + 1) if ws.cell(row=r, column=hdr["Sensor"]).value}
+    new = [r for r in records if r.get("catalog") == "sensor" and r["n"] not in existing]
+    new.sort(key=lambda r: (r["cat"], r["n"]))
+
+    # copy the styling of an existing data row so the new rows are indistinguishable
+    template = {c: ws.cell(row=5, column=c) for c in range(1, ws.max_column + 1)}
+    row = ws.max_row + 1
+    for rec in new:
+        sl, hook = V50_COLS.get(rec["id"], ("", ""))
+        vals = {
+            "ID": rec["id"],
+            "Sensor": rec["n"],
+            "Category": CAT_BACK.get(rec["cat"], rec["cat"]),
+            "Subcategory": rec.get("sub", ""),
+            "What It Measures": rec.get("meas", ""),
+            "How It Works (Plain English)": rec.get("how", ""),
+            "Interface": "/".join(rec.get("iface") or []),
+            "Voltage": rec.get("v", ""),
+            "≈Price USD": rec.get("usd"),
+            "Tier": schema.price_tier(rec.get("usd")),
+            "Difficulty": f"{rec.get('diff')} · "
+                          f"{schema.DIFFICULTY_RUBRIC.get(rec.get('diff'), '').split(' — ')[0]}",
+            "Power Draw": rec.get("pwr", ""),
+            "Key Specs & Gotchas": " · ".join(
+                x for x in (rec.get("range"), rec.get("accuracy"), rec.get("rate"),
+                            rec.get("requires")) if x),
+            "Where To Buy": ", ".join(rec.get("buy") or []),
+            "Boards / Modules": rec.get("brd", ""),
+            "Library / Driver": rec.get("lib", ""),
+            "Common Uses": rec.get("use", ""),
+            "Invention Sparks": rec.get("spark", ""),
+            "Pairs Well With": rec.get("pair", ""),
+            "Themes": ", ".join(rec.get("tags") or []),
+            "Second Life (off-label modes)": sl,
+            "Edge-AI Hook": hook,
+        }
+        for col_name, col in hdr.items():
+            if col_name is None:
+                continue
+            cell = ws.cell(row=row, column=col, value=vals.get(col_name, ""))
+            t = template.get(col)
+            if t is not None:
+                cell.font = t.font.copy()
+                cell.fill = t.fill.copy()
+                cell.border = t.border.copy()
+                cell.alignment = t.alignment.copy()
+        ws.row_dimensions[row].height = ws.row_dimensions[5].height
+        row += 1
+    return len(new)
+
+
+def add_corrections_log(wb, changes, added=0):
     ws = wb.create_sheet("Corrections Log")
     S.sheet_defaults(ws, tab_color="A8412F")
     ncols = 5
@@ -150,8 +222,9 @@ def add_corrections_log(wb, changes):
         ws, "🩹 CORRECTIONS LOG — every cell this pass changed, and why",
         "v50's Sensor Catalog was inherited unchanged from v5. A hostile review found errors that "
         "a reference document cannot carry, including two genuine safety hazards and one "
-        "instruction that destroys hardware. Each row below is one corrected cell. Nothing else "
-        "in this workbook was touched.", ncols)
+        "instruction that destroys hardware. Each row below is one corrected cell. "
+        f"A further {added} sensors were merged into the Catalog, carrying v50's own Second Life "
+        "and Edge-AI Hook columns so it stays one catalog rather than two tiers.", ncols)
 
     headline = [
         ("🔴 SAFETY", "MQ gas sensors sited inside LPG lockers and hydrogen-accumulating battery rooms",
@@ -233,7 +306,7 @@ def add_corrections_log(wb, changes):
     return ws
 
 
-EXP_COLS = [
+_UNUSED_EXP_COLS = [
     ("ID", 7), ("Sensor", 24), ("Category", 19), ("What It Measures", 30),
     ("How It Works (Plain English)", 46), ("What Fools It", 46), ("Modality", 12),
     ("Interface", 14), ("Range", 20), ("Accuracy", 18), ("Contact", 14), ("Privacy", 13),
@@ -242,7 +315,7 @@ EXP_COLS = [
 ]
 
 
-def add_expansion(wb, records):
+def _unused_add_expansion(wb, records):
     """The 175 parts v50's catalog does not contain, in a richer column set."""
     v50_names = set()
     ws0 = wb["Sensor Catalog"]
