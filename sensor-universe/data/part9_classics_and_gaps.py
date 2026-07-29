@@ -78,7 +78,7 @@ dict(n="VCNL4040 proximity + lux", pn="VCNL4040", cat="Distance & Ranging", sub=
 
 dict(n="US-100 ultrasonic w/ temp comp", pn="US-100", cat="Distance & Ranging", sub="Ultrasonic",
  meas="2-450cm with temperature-corrected speed of sound", how="HC-SR04-class ranging plus an onboard thermometer that corrects the speed of sound — and a proper UART mode with checksums.",
- iface="UART or trigger/echo", v="2.4-5.5V (3.3V safe!)", usd=4, diff=1, pwr="2mA avg",
+ iface="UART or trigger/echo", v="2.4-5.5V; output swings at VCC, so run it at 3.3V for direct GPIO (3.3V-native, unlike HC-SR04)", usd=4, diff=1, pwr="2mA avg",
  spec="±0.3cm + temp compensation", buy="AE,AMZ",
  brd="US-100 with jumper for mode", lib="UART 2-byte protocol",
  use="Anywhere HC-SR04 goes, but 3.3V-native and more accurate outdoors.",

@@ -110,6 +110,7 @@ RULES = [
 
 # Sheets that legitimately discuss these patterns in order to warn about them.
 EXEMPT_SHEETS = {"Corrections Log", "Failure Museum", "Illusions & Artifacts",
+                 "The Anti-Catalog II",
                  "The Anti-Catalog", "Physics Cheatsheet", "I2C & Wiring Reality"}
 
 

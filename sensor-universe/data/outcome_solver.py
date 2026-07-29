@@ -17,7 +17,161 @@ Two greedy objectives are run, and the difference between them is the finding:
 v50 already documents how to COMBINE sensors (Derived Quantities, Combination
 Grammar, Fusion Patterns). Nothing computes what to BUY. That is this.
 """
-from collections import defaultdict
+from collections import Counter, defaultdict
+
+try:
+    import fusion
+except ImportError:          # fusion layer optional — solver still runs without it
+    fusion = None
+
+
+def capability_counts(recs):
+    """How many distinct parts in `recs` cover each capability key."""
+    counts = Counter()
+    for r in recs:
+        for c in fusion.covers(r):
+            counts[c] += 1
+    return counts
+
+
+def closure(recs, edges=None):
+    """Monotone fixpoint over the fusion edges: which derived instruments does
+    this set of sensors unlock? A fired edge grants its `provides` key, so
+    chained edges (instrument feeding instrument) resolve in <= len(edges)+1
+    passes. Returns fired edge keys, the emergent outcomes gained, and the new
+    ROUTES (existing inference outcomes reached with none of their direct
+    sensors present)."""
+    edges = fusion.FUSION_EDGES if edges is None else edges
+    counts = capability_counts(recs)
+    declared = {i for r in recs for i in r.get("inferences") or []}
+    fired, fired_keys, granted = [], set(), set()
+    changed = True
+    while changed:
+        changed = False
+        for e in edges:
+            if e["key"] in fired_keys:
+                continue
+            if all(counts.get(c, 0) >= m or (m == 1 and c in granted)
+                   for c, m in e["requires"]):
+                fired.append(e)
+                fired_keys.add(e["key"])
+                granted.add(e["provides"])
+                changed = True
+    return dict(
+        fired=fired,
+        fired_keys=sorted(fired_keys),
+        emergent=sorted({e["provides"] for e in fired
+                         if e["provides"] in fusion.EMERGENT}),
+        new_routes=sorted({e["provides"] for e in fired
+                           if e["provides"] not in fusion.EMERGENT
+                           and e["provides"] not in declared}),
+        counts=dict(counts))
+
+
+def minimise(S, kit, target, by_cost=True):
+    """Local search on a greedy kit: reverse-delete redundant members (most
+    expensive first), then try replacing each member with any single cheaper
+    non-member that preserves coverage. Greedy is within (1-1/e) of optimal;
+    this closes some of the remaining gap and, when it finds nothing, certifies
+    the kit locally minimal under prune and 1-swap. Returns (kit, notes)."""
+    notes = []
+    kit = list(kit)
+
+    def coverage(members):
+        cov = set()
+        for sid, _r, _g in members:
+            cov |= S[sid][1] & target
+        return cov
+
+    full = coverage(kit)
+
+    # reverse-delete: a later pick can make an earlier one redundant
+    changed = True
+    while changed:
+        changed = False
+        for cand in sorted(kit, key=lambda k: -(k[1].get("usd") or 0)):
+            rest = [k for k in kit if k[0] != cand[0]]
+            if coverage(rest) == full:
+                kit = rest
+                notes.append(f"pruned {cand[1]['n']} (${cand[1].get('usd') or 0:g}) — "
+                             "made redundant by later picks")
+                changed = True
+                break
+
+    # 1-swap: replace any member with a strictly cheaper non-member
+    if by_cost:
+        member_ids = {sid for sid, _r, _g in kit}
+        changed = True
+        while changed:
+            changed = False
+            for i, (sid, r, g) in enumerate(list(kit)):
+                rest_cov = coverage([k for k in kit if k[0] != sid])
+                needed = full - rest_cov
+                price = r.get("usd") or 0
+                best = None
+                for tid, (tr, tinf) in S.items():
+                    if tid in member_ids:
+                        continue
+                    tprice = tr.get("usd") or 0
+                    if tprice >= price:
+                        continue
+                    if needed <= (tinf & target):
+                        if best is None or tprice < (best[1].get("usd") or 0):
+                            best = (tid, tr)
+                if best is not None:
+                    tid, tr = best
+                    kit[i] = (tid, tr, g)
+                    member_ids.discard(sid)
+                    member_ids.add(tid)
+                    notes.append(f"swapped {r['n']} (${price:g}) -> {tr['n']} "
+                                 f"(${tr.get('usd') or 0:g}), saved "
+                                 f"${price - (tr.get('usd') or 0):g}")
+                    changed = True
+                    break
+    return kit, notes
+
+
+def greedy_budget(S, target, budget, pool=None):
+    """Budgeted maximum coverage: cost-benefit greedy under a spend cap,
+    compared against the best single affordable sensor — that comparison is
+    what carries the 1/2*(1-1/e) guarantee. Returns (kit, covered, spend)."""
+    pool = pool if pool is not None else S
+    cov, kit, used, spend = set(), [], set(), 0.0
+    while True:
+        best, bv = None, 0.0
+        for sid, (r, inf) in pool.items():
+            if sid in used:
+                continue
+            price = r.get("usd") or 0
+            if spend + price > budget:
+                continue
+            g = len((inf & target) - cov)
+            if not g:
+                continue
+            v = g / max(price, 0.5)
+            if v > bv:
+                bv, best = v, (sid, r, g)
+        if best is None:
+            break
+        used.add(best[0])
+        kit.append(best)
+        spend += best[1].get("usd") or 0
+        cov |= S[best[0]][1] & target
+
+    # guarantee step: the single best affordable sensor may beat the greedy set
+    single, sg = None, 0
+    for sid, (r, inf) in pool.items():
+        price = r.get("usd") or 0
+        if price > budget:
+            continue
+        g = len(inf & target)
+        if g > sg:
+            sg, single = g, (sid, r, g)
+    if single is not None and sg > len(cov):
+        kit = [single]
+        cov = S[single[0]][1] & target
+        spend = single[1].get("usd") or 0
+    return kit, cov, spend
 
 
 def index(records, INFERENCE):
@@ -108,6 +262,12 @@ def build(records, INFERENCE):
     # ---------------------------------------------------------------- the curve
     kit_cost, _ = greedy(ALL, by_cost=True)
     kit_count, _ = greedy(ALL, by_cost=False)
+
+    # local search on the terminal kits (tiers stay raw greedy prefixes — the
+    # tier prose depends on each being the previous plus additions)
+    kit_cost_min, min_notes_cost = minimise(S, kit_cost, ALL, by_cost=True)
+    kit_count_min, min_notes_count = minimise(S, kit_count, ALL, by_cost=False)
+
     trace_cost = trace_kit(S, kit_cost, INFERENCE, ALL)
     trace_count = trace_kit(S, kit_count, INFERENCE, ALL)
 
@@ -241,6 +401,65 @@ def build(records, INFERENCE):
             keys=sorted(inf), questions=[INFERENCE[k][0] for k in sorted(inf)]))
     edges = sum(len(g["keys"]) for g in graph)
 
+    # ---------------------------------------------------------------- fusion
+    fus = None
+    if fusion is not None:
+        tier_closures = []
+        for t in tiers:
+            recs_t = [S[sid][0] for sid, _r, _g in kit_cost[:t["upto"]]]
+            cl = closure(recs_t)
+            tier_closures.append(dict(
+                name=t["name"], n=t["n"], cost=t["cost"], declared=t["cov"],
+                fired=len(cl["fired"]), emergent=len(cl["emergent"]),
+                new_routes=len(cl["new_routes"]),
+                emergent_keys=cl["emergent"], new_route_keys=cl["new_routes"],
+                fired_keys=cl["fired_keys"],
+                total=t["cov"] + len(cl["emergent"]),
+                multiplier=(t["cov"] + len(cl["emergent"])) / t["cov"]))
+
+        # which single added sensor unlocks the most emergence over FOUNDATION?
+        found_ids = {sid for sid, _r, _g in kit_cost[:tiers[0]["upto"]]}
+        found_recs = [S[sid][0] for sid in found_ids]
+        base = closure(found_recs)
+        base_fired = set(base["fired_keys"])
+        marginal = []
+        for sid, (r, _inf) in S.items():
+            if sid in found_ids:
+                continue
+            cl = closure(found_recs + [r])
+            gained = [k for k in cl["fired_keys"] if k not in base_fired]
+            if gained:
+                em_gain = len(set(cl["emergent"]) - set(base["emergent"]))
+                marginal.append(dict(id=sid, name=r["n"], usd=r.get("usd"),
+                                     edges_gained=len(gained), emergent_gained=em_gain,
+                                     gained_keys=gained))
+        marginal.sort(key=lambda m: (-m["edges_gained"],
+                                     m["usd"] if isinstance(m["usd"], (int, float)) else 1e9))
+
+        full = closure([v[0] for v in S.values()])
+        by_key = {e["key"]: e for e in fusion.FUSION_EDGES}
+        gaps = []
+        for e in fusion.FUSION_EDGES:
+            if e["key"] not in set(full["fired_keys"]):
+                missing = [(c, m, full["counts"].get(c, 0)) for c, m in e["requires"]
+                           if full["counts"].get(c, 0) < m]
+                gaps.append(dict(key=e["key"], name=e["name"], missing=missing))
+
+        fus = dict(n_edges=len(fusion.FUSION_EDGES), n_emergent=len(fusion.EMERGENT),
+                   tier_closures=tier_closures, marginal=marginal, gaps=gaps,
+                   foundation_closure=dict(fired=len(base["fired"]),
+                                           emergent=base["emergent"],
+                                           new_routes=base["new_routes"]),
+                   full_fired=len(full["fired_keys"]))
+
+    # budget frontier: the best reachable at hard spend caps
+    budget_frontier = []
+    for b in (10, 25, 50, 100, 250):
+        kb, cb, sb = greedy_budget(S, ALL, b)
+        budget_frontier.append(dict(budget=b, n_sens=len(kb), covered=len(cb),
+                                    pct=len(cb) / len(ALL), spend=sb,
+                                    kit=" · ".join(r["n"] for _s, r, _g in kb)))
+
     return dict(curve=curve, tiers=tiers, outcomes=outcomes, domain_kits=domain_kits,
                 constraint_kits=constraint_kits, irreplaceable=irr[:18],
                 recomb=recomb[:18], n_all=len(ALL), n_sensors=len(S),
@@ -248,6 +467,11 @@ def build(records, INFERENCE):
                 cost_count=sum((r.get("usd") or 0) for _, r, _ in kit_count),
                 cost_cost=sum((r.get("usd") or 0) for _, r, _ in kit_cost),
                 trace_cost=trace_cost, trace_count=trace_count,
+                fusion=fus, budget_frontier=budget_frontier,
+                minimise_notes_cost=min_notes_cost,
+                minimise_notes_count=min_notes_count,
+                kit_cost_min_len=len(kit_cost_min),
+                cost_cost_min=sum((r.get("usd") or 0) for _, r, _ in kit_cost_min),
                 graph=graph, edges=edges,
                 irreplaceable_full=[dict(id=r["id"], name=r["n"], usd=r.get("usd"),
                                          score=round(sc, 3), n=n, sole=solo)

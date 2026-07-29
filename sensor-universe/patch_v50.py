@@ -33,12 +33,13 @@ from physics_codes_ii import CODES_II, CORRECTIONS as PHYS_FIX  # noqa: E402
 from derived_instruments import INSTRUMENTS, METHOD  # noqa: E402
 from anti_catalog_ii import WALLS  # noqa: E402
 import outcome_solver  # noqa: E402
+import fusion  # noqa: E402
 import vocab  # noqa: E402
 import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
 SRC = "/root/.claude/uploads/f55cc0f7-8744-54de-a2e0-8ff2f0fa91bf/86aced1a-esp32_sensor_universe_v50.xlsx"
-OUT = HERE / "esp32_sensor_universe_v54.xlsx"
+OUT = HERE / "esp32_sensor_universe_v55.xlsx"
 
 CAT_BACK = {  # schema-v2 category -> the v50 taxonomy name, so the sheet stays coherent
     "Humidity & Moisture": "Humidity + Temp", "CO2": "CO2 (true)",
@@ -148,6 +149,18 @@ def main():
     print(f"Solver Run: both objectives traced in full "
           f"({sol['kit_cost_len']} + {sol['kit_count_len']} steps, every step's outcomes named)")
 
+    layout = make_layout(records)
+    add_fusion_solver(wb, sol)
+    add_kit_builder(wb, records, sol, layout)
+    add_coverage_matrix(wb, records, layout)
+    fus = sol["fusion"]
+    print(f"Fusion Solver: {fus['n_edges']} edges, {fus['n_emergent']} emergent outcomes; "
+          f"FOUNDATION closes to {fus['tier_closures'][0]['total']} capabilities, "
+          f"COMPLETE to {fus['tier_closures'][-1]['total']}")
+    forge_fixed = fix_idea_forge(wb)
+    print(f"Idea Forge: {forge_fixed} formulas rewired for the 405-row catalog "
+          f"(was blind to the 167 merged sensors)")
+
     # The same run, written out in formats that do not need Excel. This is what
     # makes the analysis servable anywhere else.
     import solve as solve_cli
@@ -198,7 +211,11 @@ def append_new_sensors(wb, ws, hdr, records):
 
     # copy the styling of an existing data row so the new rows are indistinguishable
     template = {c: ws.cell(row=5, column=c) for c in range(1, ws.max_column + 1)}
-    row = ws.max_row + 1
+    # v50 pads every sheet with styled empty rows to row 1000; appending at
+    # max_row+1 stranded the new sensors at rows 1001+ with a 759-row hole,
+    # outside the sheet's own AutoFilter. Append after the last POPULATED row.
+    row = 1 + max(r for r in range(4, ws.max_row + 1)
+                  if ws.cell(row=r, column=hdr["Sensor"]).value)
     for rec in new:
         sl, hook = V50_COLS.get(rec["id"], ("", ""))
         vals = {
@@ -240,6 +257,10 @@ def append_new_sensors(wb, ws, hdr, records):
                 cell.alignment = t.alignment.copy()
         ws.row_dimensions[row].height = ws.row_dimensions[5].height
         row += 1
+    # the filter range was still $A$3:$V$241 — the appended sensors were
+    # invisible to every filter operation. Extend it over the whole catalog.
+    from openpyxl.utils import get_column_letter
+    ws.auto_filter.ref = f"$A$3:${get_column_letter(ws.max_column)}${row - 1}"
     return len(new)
 
 
@@ -522,6 +543,32 @@ def add_solver(wb, sol):
             S.cell(ws, row, 7, f"{per:.1f} outcomes per $", size=8.5, color=S.MUTED)
         ws.row_dimensions[row].height = 14
         row += 1
+    row += 1
+
+    # ---- budget frontier
+    row = S.section(ws, row, "6 · WHAT A FIXED BUDGET BUYS", ncols,
+                    "Hand the optimiser a hard spend cap instead of a coverage target. "
+                    "The first £10 buys almost half of everything — the arithmetic of the "
+                    "inversion, priced.")
+    for col, name in enumerate(["Budget", "Parts", "Outcomes", "% of all", "Spent",
+                                "The kit", ""], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center"); c.border = S.BORDER
+    row += 1
+    for b in sol["budget_frontier"]:
+        S.cell(ws, row, 1, f"${b['budget']}", size=10, bold=True, halign="center",
+               fill="E4EFE6")
+        S.cell(ws, row, 2, b["n_sens"], size=10, halign="center")
+        S.cell(ws, row, 3, b["covered"], size=10, halign="center")
+        S.cell(ws, row, 4, f"{b['pct']*100:.0f}%", size=11, bold=True, halign="center",
+               fill="EAF0F6")
+        S.cell(ws, row, 5, f"${b['spend']:.1f}", size=10, halign="center")
+        ws.merge_cells(start_row=row, start_column=6, end_row=row, end_column=ncols)
+        S.cell(ws, row, 6, b["kit"], size=8)
+        ws.row_dimensions[row].height = max(24, 12 + len(b["kit"]) // 8)
+        row += 1
     S.set_widths(ws, [30, 15, 13, 13, 22, 46, 30])
     ws.freeze_panes = "A4"
     return ws
@@ -609,6 +656,21 @@ def add_solver_run(wb, sol):
                    "Solver Data sheet."),
         ("Re-run it", "python3 solve.py — same optimiser, any subset of outcomes, any "
                       "constraint. `--export` writes JSON/CSV/Markdown for use outside Excel."),
+        ("Post-processing", "Reverse-delete + 1-swap local search on the terminal kits "
+                            "(tiers stay raw greedy prefixes, since each tier is defined as "
+                            "the previous plus additions): "
+                            + ("; ".join(sol["minimise_notes_cost"])
+                               if sol["minimise_notes_cost"]
+                               else "certified locally minimal under prune and 1-swap")
+                            + f". Minimised COMPLETE kit: {sol['kit_cost_min_len']} parts, "
+                              f"${sol['cost_cost_min']:.0f} (greedy said "
+                              f"{sol['kit_cost_len']} / ${sol['cost_cost']:.0f})."),
+        ("Fusion layer", f"{sol['fusion']['n_edges']} authored hyperedges close each kit over "
+                         "combination outcomes — see the Fusion Solver sheet. The count "
+                         "objective's kit: "
+                         + ("; ".join(sol["minimise_notes_count"])
+                            if sol["minimise_notes_count"]
+                            else "certified locally minimal under prune and 1-swap") + "."),
     ]:
         S.cell(ws, row, 1, k, size=9, bold=True, fill="E4EFE6")
         ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=ncols)
@@ -755,6 +817,432 @@ def add_solver_data(wb, sol, INFERENCE):
 
     S.set_widths(ws, [10, 17, 34, 8, 12, 10, 10, 84])
     ws.freeze_panes = "C4"
+    return ws
+
+
+def fix_idea_forge(wb):
+    """The forge's 41 formulas were sized for the 238-row catalog and can never
+    deal the 167 merged sensors. Rewire every range for rows 4-408."""
+    from openpyxl.worksheet.formula import ArrayFormula
+    ws, fixed = wb["Idea Forge"], 0
+    for row in ws.iter_rows():
+        for c in row:
+            v = c.value
+            t = v.text if isinstance(v, ArrayFormula) else v
+            if isinstance(t, str) and t.startswith("="):
+                new = (t.replace("$241", "$408")
+                        .replace("RANDBETWEEN(1,238)", "RANDBETWEEN(1,405)"))
+                if new != t:
+                    c.value = new   # plain string; these are ordinary formulas
+                    fixed += 1
+    return fixed
+
+
+# --------------------------------------------------------------- fusion sheets
+
+def make_layout(records):
+    """Shared geometry for Kit Builder and Coverage Matrix. Sensor i sits on
+    row 8+i on BOTH sheets — that row alignment is what makes every cross-sheet
+    formula a plain relative reference."""
+    from openpyxl.utils import get_column_letter
+    caps = fusion.matrix_capabilities()
+    sensors = sorted((r for r in records if r.get("catalog") == "sensor"),
+                     key=lambda r: int(r["id"][1:]))
+    first_cap_col = 5                                   # column E
+    col_of = {k: first_cap_col + i for i, (k, _kd) in enumerate(caps)}
+    return dict(
+        caps=caps, sensors=sensors, col_of=col_of,
+        first_row=8, last_row=7 + len(sensors),
+        first_cap_col=first_cap_col,
+        last_cap_col=first_cap_col + len(caps) - 1,
+        last_inf_col=first_cap_col + sum(1 for _k, kd in caps if kd == "inference") - 1,
+        L=get_column_letter)
+
+
+def add_coverage_matrix(wb, records, lay):
+    """The 0/1 grid every Kit Builder formula reads. Row 5 counts how many
+    OWNED sensors cover each capability; row 6 flags the uncovered ones."""
+    ws = wb.create_sheet("Coverage Matrix")
+    S.sheet_defaults(ws, tab_color="3A4A6B")
+    L, col_of = lay["L"], lay["col_of"]
+    fr, lr = lay["first_row"], lay["last_row"]
+
+    ws.merge_cells("A1:H1")
+    c = ws.cell(row=1, column=1, value="🔢 COVERAGE MATRIX — the solver's input as a live grid")
+    c.font = S.Font(name=S.FONT, size=16, bold=True, color="FFFFFF")
+    for i in range(1, 9):
+        ws.cell(row=1, column=i).fill = S.PatternFill("solid", fgColor=S.NAVY)
+    c.alignment = S.Alignment(vertical="center", indent=1)
+    ws.row_dimensions[1].height = 30
+    ws.merge_cells("A2:H2")
+    s = ws.cell(row=2, column=1, value=(
+        "One row per sensor, one column per capability; 1 = this sensor covers it. Row 5 counts "
+        "how many sensors you own (Kit Builder column D) cover each capability; row 6 flags the "
+        "still-uncovered outcomes. Every formula on the Kit Builder reads THIS sheet — nothing "
+        "else enters the computation. The same grid, dense, is exports/coverage_matrix.csv."))
+    s.font = S.sfont(9.5, italic=True, color=S.MUTED)
+    s.alignment = S.Alignment(vertical="center", indent=1, wrap_text=True)
+    ws.row_dimensions[2].height = 30
+
+    ws.cell(row=3, column=4, value="kind →").font = S.sfont(8, color=S.MUTED)
+    for k, kd in lay["caps"]:
+        cc = ws.cell(row=3, column=col_of[k], value="INF" if kd == "inference" else "PHN")
+        cc.font = S.sfont(7, bold=True,
+                          color=S.NAVY if kd == "inference" else S.ACCENT)
+        cc.alignment = S.Alignment(horizontal="center")
+
+    for col, name in (1, "ID"), (2, "Sensor"), (3, "$"), (4, "Reach"):
+        hc = ws.cell(row=4, column=col, value=name)
+        hc.font = S.sfont(9, bold=True, color="FFFFFF")
+        hc.fill = S.PatternFill("solid", fgColor=S.NAVY)
+    for k, _kd in lay["caps"]:
+        hc = ws.cell(row=4, column=col_of[k], value=k)
+        hc.font = S.sfont(7.5, bold=True)
+        hc.alignment = S.Alignment(textRotation=90, horizontal="center", vertical="bottom")
+    ws.row_dimensions[4].height = 118
+
+    ws.cell(row=5, column=2, value="OWNED sensors covering ↓").font = S.sfont(8.5, bold=True)
+    ws.cell(row=6, column=2, value="1 = still uncovered ↓").font = S.sfont(8.5, bold=True, color=S.BAD)
+    for k, _kd in lay["caps"]:
+        col = col_of[k]
+        cl = L(col)
+        c5 = ws.cell(row=5, column=col,
+                     value=f"=SUMPRODUCT({cl}${fr}:{cl}${lr},'Kit Builder'!$D${fr}:$D${lr})")
+        c5.fill = S.PatternFill("solid", fgColor="EAF0F6")
+        c5.font = S.sfont(8, bold=True)
+        c6 = ws.cell(row=6, column=col, value=f"=IF({cl}5=0,1,0)")
+        c6.font = S.sfont(8, color=S.MUTED)
+
+    covers = {r["id"]: fusion.covers(r) for r in lay["sensors"]}
+    for i, r in enumerate(lay["sensors"]):
+        row = fr + i
+        ws.cell(row=row, column=1, value=r["id"]).font = S.sfont(8, color=S.MUTED)
+        ws.cell(row=row, column=2, value=r["n"]).font = S.sfont(8.5)
+        usd = r.get("usd")
+        ws.cell(row=row, column=3,
+                value=usd if isinstance(usd, (int, float)) else 0).font = S.sfont(8)
+        ws.cell(row=row, column=4, value=len(covers[r["id"]])).font = S.sfont(8)
+        for k in covers[r["id"]]:
+            col = col_of.get(k)
+            if col:
+                ws.cell(row=row, column=col, value=1)   # sparse: blanks are 0
+
+    ws.conditional_formatting.add(
+        f"E{fr}:{L(lay['last_cap_col'])}{lr}",
+        S.CellIsRule(operator="equal", formula=["1"],
+                     fill=S.PatternFill("solid", fgColor="CFE3D4")))
+    widths = [8, 30, 6, 6] + [2.8] * len(lay["caps"])
+    S.set_widths(ws, widths)
+    ws.freeze_panes = "E8"
+    return ws
+
+
+def add_kit_builder(wb, records, sol, lay):
+    """The solver, running IN the sheet. Mark what you own; everything updates."""
+    ws = wb.create_sheet("Kit Builder")
+    S.sheet_defaults(ws, tab_color="18645A")
+    L, col_of = lay["L"], lay["col_of"]
+    fr, lr = lay["first_row"], lay["last_row"]
+    inf_first, inf_last = L(lay["first_cap_col"]), L(lay["last_inf_col"])
+    ncols = 7
+
+    row = _banner(
+        ws, "🎛 KIT BUILDER — mark what you own, watch what you know",
+        "Type 1 in a yellow cell to own that sensor. Everything recomputes live, in Excel, with "
+        "no Python: which of the 151 outcomes your kit covers, what it costs, which single "
+        "purchase buys the most NEW outcomes next, and which fusion instruments (Fusion Solver "
+        "sheet) your kit unlocks. The FOUNDATION kit is pre-marked so the machinery is alive when "
+        "you open it — clear column D to start from nothing. Computed cells are blue; edit only "
+        "the yellow.", ncols)
+
+    tiles = [
+        ("Outcomes covered", f"=COUNTIF('Coverage Matrix'!${inf_first}$5:${inf_last}$5,\">0\")",
+         f"of {sol['n_all']} — single-sensor coverage only"),
+        ("Kit cost", f"=SUMPRODUCT($C${fr}:$C${lr},$D${fr}:$D${lr})", "sum of owned parts"),
+        ("Sensors owned", f"=SUM($D${fr}:$D${lr})", ""),
+    ]
+    trow = row + 1
+    for i, (label, formula, note) in enumerate(tiles):
+        col = 1 + i * 2
+        lc = ws.cell(row=trow, column=col, value=label)
+        lc.font = S.sfont(9, bold=True)
+        fc = ws.cell(row=trow, column=col + 1, value=formula)
+        fc.font = S.sfont(14, bold=True, color=S.NAVY)
+        fc.fill = S.PatternFill("solid", fgColor="EAF0F6")
+        fc.alignment = S.Alignment(horizontal="center", vertical="center")
+        nc = ws.cell(row=trow + 1, column=col + 1, value=note)
+        nc.font = S.sfont(7.5, italic=True, color=S.MUTED)
+    ws.row_dimensions[trow].height = 26
+    row = trow + 2  # placeholder; fusion tiles added after blocks are placed
+
+    # ---- sensor block (rows 8..412, aligned with the matrix)
+    row = fr - 1
+    for col, name in enumerate(["ID", "Sensor", "$", "Own? 0/1", "Buys next",
+                                "Category", "Reach"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        c.border = S.BORDER
+    preload = {sid for sid, _r, _g in
+               [(s["id"], None, None) for s in sol["trace_cost"][:sol["tiers"][0]["upto"]]]}
+    covers = {r["id"]: fusion.covers(r) for r in lay["sensors"]}
+    for i, r in enumerate(lay["sensors"]):
+        rw = fr + i
+        ws.cell(row=rw, column=1, value=r["id"]).font = S.sfont(8, color=S.MUTED)
+        ws.cell(row=rw, column=2, value=r["n"]).font = S.sfont(8.5, bold=r["id"] in preload)
+        usd = r.get("usd")
+        ws.cell(row=rw, column=3,
+                value=usd if isinstance(usd, (int, float)) else 0).font = S.sfont(8)
+        oc = ws.cell(row=rw, column=4, value=1 if r["id"] in preload else 0)
+        oc.fill = S.PatternFill("solid", fgColor="FFF3C4")
+        oc.font = S.sfont(9, bold=True)
+        oc.alignment = S.Alignment(horizontal="center")
+        oc.border = S.BORDER
+        bc = ws.cell(row=rw, column=5, value=(
+            f"=IF($D{rw}=1,0,SUMPRODUCT('Coverage Matrix'!${inf_first}{rw}:${inf_last}{rw},"
+            f"'Coverage Matrix'!${inf_first}$6:${inf_last}$6))"))
+        bc.font = S.sfont(8.5, bold=True, color=S.NAVY)
+        bc.alignment = S.Alignment(horizontal="center")
+        ws.cell(row=rw, column=6, value=r.get("cat", "")).font = S.sfont(7.5, color=S.MUTED)
+        ws.cell(row=rw, column=7, value=len(covers[r["id"]])).font = S.sfont(8)
+        ws.row_dimensions[rw].height = 12.5
+    from openpyxl.worksheet.datavalidation import DataValidation
+    dv = DataValidation(type="list", formula1='"0,1"', allow_blank=True,
+                        errorTitle="0 or 1 only", error="Own = 1, not owned = 0")
+    ws.add_data_validation(dv)
+    dv.add(f"D{fr}:D{lr}")
+    ws.conditional_formatting.add(
+        f"E{fr}:E{lr}",
+        S.DataBarRule(start_type="num", start_value=0, end_type="num",
+                      end_value=12, color="C8853A", showValue=True))
+
+    # ---- outcome status block
+    row = lr + 2
+    row = S.section(ws, row, "EVERY OUTCOME — covered by your kit?", ncols,
+                    "Routes = how many owned sensors can answer it. Red rows are what "
+                    "your kit cannot yet know.")
+    for col, name in enumerate(["Domain", "You want to know…", "Key",
+                                "Owned routes", "Status", "", ""], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor="4A5878")
+        c.border = S.BORDER
+    row += 1
+    out_first = row
+    for k in vocab.INFERENCE:
+        q, d = vocab.INFERENCE[k]
+        cl = L(col_of[k])
+        ws.cell(row=row, column=1, value=d).font = S.sfont(8, color=S.MUTED)
+        ws.cell(row=row, column=2, value=q).font = S.sfont(8.5, bold=True)
+        ws.cell(row=row, column=3, value=k).font = S.sfont(7.5, color=S.MUTED)
+        rc = ws.cell(row=row, column=4, value=f"='Coverage Matrix'!${cl}$5")
+        rc.font = S.sfont(8.5, bold=True)
+        rc.alignment = S.Alignment(horizontal="center")
+        sc = ws.cell(row=row, column=5, value=f'=IF($D{row}>0,"covered","—")')
+        sc.font = S.sfont(8.5)
+        sc.alignment = S.Alignment(horizontal="center")
+        ws.row_dimensions[row].height = 12.5
+        row += 1
+    out_last = row - 1
+    ws.conditional_formatting.add(
+        f"A{out_first}:E{out_last}",
+        S.FormulaRule(formula=[f"$D{out_first}=0"],
+                      font=S.sfont(8.5, color=S.BAD),
+                      fill=S.PatternFill("solid", fgColor="FBE9E4")))
+
+    # ---- fusion edge block (topological order: chains reference earlier rows)
+    row = out_last + 2
+    row = S.section(ws, row, "FUSION INSTRUMENTS — what your kit unlocks beyond any sensor", ncols,
+                    "Each row is a derived instrument from the Fusion Solver sheet. It lights "
+                    "UNLOCKED when your kit holds every capability it needs. ×N means N "
+                    "measurement points — N copies of one covering part also works.")
+    for col, name in enumerate(["Instrument", "Pattern", "Needs", "Status",
+                                "What you gain", "The math", ""], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor="1F6F5C")
+        c.border = S.BORDER
+    row += 1
+    edge_first = row
+    edge_row = {}
+    E_ = set(fusion.EMERGENT)
+    provided_by = {}
+    for e in fusion.FUSION_EDGES:
+        provided_by.setdefault(e["provides"], []).append(e["key"])
+    for e in fusion.topo_edges():
+        conds = []
+        needs = []
+        for cap, m in e["requires"]:
+            if cap in col_of:
+                cl = L(col_of[cap])
+                base = f"'Coverage Matrix'!${cl}$5>={m}"
+            else:
+                base = None   # emergent-only capability: no matrix column
+            chain = [f'$D${edge_row[k]}="UNLOCKED"' for k in provided_by.get(cap, [])
+                     if k in edge_row]
+            if base and chain:
+                conds.append("OR(" + base + "," + ",".join(chain) + ")")
+            elif base:
+                conds.append(base)
+            elif chain:
+                conds.append("OR(" + ",".join(chain) + ")" if len(chain) > 1 else chain[0])
+            needs.append(f"{'×' + str(m) + ' ' if m > 1 else ''}{cap}")
+        q = (fusion.EMERGENT.get(e["provides"]) or vocab.INFERENCE.get(e["provides"]))[0]
+        ws.cell(row=row, column=1, value=e["name"]).font = S.sfont(8.5, bold=True)
+        ws.cell(row=row, column=2, value=e["pattern"]).font = S.sfont(7.5, color=S.MUTED)
+        ws.cell(row=row, column=3, value=" + ".join(needs)).font = S.sfont(7.5)
+        stc = ws.cell(row=row, column=4,
+                      value=f'=IF(AND({",".join(conds)}),"UNLOCKED","—")')
+        stc.font = S.sfont(8.5, bold=True)
+        stc.alignment = S.Alignment(horizontal="center")
+        gc = ws.cell(row=row, column=5, value=("NEW: " if e["provides"] in E_ else "route: ") + q)
+        gc.font = S.sfont(7.5, color=S.NAVY if e["provides"] in E_ else S.MUTED)
+        ws.cell(row=row, column=6, value=e["math"]).font = S.sfont(7, color=S.MUTED)
+        ws.row_dimensions[row].height = 12.5
+        edge_row[e["key"]] = row
+        row += 1
+    edge_last = row - 1
+    ws.conditional_formatting.add(
+        f"A{edge_first}:F{edge_last}",
+        S.FormulaRule(formula=[f'$D{edge_first}="UNLOCKED"'],
+                      fill=S.PatternFill("solid", fgColor="D9EBDD")))
+
+    # ---- emergent tile row (needed the edge rows to exist first)
+    et = ws.cell(row=trow, column=7,
+                 value=f'=COUNTIF($D${edge_first}:$D${edge_last},"UNLOCKED")')
+    et.font = S.sfont(14, bold=True, color="1F6F5C")
+    et.fill = S.PatternFill("solid", fgColor="E4EFE6")
+    et.alignment = S.Alignment(horizontal="center", vertical="center")
+    lc = ws.cell(row=trow - 1, column=7, value="Fusion unlocked")
+    lc.font = S.sfont(9, bold=True)
+    lc.alignment = S.Alignment(horizontal="center")
+    nc = ws.cell(row=trow + 1, column=7, value=f"of {len(fusion.FUSION_EDGES)} instruments")
+    nc.font = S.sfont(7.5, italic=True, color=S.MUTED)
+    nc.alignment = S.Alignment(horizontal="center")
+
+    S.set_widths(ws, [8, 34, 7, 9, 10, 20, 42])
+    ws.freeze_panes = f"F{fr}"
+    return ws
+
+
+def add_fusion_solver(wb, sol):
+    """The static record of the fusion computation: edges, closures, marginals."""
+    fus = sol["fusion"]
+    ws = wb.create_sheet("Fusion Solver")
+    S.sheet_defaults(ws, tab_color="0F5B4E")
+    ncols = 8
+    row = _banner(
+        ws, "🧬 FUSION SOLVER — what combinations know that no sensor claims",
+        f"{fus['n_edges']} derived instruments, authored from this atlas's own Derived "
+        f"Quantities, Derived Instruments and Combination Grammar — now as computable data. "
+        f"{fus['n_emergent']} outcomes exist in NO sensor's row because only combinations "
+        "provide them. Everything below is computed against the live catalog; the Kit Builder "
+        "sheet runs the same computation on YOUR kit, live.", ncols)
+
+    for label, text in fusion.FUSION_FINDINGS:
+        S.cell(ws, row, 1, label, size=9.5, bold=True, fill="FBEFD8")
+        ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=ncols)
+        S.cell(ws, row, 2, text, size=9.5)
+        ws.row_dimensions[row].height = max(30, 12 + len(text) // 4.4)
+        row += 1
+    row += 1
+
+    # ---- tier closures
+    row = S.section(ws, row, "1 · THE MULTIPLIER — each kit, closed under fusion", ncols,
+                    "Declared = what the sensors claim alone (the old lower bound). "
+                    "Emergent = outcomes the same parts unlock through the instruments below. "
+                    "No new hardware appears anywhere in this table.")
+    for col, name in enumerate(["Kit", "Parts", "Cost", "Declared", "Edges fired",
+                                "Emergent", "TOTAL", "What emerges"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor=S.NAVY)
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        c.border = S.BORDER
+    row += 1
+    for t in fus["tier_closures"]:
+        S.cell(ws, row, 1, t["name"], size=10, bold=True, color=S.NAVY,
+               fill="E4EFE6", halign="center")
+        S.cell(ws, row, 2, t["n"], size=10, halign="center")
+        S.cell(ws, row, 3, f"${t['cost']:.0f}", size=10, halign="center")
+        S.cell(ws, row, 4, t["declared"], size=10, halign="center")
+        S.cell(ws, row, 5, t["fired"], size=10, halign="center")
+        S.cell(ws, row, 6, f"+{t['emergent']}", size=10, bold=True, halign="center",
+               fill="D9EBDD")
+        S.cell(ws, row, 7, t["total"], size=11, bold=True, halign="center", fill="EAF0F6")
+        S.cell(ws, row, 8, " · ".join(t["emergent_keys"]), size=7.5)
+        ws.row_dimensions[row].height = max(24, 11 + len(" · ".join(t["emergent_keys"])) // 8)
+        row += 1
+    row += 1
+
+    # ---- the edge table
+    row = S.section(ws, row, "2 · THE INSTRUMENTS — every edge, in full", ncols,
+                    "requires → provides, with the actual math. ×N = N measurement points. "
+                    "Two instruments consume the OUTPUT of others (chains, marked ⛓).")
+    for col, name in enumerate(["Instrument", "Pattern", "Requires", "Provides",
+                                "The math", "Why it works", "What kills it",
+                                "Worked build"], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor="1F6F5C")
+        c.alignment = S.Alignment(wrap_text=True, horizontal="center", vertical="center")
+        c.border = S.BORDER
+    row += 1
+    E_ = set(fusion.EMERGENT)
+    all_provided = {e["provides"] for e in fusion.FUSION_EDGES}
+    for e in fusion.topo_edges():
+        chained = any(c in all_provided for c, _m in e["requires"])
+        needs = " + ".join(f"{'×' + str(m) + ' ' if m > 1 else ''}{c}"
+                           for c, m in e["requires"])
+        q = (fusion.EMERGENT.get(e["provides"]) or vocab.INFERENCE.get(e["provides"]))[0]
+        S.cell(ws, row, 1, ("⛓ " if chained else "") + e["name"], size=8.5, bold=True)
+        S.cell(ws, row, 2, e["pattern"], size=8, color=S.MUTED, halign="center")
+        S.cell(ws, row, 3, needs, size=8)
+        pv = S.cell(ws, row, 4, ("NEW · " if e["provides"] in E_ else "route · ") + q, size=8,
+                    fill="D9EBDD" if e["provides"] in E_ else None)
+        S.cell(ws, row, 5, e["math"], size=8, color=S.NAVY)
+        S.cell(ws, row, 6, e["why"], size=8)
+        S.cell(ws, row, 7, e["confound"], size=8, fill="FBE9E4")
+        S.cell(ws, row, 8, e["example"], size=8)
+        ws.row_dimensions[row].height = max(40, 12 + max(len(e["why"]), len(e["confound"])) // 5.5)
+        row += 1
+    row += 1
+
+    # ---- marginal ranking
+    row = S.section(ws, row, "3 · BEST NEXT PURCHASE FOR EMERGENCE", ncols,
+                    "Starting from the $18 FOUNDATION kit: which single added part fires the "
+                    "most new instruments? This is a different question from 'buys the most "
+                    "outcomes' — and it has different answers.")
+    for col, name in enumerate(["Add this", "$", "New instruments", "Emergent",
+                                "Which ones", "", "", ""], 1):
+        c = ws.cell(row=row, column=col, value=name)
+        c.font = S.sfont(9, bold=True, color="FFFFFF")
+        c.fill = S.PatternFill("solid", fgColor="4A5878")
+        c.border = S.BORDER
+    row += 1
+    seen_names = set()
+    shown = 0
+    for m in fus["marginal"]:
+        base = m["name"].split(" (")[0][:20]   # collapse near-duplicates (PIR variants)
+        if base in seen_names:
+            continue
+        seen_names.add(base)
+        S.cell(ws, row, 1, m["name"], size=8.5, bold=True)
+        S.cell(ws, row, 2, f"${m['usd']}", size=8.5, halign="center")
+        S.cell(ws, row, 3, f"+{m['edges_gained']}", size=9, bold=True, halign="center",
+               fill="D9EBDD")
+        S.cell(ws, row, 4, f"+{m['emergent_gained']}", size=8.5, halign="center")
+        ws.merge_cells(start_row=row, start_column=5, end_row=row, end_column=ncols)
+        S.cell(ws, row, 5, " · ".join(m["gained_keys"]), size=8)
+        ws.row_dimensions[row].height = 14
+        row += 1
+        shown += 1
+        if shown >= 20:
+            break
+
+    S.set_widths(ws, [30, 12, 26, 26, 34, 42, 42, 36])
+    ws.freeze_panes = "A4"
     return ws
 
 

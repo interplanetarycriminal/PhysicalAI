@@ -322,7 +322,7 @@ ENRICH_CORE = {
  substitutes="Longer range: VL53L1X. Very short range: VL6180X. 64-zone depth: VL53L5CX.",
  esp32_compat="Any variant; budget a GPIO per sensor for XSHUT"),
 
-"S065": E(modality="Thermal", phenomena=["temperature-remote", "occupancy-signal"],
+"S065": E(modality="Thermal", phenomena=["occupancy-signal"],
  inferences=["someone-present", "intrusion", "crossed-boundary", "entered-or-left"],
  contact="Standoff", privacy="Aggregate", environment=["Indoor"],
  range="~7 m, 120° cone", rate="Event-driven, with an adjustable hold time",

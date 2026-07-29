@@ -537,4 +537,12 @@ FUSION = {
    "Spatial structure is invisible from a single point and obvious from ten.",
    "Ten $2 temperature nodes reveal which rooms drift coldest and why. Street-level PM "
    "nodes reveal a heat island or a polluting neighbour. ESP-NOW makes the mesh nearly free."),
+ "active-probe": ("Active probe",
+   "Emit a known stimulus and read the response — sensor plus actuator become one instrument.",
+   "A response to a stimulus YOU control carries information no passive reading can: the "
+   "system's transfer function, not just its state.",
+   "A speaker chirps at a jar and a mic finds the Helmholtz resonance: fill level through "
+   "the wall. A resistor pulses heat into a thermistor bead: the cooling curve identifies "
+   "the liquid around it. A ranging ping at a FIXED distance: the flight time reads air "
+   "temperature. The Combination Grammar's Active Interrogation family, as a fusion kind."),
 }

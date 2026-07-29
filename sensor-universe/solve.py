@@ -125,6 +125,17 @@ def export(records, INFERENCE, sol):
         irreplaceable=sol["irreplaceable_full"],
         recombinatory=sol["recomb_full"],
         graph=sol["graph"],
+        budget_frontier=sol["budget_frontier"],
+        minimisation=dict(cost_notes=sol["minimise_notes_cost"],
+                          count_notes=sol["minimise_notes_count"],
+                          minimised_kit=dict(sensors=sol["kit_cost_min_len"],
+                                             usd=round(sol["cost_cost_min"], 2))),
+        fusion=(dict(
+            n_edges=sol["fusion"]["n_edges"], n_emergent=sol["fusion"]["n_emergent"],
+            tier_closures=sol["fusion"]["tier_closures"],
+            marginal=sol["fusion"]["marginal"][:50],
+            gaps=sol["fusion"]["gaps"],
+        ) if sol.get("fusion") else None),
     )
     (EXPORTS / "solver_run.json").write_text(json.dumps(payload, indent=1, ensure_ascii=False))
 
@@ -172,7 +183,32 @@ def export(records, INFERENCE, sol):
                             round(s["per_outcome"], 3) if s["per_outcome"] is not None else "",
                             "|".join(s["bought_keys"])])
 
-    # 6 · the servable narrative
+    # 6 · the fusion layer: edges and the dense capability matrix
+    import fusion as fus
+    with open(EXPORTS / "fusion_edges.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["key", "name", "pattern", "requires", "provides", "provides_kind",
+                    "question", "domain", "math", "why", "confound", "example"])
+        for e in fus.FUSION_EDGES:
+            kind = "emergent" if e["provides"] in fus.EMERGENT else "route"
+            q, d = (fus.EMERGENT.get(e["provides"])
+                    or __import__("vocab").INFERENCE.get(e["provides"]))
+            w.writerow([e["key"], e["name"], e["pattern"],
+                        "|".join(f"{c}×{m}" for c, m in e["requires"]),
+                        e["provides"], kind, q, d,
+                        e["math"], e["why"], e["confound"], e["example"]])
+
+    caps = fus.matrix_capabilities()
+    with open(EXPORTS / "coverage_matrix.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["sensor_id", "sensor", "usd"] + [k for k, _kd in caps])
+        for r in sorted((x for x in records if x.get("catalog") == "sensor"),
+                        key=lambda x: int(x["id"][1:])):
+            cov = fus.covers(r)
+            w.writerow([r["id"], r["n"], r.get("usd")]
+                       + [1 if k in cov else 0 for k, _kd in caps])
+
+    # 7 · the servable narrative
     (EXPORTS / "SOLVER.md").write_text(markdown(sol, INFERENCE))
 
     return sorted(p.name for p in EXPORTS.iterdir())
@@ -215,6 +251,40 @@ def markdown(sol, INFERENCE):
     for s in sol["trace_count"]:
         L.append(f"| {s['rank']} | {s['name']} | {s['usd']:g} | +{s['gain']} | {s['cum']} | "
                  f"{s['pct']*100:.0f}% | {s['cum_cost']:.0f} |")
+
+    if sol.get("fusion"):
+        import fusion as fus
+        f = sol["fusion"]
+        L += ["", "## The multiplier — every kit, closed under fusion", "",
+              f"The solver's coverage numbers count what each sensor supports alone — a stated "
+              f"lower bound. {f['n_edges']} authored fusion edges (from the atlas's Derived "
+              f"Quantities, Derived Instruments and Combination Grammar) compute the gap: "
+              f"{f['n_emergent']} outcomes exist in no sensor's row, because only combinations "
+              f"provide them.", "",
+              "| Kit | Parts | Cost | Declared | Edges fired | Emergent | TOTAL |",
+              "|---|--:|--:|--:|--:|--:|--:|"]
+        for t in f["tier_closures"]:
+            L.append(f"| **{t['name']}** | {t['n']} | ${t['cost']:.0f} | {t['declared']} | "
+                     f"{t['fired']} | +{t['emergent']} | **{t['total']}** |")
+        L += ["", "### Best next purchase for emergence (from FOUNDATION)", "",
+              "| Add this | $ | New instruments | Which |", "|---|--:|--:|---|"]
+        for m in f["marginal"][:12]:
+            L.append(f"| {m['name']} | {m['usd']} | +{m['edges_gained']} | "
+                     f"{' · '.join(m['gained_keys'])} |")
+        L += ["", "### The instruments", "",
+              "| Instrument | Pattern | Requires | Provides | Math |", "|---|---|---|---|---|"]
+        for e in fus.topo_edges():
+            kind = "NEW" if e["provides"] in fus.EMERGENT else "route"
+            needs = " + ".join(f"{'×' + str(m) + ' ' if m > 1 else ''}{c}"
+                               for c, m in e["requires"])
+            L.append(f"| {e['name']} | {e['pattern']} | {needs} | {kind}: {e['provides']} | "
+                     f"{e['math']} |")
+
+    L += ["", "## What a fixed budget buys", "",
+          "| Budget | Parts | Outcomes | % | Spent |", "|--:|--:|--:|--:|--:|"]
+    for b in sol["budget_frontier"]:
+        L.append(f"| ${b['budget']} | {b['n_sens']} | {b['covered']} | "
+                 f"{b['pct']*100:.0f}% | ${b['spend']:.1f} |")
 
     L += ["", "## Single-domain kits", "",
           "| Domain | Outcomes | Sensors | Cost | Kit |", "|---|--:|--:|--:|---|"]
@@ -267,6 +337,10 @@ def main():
     p.add_argument("--battery", action="store_true")
     p.add_argument("--beginner", action="store_true")
     p.add_argument("--outdoor", action="store_true")
+    p.add_argument("--budget", type=float,
+                   help="hard spend cap: maximise outcomes under $N instead of covering all")
+    p.add_argument("--fusion", action="store_true",
+                   help="also report which fusion instruments the resulting kit unlocks")
     p.add_argument("--export", action="store_true", help="write exports/ and exit")
     p.add_argument("--json", action="store_true", help="emit this run as JSON")
     a = p.parse_args()
@@ -307,12 +381,52 @@ def main():
                   f"{sorted({d for _q, d in INF.values()})}")
             return
 
-    res = osv.solve(records, INF, keys=keys, by_cost=(a.by == "cost"),
-                    predicate=build_predicate(a))
+    if a.budget is not None:
+        S = osv.index(records, INF)
+        target = set(keys) if keys else set(INF)
+        pred = build_predicate(a)
+        pool = {k: v for k, v in S.items() if pred(v[0])} if pred else S
+        kit, cov, spend = osv.greedy_budget(S, target, a.budget, pool=pool)
+        tr = osv.trace_kit(S, kit, INF, target)
+        res = dict(target=sorted(target), unknown=[], trace=tr,
+                   covered=sorted(cov), missed=sorted(target - cov),
+                   n_sensors=len(kit), cost=spend,
+                   pct=len(cov) / max(len(target), 1))
+        title += f" — under ${a.budget:g}"
+    else:
+        res = osv.solve(records, INF, keys=keys, by_cost=(a.by == "cost"),
+                        predicate=build_predicate(a))
+
     if a.json:
         print(json.dumps(res, indent=1, ensure_ascii=False))
     else:
         print(report(res, INF, title, constraint_label(a), a.by))
+
+    if a.fusion:
+        import fusion as fus
+        by_id = {r["id"]: r for r in records}
+        kit_recs = [by_id[s["id"]] for s in res["trace"]]
+        cl = osv.closure(kit_recs)
+        print(f"\n## Fusion closure of this kit\n")
+        print(f"- Instruments unlocked: {len(cl['fired'])} of {len(fus.FUSION_EDGES)}")
+        print(f"- Emergent outcomes gained: {len(cl['emergent'])} — "
+              + (", ".join(cl["emergent"]) or "none"))
+        if cl["new_routes"]:
+            print(f"- New routes to declared outcomes: {', '.join(cl['new_routes'])}")
+        near = []
+        fired = set(cl["fired_keys"])
+        granted = {e["provides"] for e in cl["fired"]}
+        for e in fus.FUSION_EDGES:
+            if e["key"] in fired:
+                continue
+            missing = [(c, m) for c, m in e["requires"]
+                       if cl["counts"].get(c, 0) < m and not (m == 1 and c in granted)]
+            if len(missing) == 1:
+                c, m = missing[0]
+                near.append(f"{e['name']} — needs {('×' + str(m) + ' ') if m > 1 else ''}{c} "
+                            f"(have {cl['counts'].get(c, 0)})")
+        if near:
+            print("- One capability away: " + "; ".join(near[:8]))
 
 
 if __name__ == "__main__":

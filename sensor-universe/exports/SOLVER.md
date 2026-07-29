@@ -147,6 +147,101 @@ Pick the row you want from Outcome → Kit. If you want breadth, buy a tier. If 
 | 38 | Atmospheric electricity (field mill lite) | 15 | +1 | 150 | 99% | 1218 |
 | 39 | IIS3DWB wideband vibration sensor | 45 | +1 | 151 | 100% | 1263 |
 
+## The multiplier — every kit, closed under fusion
+
+The solver's coverage numbers count what each sensor supports alone — a stated lower bound. 52 authored fusion edges (from the atlas's Derived Quantities, Derived Instruments and Combination Grammar) compute the gap: 26 outcomes exist in no sensor's row, because only combinations provide them.
+
+| Kit | Parts | Cost | Declared | Edges fired | Emergent | TOTAL |
+|---|--:|--:|--:|--:|--:|--:|
+| **FOUNDATION** | 13 | $18 | 79 | 13 | +8 | **87** |
+| **CORE** | 27 | $62 | 114 | 26 | +13 | **127** |
+| **BROAD** | 43 | $149 | 136 | 36 | +15 | **151** |
+| **COMPLETE** | 58 | $733 | 151 | 39 | +18 | **169** |
+
+### Best next purchase for emergence (from FOUNDATION)
+
+| Add this | $ | New instruments | Which |
+|---|--:|--:|---|
+| BL0940 calibration-free mains metering IC | 1.5 | +5 | building-ua · inrush-signature · nilm-signature · pf-power-quality · which-room-energy |
+| ADE7953 dual-channel single-phase energy meter | 3.5 | +5 | building-ua · inrush-signature · nilm-signature · pf-power-quality · which-room-energy |
+| ATM90E32AS polyphase energy metering AFE | 4.0 | +5 | building-ua · inrush-signature · nilm-signature · pf-power-quality · which-room-energy |
+| MLX90614 IR thermometer | 8 | +5 | black-ice-watch · cloud-cover-ir · condensation-watch · mould-forecast · stove-watch |
+| PZEM-004T AC power module | 11 | +5 | building-ua · inrush-signature · nilm-signature · pf-power-quality · which-room-energy |
+| MLX90632 miniature IR temp | 14 | +5 | black-ice-watch · cloud-cover-ir · condensation-watch · mould-forecast · stove-watch |
+| MLX90614 forehead mode | 25 | +5 | black-ice-watch · cloud-cover-ir · condensation-watch · mould-forecast · stove-watch |
+| Grid-EYE AMG8833 thermal array | 35 | +5 | black-ice-watch · cloud-cover-ir · condensation-watch · mould-forecast · stove-watch |
+| Eastron SDM120-Modbus DIN energy meter | 38.0 | +5 | building-ua · inrush-signature · nilm-signature · pf-power-quality · which-room-energy |
+| MLX90640 thermal camera | 45 | +5 | black-ice-watch · cloud-cover-ir · condensation-watch · mould-forecast · stove-watch |
+| D6T thermal presence | 55 | +5 | black-ice-watch · cloud-cover-ir · condensation-watch · mould-forecast · stove-watch |
+| MLX90641 thermal (16x12) | 60 | +5 | black-ice-watch · cloud-cover-ir · condensation-watch · mould-forecast · stove-watch |
+
+### The instruments
+
+| Instrument | Pattern | Requires | Provides | Math |
+|---|---|---|---|---|
+| Condensation forecaster | differential | dew-point + temperature-remote | NEW: condensation-risk | Risk when T_surface − T_dew < 1.5°C (T_dew via Magnus: γ = ln(RH/100) + 17.62·T/(243.12+T)) |
+| Mould sentinel (surface-honest) | temporal | condensation-risk | route: mould-risk | Sustained surface-RH > 80% ≈ T_surface within 3°C of T_dew for >6 h/day, integrated over days |
+| Hydronic heat meter | differential | flow-liquid + ×2 temperature-contact | route: thermal-energy-moved | P[W] = (flow[L/min]/60) × 4186 × ΔT[K]; energy = ∫P dt |
+| Wet-bulb heat-stress meter | differential | ×2 temperature-contact | NEW: wet-bulb-heat-stress | T_wet from psychrometric pair (one probe in a wet cotton wick, ~3 m/s airflow); T_wet ≥ 31°C = dangerous, ≥ 35°C = lethal to sustained human work |
+| Dual-probe heat-pulse soil water | differential | ×2 temperature-contact | NEW: soil-water-volumetric | θ = (C − C_dry)/4.18 where C = q/(ρ_soil·ΔT_max·r²·e); heat pulse from a resistor wire |
+| Sky thermometer cloud detector | differential | temperature-remote + temperature-contact | route: sky-clear | Clear sky reads 25–45°C BELOW air temp in thermal IR; overcast reads within ~5°C |
+| Road ice predictor | differential | temperature-remote + dew-point | NEW: black-ice-risk | Alarm when T_road ≤ 1°C AND T_road ≤ T_dew + 0.5°C (frost deposition condition) |
+| Filter-health differential barometer | differential | ×2 pressure-absolute | route: filter-clogged | ΔP = P_upstream − P_downstream; alarm at 2–3× the clean-filter baseline |
+| Compost activity meter | differential | ×2 temperature-contact | route: compost-active | ΔT = T_core − T_ambient; active thermophilic compost holds ΔT ≈ 20–40°C |
+| Bearing temperature-rise monitor | differential | ×2 temperature-contact | route: bearing-failing | ΔT = T_bearing − T_ambient; trend of ΔT at constant load is the health signal |
+| Live air-density computer | compensation | pressure-absolute + temperature-contact + humidity-relative | NEW: air-density | ρ = (P_dry·M_d + P_vap·M_v)/(R·T); P_vap from RH × saturation pressure (Magnus) |
+| Feels-like temperature station | compensation | temperature-contact + humidity-relative + wind-speed | NEW: feels-like-temperature | T<10°C: wind chill (Environment Canada 2001 formula); T>20°C: heat index (Rothfusz regression); between: dry bulb |
+| Evapotranspiration (irrigation truth) | compensation | temperature-contact + humidity-relative + wind-speed + irradiance | NEW: evapotranspiration | FAO-56 Penman-Monteith ET₀ (or Hargreaves ET₀ = 0.0023·Ra·√ΔT·(T+17.8) when only temperature is available) |
+| Pressure-corrected cosmic-ray telescope | compensation | ionising-radiation + pressure-absolute | route: cosmic-flux | Corrected rate = raw rate × e^(β·(P−P₀)), β ≈ 0.2%/hPa for muons |
+| Temperature-honest pH | compensation | ph + temperature-contact | route: water-ph | Nernst slope = −59.16 mV/pH × (T/298.15); correct slope, then report at 25°C |
+| Temperature-corrected soil moisture | compensation | dielectric-constant + temperature-contact | route: plant-thirsty | Correct raw counts by the probe's measured temperature coefficient (typ. 0.1–0.3%/°C), learned from a 24 h constant-moisture log |
+| Temperature-honest snow depth | compensation | distance-point + temperature-contact | route: snow-depth | depth = mount_height − range × c(T)/c₀, with c(T) = 331.3 + 0.606·T m/s |
+| Solar performance-ratio meter | compensation | irradiance + current-dc | route: solar-performance | PR = P_actual / (G/1000 × P_rated); healthy arrays hold PR 0.75–0.85 |
+| Fire coincidence detector | cross-validation | smoke-present + co-present | route: fire-present | Alarm = smoke AND (CO rising ≥ 5 ppm over baseline within 10 min); either alone = advisory |
+| Two-physics presence verifier | cross-validation | ×2 someone-present | NEW: presence-verified | Verified = both channels TRUE within a 5 s window; disagreement = log + keep watching |
+| Two-channel breathing sentinel | cross-validation | respiration + sound-pressure | route: breathing-stopped | Escalate when radar respiration amplitude < threshold AND breath-band audio (0.1–0.5 Hz envelope) silent for > 20 s |
+| ENF recording authenticator | cross-validation | sound-pressure + voltage | NEW: recording-authenticity | Extract 50 Hz hum drift from audio; correlate against your logged grid-frequency history; genuine timestamps correlate r > 0.9 over minutes |
+| Occupancy-gated leak detector | context-gating | flow-liquid + someone-present | route: water-leak | Alarm when flow > 0 sustained > 10 min AND nobody-present > 30 min |
+| Stove-left-on sentinel | context-gating | temperature-remote + someone-present | route: stove-left-on | Escalate when T_stove > 120°C AND kitchen empty > 15 min (advise), > 30 min (alarm) |
+| Window-state inferencer | context-gating | temperature-contact + co2-concentration | NEW: window-open-state | Open = CO2 decay rate jumps > 3× baseline ACH while indoor–outdoor ΔT drives a simultaneous temperature slew |
+| Badge-in attribution gate | context-gating | identity-token + someone-present | route: who-is-it | Attribute presence to token holder when RFID event and presence onset agree within 30 s; decay attribution when presence lapses |
+| Empty-room energy auditor | context-gating | power-now + someone-present | NEW: energy-waste-unoccupied | Waste = ∫ P dt while unoccupied, per room per week; rank rooms by wasted kWh |
+| CO2-decay ventilation meter | temporal | co2-concentration | NEW: air-changes-hour | ACH = ln((C₁−C_out)/(C₂−C_out)) / Δt[h], C_out ≈ 420 ppm, after the room empties |
+| CO2 tape-measure | temporal | co2-concentration | NEW: room-volume-estimate | V = N·q / (d[CO2]/dt) with q ≈ 18 L/h CO2 per seated adult, sealed room, short window |
+| Grid-stress seismograph | temporal | voltage | NEW: grid-stress | f from zero-crossing timestamps; Δf from 50.000 Hz ∝ generation−load imbalance; df/dt during events = inertia signal |
+| Motor-start health tracker | temporal | current-ac | NEW: inrush-health | Trend inrush peak, spin-up time, and start count per day; rising start-time at constant voltage = mechanical or capacitor degradation |
+| Building thermal time-constant | temporal | temperature-contact | NEW: thermal-time-constant | τ from exponential fit of indoor T decay after heating stops (calm night); T(t) = T_out + (T₀−T_out)·e^(−t/τ) |
+| Appliance fingerprint disaggregator | temporal | current-ac | route: which-appliance | Event detection on ΔP edges; classify by (ΔP, ΔQ, inrush shape, duration) signature clusters |
+| Thermal-effusivity liquid identifier | active-probe | temperature-contact | route: material-type | Pulse a co-located resistor; ΔT(t) of the sensor tracks 1/e = 1/√(kρc); water e≈1580, oil ≈500, air ≈5.5 W·s^½/m²K |
+| Path-averaged sonic thermometer | active-probe | ultrasound | NEW: path-averaged-temperature | T = ((d/t_flight)² /400 approx from c² = 403·T[K]; practically T[°C] = (d/t − 331.3)/0.606 at fixed d |
+| Helmholtz through-wall fill gauge | active-probe | sound-pressure | route: container-fullness | f = (c/2π)·√(A/(V·L)): resonant frequency rises as headspace V shrinks; chirp and find the peak |
+| Acoustic direction finder | triangulation | ×2 sound-pressure | NEW: sound-direction | θ = arcsin(Δt·343/d) from the arrival-time difference across a known baseline d |
+| Two-beam speed trap | triangulation | ×2 proximity | route: vehicle-speed | v = d/Δt between two beam-break timestamps a known distance apart; ±1% with µs timestamps |
+| Barometric door locator | triangulation | ×3 pressure-absolute | NEW: which-door-opened | A door swing is a ~0.3–3 Pa transient; arrival order + amplitude ratio across 3 synced nodes localises the source |
+| Acoustic pipe-leak correlator | triangulation | ×2 sound-structural | NEW: leak-location | Leak position from cross-correlation lag: x = (L − v·Δt)/2, v ≈ 1200–1400 m/s in water-filled metal pipe |
+| Space-utilisation truth map | fleet | ×3 occupancy-signal | NEW: space-utilisation-map | Per-zone occupied-hours histograms; utilisation = occupied / available hours per zone per week |
+| Thermal microclimate mapper | fleet | ×3 temperature-contact | NEW: thermal-map | Simultaneous ΔT across ≥3 fixed points; persistent cold spots + dew-point proximity = condensation/draught candidates |
+| Fast-and-absolute altimeter | complementary | pressure-absolute + position-global | route: how-high | Complementary filter: alt = LP(GPS_alt) + HP(baro_alt); baro gives cm-resolution dynamics, GPS pins the absolute and cancels weather drift |
+| Contactless sleep-stage estimator | complementary | respiration + acceleration | route: sleep-stage-proxy | Actigraphy (movement bouts) × respiration regularity: still+regular ≈ deep, still+variable ≈ REM, moving ≈ light/wake |
+| Personal exposure dosimeter | complementary | particulate-mass + position-global | NEW: personal-exposure-dose | Dose = ∫ C(t)·V̇ dt segmented by GPS trace; map µg-minutes to street segments |
+| Power-factor and quality monitor | complementary | current-ac + voltage | route: power-quality | PF = P/(V_rms·I_rms); THD from harmonic decomposition; sag/swell from cycle-by-cycle V_rms |
+| Hive vital-signs fusion | complementary | weight + sound-structural + temperature-contact | route: hive-state | Weight slope = forage/consumption; acoustic 200–500 Hz band = swarm prep; brood T held 34–36°C = queenright |
+| Radiative frost forecaster | context-gating | temperature-contact + air-velocity | route: frost-tonight | Frost when: sky-facing radiative loss (clear night) + wind < 2 m/s (no mixing) + T approaching 0 with dew point < 0 (deposition not dew) |
+| Whole-building heat-loss coefficient | differential | energy-accumulated + ×2 temperature-contact | NEW: building-heat-loss | UA[W/K] = heating power ÷ (T_in − T_out), fitted over steady calm nights |
+| Passive gait-speed corridor | temporal | through-wall-motion | route: gait-quality | Walking speed from range-rate through a fixed corridor; declining weekly median gait speed is a validated frailty predictor |
+| Per-use appliance cost meter | context-gating | energy-accumulated + cycle-complete | NEW: cost-per-use | Cost/use = (E_end − E_start over one detected cycle) × tariff; distribution over cycles reveals degradation |
+| Radon early-warning proxy | context-gating | pressure-absolute + air-changes-hour | NEW: radon-risk-rising | Risk rising when P falling > 3 hPa/6 h (soil-gas pressure gradient reverses) AND measured ACH < 0.4 |
+
+## What a fixed budget buys
+
+| Budget | Parts | Outcomes | % | Spent |
+|--:|--:|--:|--:|--:|
+| $10 | 11 | 63 | 42% | $9.9 |
+| $25 | 18 | 88 | 58% | $24.4 |
+| $50 | 25 | 107 | 71% | $48.4 |
+| $100 | 35 | 127 | 84% | $97.9 |
+| $250 | 50 | 143 | 95% | $233.9 |
+
 ## Single-domain kits
 
 | Domain | Outcomes | Sensors | Cost | Kit |
@@ -170,11 +265,11 @@ Pick the row you want from Outcome → Kit. If you want breadth, buy a tier. If 
 | Constraint | Eligible | Reachable | % | Kit cost | Lost entirely |
 |---|--:|--:|--:|--:|---|
 | 🔒 No privacy footprint | 350 | 150/151 | 99% | 63 parts, $903 | Did they blink or move their eyes? |
-| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is there a flammable gas leak? · How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · Is radon accumulating? · Is there carbon monoxide? |
-| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | How is this person walking? · Are they likely dehydrated? · Which muscle is working, and how hard? · Is this person's arousal or stress rising? · How stressed or recovered is this body? · How much have they moved today? |
-| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · Is radon accumulating? · Did they blink or move their eyes? · What angle is this joint at, through its range? |
-| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is transmitting nearby, and how strongly? · What is making noise above human hearing? |
-| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is new furniture or flooring off-gassing? · Is radon accumulating? · Which muscle is working, and how hard? · Are they likely dehydrated? · Has breathing become irregular or stopped? · Did they blink or move their eyes? |
+| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is there a flammable gas leak? · How polluted is the air right now? · Is something emitting ozone? · Is there carbon monoxide? · Is new furniture or flooring off-gassing? · Is radon accumulating? |
+| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | Is this person's arousal or stress rising? · What is the blood oxygen saturation? · How is this person walking? · How much have they moved today? · Did they blink or move their eyes? · Are they likely dehydrated? |
+| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | How polluted is the air right now? · Is something emitting ozone? · Is new furniture or flooring off-gassing? · Is radon accumulating? · Is this person's arousal or stress rising? · What is the blood oxygen saturation? |
+| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · Is the atmosphere electrically charged? · Which radioactive isotope is this? · What is making noise above human hearing? · What is transmitting nearby, and how strongly? |
+| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is radon accumulating? · Is new furniture or flooring off-gassing? · Has breathing become irregular or stopped? · What is the heart rate? · Is this person's arousal or stress rising? · What is the blood oxygen saturation? |
 
 ## Every outcome, and what buys it
 
@@ -498,8 +593,8 @@ Hubs cover many outcomes and are replaceable. Keys cover few and are the only ro
 | MLX90640 thermal camera | 45 | 8 outcomes | DFRobot Gravity mmWave presence radar | 22 | 0.59 |
 | ADS1292R 2-channel ECG + respiration front end | 70.0 | 4 outcomes | EMF / RF field probes | 12 | 0.58 |
 | Soil/water nitrate ion-selective | 90 | 4 outcomes | DPS310 barometer | 7 | 0.57 |
-| Ammonium ion-selective electrode | 189.0 | 4 outcomes | MAX30205 clinical body temp | 9 | 0.56 |
-| Hamamatsu C12880MA micro-spectrometer | 330.0 | 5 outcomes | BNO086 high-perf fusion IMU | 22 | 0.55 |
+| Hamamatsu C12880MA micro-spectrometer | 330.0 | 5 outcomes | MAX30205 clinical body temp | 9 | 0.56 |
+| Ammonium ion-selective electrode | 189.0 | 4 outcomes | BNO086 high-perf fusion IMU | 22 | 0.55 |
 | A02YYUW waterproof ultrasonic | 9 | 7 outcomes | MAX31855 thermocouple amp | 15 | 0.53 |
 | LTR-390 UV + ambient | 5 | 5 outcomes | MPRLS ported pressure | 15 | 0.53 |
 | RC522 RFID reader | 2 | 8 outcomes | BMP390 precision barometer | 10 | 0.5 |

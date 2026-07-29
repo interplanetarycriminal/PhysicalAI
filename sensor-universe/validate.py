@@ -157,12 +157,90 @@ def validate_seeds(records, seeds):
                                       "BOM cannot be computed or checked")
 
 
+def validate_fusion(records):
+    """The fusion layer's contract: every capability atom resolves, every
+    emergent outcome is reachable, and the chain graph is a DAG (a cycle would
+    be an Excel circular reference on the Kit Builder sheet)."""
+    try:
+        import fusion
+        import vocab
+    except ImportError:
+        warn("fusion", "data/fusion.py not present — fusion checks skipped")
+        return
+    P, I, E = set(vocab.PHENOMENON), set(vocab.INFERENCE), set(fusion.EMERGENT)
+
+    for k, v in fusion.EMERGENT.items():
+        if not (isinstance(v, tuple) and len(v) == 2):
+            err(f"fusion:{k}", "EMERGENT value must be (question, domain)")
+            continue
+        if v[1] not in vocab.INFERENCE_DOMAINS:
+            err(f"fusion:{k}", f"unknown domain {v[1]!r}")
+        if k in P or k in I:
+            err(f"fusion:{k}", "EMERGENT key collides with PHENOMENON/INFERENCE")
+
+    seen, provided = set(), set()
+    for e in fusion.FUSION_EDGES:
+        k = e.get("key", "?")
+        for f in ("key", "name", "pattern", "requires", "provides",
+                  "math", "why", "confound", "example"):
+            if not e.get(f):
+                err(f"fusion:{k}", f"missing/empty field {f!r}")
+        if k in seen:
+            err(f"fusion:{k}", "duplicate edge key")
+        seen.add(k)
+        if e.get("pattern") not in vocab.FUSION:
+            err(f"fusion:{k}", f"pattern {e.get('pattern')!r} not in vocab.FUSION")
+        for c, m in e.get("requires") or []:
+            if c not in P | I | E:
+                err(f"fusion:{k}", f"unresolved capability {c!r}")
+            if not (isinstance(m, int) and 1 <= m <= 10):
+                err(f"fusion:{k}", f"multiplicity {m!r} out of range for {c!r}")
+            if m > 1 and c in E:
+                err(f"fusion:{k}", f"multiplicity >1 on emergent {c!r} — granted "
+                                   "capabilities are boolean")
+        pv = e.get("provides")
+        if pv not in E | I:
+            err(f"fusion:{k}", f"provides {pv!r} not in EMERGENT or INFERENCE")
+        if pv in {c for c, _m in e.get("requires") or []}:
+            err(f"fusion:{k}", "edge requires its own provides")
+        provided.add(pv)
+    for k in E - provided:
+        err(f"fusion:{k}", "EMERGENT outcome no edge provides — orphan")
+
+    try:
+        fusion.topo_edges()
+    except ValueError as ex:
+        err("fusion", str(ex))
+
+    # honest negative space: edges even the full catalog cannot fire
+    from collections import Counter as _C
+    counts = _C()
+    for r in records:
+        if r.get("catalog") != "sensor":
+            continue
+        for c in fusion.covers(r):
+            counts[c] += 1
+    granted = set()
+    for e in fusion.topo_edges():
+        ok = all(counts.get(c, 0) >= m or (m == 1 and c in granted)
+                 for c, m in e["requires"])
+        if ok:
+            granted.add(e["provides"])
+        else:
+            missing = [f"{c} (need {m}, have {counts.get(c, 0)})"
+                       for c, m in e["requires"]
+                       if counts.get(c, 0) < m and not (m == 1 and c in granted)]
+            warn(f"fusion:{e['key']}", "unfireable even by the full catalog — "
+                                       + ", ".join(missing))
+
+
 def main():
     records, seeds = load_all()
     seen_ids, seen_pns = {}, {}
     for r in records:
         validate_record(r, seen_ids, seen_pns)
     validate_seeds(records, seeds)
+    validate_fusion(records)
 
     collisions = validate_i2c(records)
 
