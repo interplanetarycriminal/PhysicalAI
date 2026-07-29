@@ -115,14 +115,15 @@ FUSION_EDGES = [
              "measures what no single hygrometer states plainly.",
          confound="The wick must stay wet and ventilated; a dry wick silently converges to the dry "
                   "bulb and the danger signal disappears exactly when it matters.",
-         example="2× DS18B20, a shoelace wick, a small fan: a £6 outdoor-work safety instrument "
-                 "for the climate we are actually getting."),
+         example="2× DS18B20, a shoelace wick, a small fan: a £6 heat-stress awareness aid for the "
+                 "climate we are actually getting — for work PLANNING, not a certified "
+                 "occupational instrument."),
 
     dict(key="soil-heat-pulse", name="Dual-probe heat-pulse soil water",
          pattern="differential",
          requires=[("temperature-contact", 2)],
          provides="soil-water-volumetric",
-         math="θ = (C − C_dry)/4.18 where C = q/(ρ_soil·ΔT_max·r²·e); heat pulse from a resistor wire",
+         math="θ = (C − C_dry)/4.18 where C = q/(e·π·r²·ΔT_max) in MJ·m⁻³·K⁻¹, q = pulse energy per metre of heater wire [J/m]; heat pulse from a resistor wire",
          why="Water dominates soil's volumetric heat capacity, so the temperature rise a known "
              "heat pulse produces 6 mm away is a direct water-content measurement — research-grade "
              "physics from two thermistor beads.",
@@ -215,8 +216,8 @@ FUSION_EDGES = [
          pattern="compensation",
          requires=[("temperature-contact", 1), ("humidity-relative", 1), ("wind-speed", 1)],
          provides="feels-like-temperature",
-         math="T<10°C: wind chill (Environment Canada 2001 formula); T>20°C: heat index "
-              "(Rothfusz regression); between: dry bulb",
+         math="T<10°C: wind chill (Environment Canada 2001 formula); T>27°C and RH>40%: heat index "
+              "(Rothfusz regression, invalid below that); between: dry bulb",
          why="Human heat loss depends on wind (convection) and humidity (evaporation limit), so "
              "the honest 'how does it feel' number is a three-sensor fusion — each sensor "
              "compensates a failure mode of the bare thermometer.",
@@ -228,7 +229,7 @@ FUSION_EDGES = [
     dict(key="et0-station", name="Evapotranspiration (irrigation truth)",
          pattern="compensation",
          requires=[("temperature-contact", 1), ("humidity-relative", 1),
-                   ("wind-speed", 1), ("irradiance", 1)],
+                   ("wind-speed", 1), ("solar-irradiance", 1)],
          provides="evapotranspiration",
          math="FAO-56 Penman-Monteith ET₀ (or Hargreaves ET₀ = 0.0023·Ra·√ΔT·(T+17.8) when only "
               "temperature is available)",
@@ -259,9 +260,10 @@ FUSION_EDGES = [
          requires=[("ph", 1), ("temperature-contact", 1)],
          provides="water-ph",
          math="Nernst slope = −59.16 mV/pH × (T/298.15); correct slope, then report at 25°C",
-         why="A pH electrode's millivolts-per-pH changes 0.2%/°C by physics (Nernst), before any "
-             "ageing. Without the temperature channel a 15°C swing masquerades as 0.15 pH — the "
-             "entire hydroponics adjustment band.",
+         why="A pH electrode's millivolts-per-pH changes ~0.34%/°C by physics (Nernst: 0.198 mV/pH per "
+             "°C), before any ageing. The error scales with distance from pH 7: a 15°C swing "
+             "masquerades as ~0.05 pH per pH-unit from neutral — a real bias across the whole "
+             "hydroponics band, and 0.15 pH by pH 4.",
          confound="This corrects the ELECTRODE's slope, not the solution's real chemistry shift "
                   "with temperature; report the measurement temperature alongside.",
          example="Any pH kit + DS18B20 in the same reservoir: the difference between chasing "
@@ -287,7 +289,7 @@ FUSION_EDGES = [
          provides="snow-depth",
          math="depth = mount_height − range × c(T)/c₀, with c(T) = 331.3 + 0.606·T m/s",
          why="Sound speed moves 0.18%/°C, and snow season IS temperature swing: a −20°C morning "
-             "reads 7 cm short on a 2 m mount with no compensation. The air thermometer turns a "
+             "reads ~14 cm short on a 2 m mount calibrated at room temperature. The air thermometer turns a "
              "toy into a gauge.",
          confound="Fresh powder absorbs 40 kHz and returns nothing (the ultrasonic absorption "
                   "wall); the US-100's onboard compensation helps but measure air temp on the "
@@ -296,7 +298,7 @@ FUSION_EDGES = [
 
     dict(key="pv-performance-ratio", name="Solar performance-ratio meter",
          pattern="compensation",
-         requires=[("irradiance", 1), ("current-dc", 1)],
+         requires=[("solar-irradiance", 1), ("current-dc", 1), ("voltage", 1)],
          provides="solar-performance",
          math="PR = P_actual / (G/1000 × P_rated); healthy arrays hold PR 0.75–0.85",
          why="Low solar output has two innocent explanations — clouds and season — and one "
@@ -332,8 +334,10 @@ FUSION_EDGES = [
              "they almost never false-trigger TOGETHER, because the failure causes are "
              "uncorrelated physics. The field result in this atlas: 39 false triggers in 40 "
              "events alone, zero when cross-validated.",
-         confound="Two sensors of the SAME physics (two PIRs) share failure causes and verify "
-                  "nothing — the ×2 must span different mechanisms to earn the name.",
+         confound="The computation counts part TYPES — it cannot check the physics differ. YOU "
+                  "must: two PIRs share failure causes and verify nothing; pick PIR + radar "
+                  "or thermal + ultrasound. Both channels must respond in seconds — CO2-based "
+                  "presence is minutes too slow for the coincidence window.",
          example="HC-SR501 + LD2410 gating a heating zone: comfort automation that never fires "
                  "for an empty room."),
 
@@ -342,7 +346,7 @@ FUSION_EDGES = [
          requires=[("respiration", 1), ("sound-pressure", 1)],
          provides="breathing-stopped",
          math="Escalate when radar respiration amplitude < threshold AND breath-band audio "
-              "(0.1–0.5 Hz envelope) silent for > 20 s",
+              "(0.1–1 Hz envelope — infants breathe 0.5–1 Hz, adults 0.2–0.33 Hz) silent for > 20 s",
          why="A radar losing breathing might mean apnea — or a rolled-over sleeper out of beam. "
              "Breath sound is an independent physics witness; requiring both to vanish before "
              "escalating is the difference between a monitor and a 3 a.m. panic machine. NOT a "
@@ -387,7 +391,8 @@ FUSION_EDGES = [
          math="Escalate when T_stove > 120°C AND kitchen empty > 15 min (advise), > 30 min (alarm)",
          why="A hot stove is cooking; a hot stove in an empty kitchen for half an hour is the "
              "leading cause of house fires. The gate is the entire product — elder-care systems "
-             "charging £40/month are this rule.",
+             "charging £40/month are this rule. NOT a life-safety device — supplement, never "
+             "replace, a certified alarm.",
          confound="An IR thermometer sees one spot: aim at the hob centre, or use a thermal "
                   "array for whole-hob coverage. Reflective pans under-read (emissivity again).",
          example="MLX90614 over the hob + PIR: peace of mind for anyone whose parent forgets "
@@ -397,8 +402,9 @@ FUSION_EDGES = [
          pattern="context-gating",
          requires=[("temperature-contact", 1), ("co2-concentration", 1)],
          provides="window-open-state",
-         math="Open = CO2 decay rate jumps > 3× baseline ACH while indoor–outdoor ΔT drives a "
-              "simultaneous temperature slew",
+         math="Open = CO2 decay rate jumps > 3× baseline ACH, confirmed by an indoor temperature "
+              "slew when indoor–outdoor ΔT exists (mild weather: no slew — trust the CO2 "
+              "channel alone)",
          why="An open window is invisible to a thermostat but blindingly obvious in the CO2 decay "
              "curve — ventilation physics changes instantly. No contact sensor on the window, no "
              "install visit: the building's own air betrays the state.",
@@ -409,7 +415,7 @@ FUSION_EDGES = [
 
     dict(key="badge-attribution", name="Badge-in attribution gate",
          pattern="context-gating",
-         requires=[("identity-token", 1), ("someone-present", 1)],
+         requires=[("identity-token", 1), ("occupancy-signal", 1)],
          provides="who-is-it",
          math="Attribute presence to token holder when RFID event and presence onset agree "
               "within 30 s; decay attribution when presence lapses",
@@ -511,24 +517,25 @@ FUSION_EDGES = [
 
     dict(key="house-thermal-constant", name="Building thermal time-constant",
          pattern="temporal",
-         requires=[("temperature-contact", 1)],
+         requires=[("temperature-contact", 2)],
          provides="thermal-time-constant",
          math="τ from exponential fit of indoor T decay after heating stops (calm night); "
               "T(t) = T_out + (T₀−T_out)·e^(−t/τ)",
          why="τ — hours to lose 63% of the indoor–outdoor difference — is the building's honest "
              "thermal quality in ONE number, and every heating-off night measures it for free. "
-             "Insulation upgrades change τ; receipts don't.",
+             "The outdoor probe pins T_out; without it the fit is ill-conditioned on a "
+             "single night's decay. Insulation upgrades change τ; receipts don't.",
          confound="Solar gain after sunrise and wind both bend the curve: fit only calm, dark "
                   "hours, and log wind to know which nights to trust.",
-         example="Any indoor thermometer, logged: τ before and after loft insulation IS the "
-                 "before/after — physics as a receipts-checker."),
+         example="Two DS18B20s, one in and one out, logged: τ before and after loft insulation IS "
+                 "the before/after — physics as a receipts-checker."),
 
     dict(key="nilm-signature", name="Appliance fingerprint disaggregator",
          pattern="temporal",
          requires=[("current-ac", 1)],
          provides="which-appliance",
-         math="Event detection on ΔP edges; classify by (ΔP, ΔQ, inrush shape, duration) "
-              "signature clusters",
+         math="Event detection on ΔI_rms edges; classify by (ΔI_rms, inrush shape, harmonic "
+              "content, duration) — the full P/Q signature plane needs the voltage channel too",
          why="Every appliance switches with a signature — the kettle's clean 3 kW step, the "
              "fridge's inrush spike, the washer's drum rhythm. One meter plus time separates "
              "them; that is NILM, and it is the canonical proof that time is the cheapest "
@@ -563,8 +570,9 @@ FUSION_EDGES = [
              "AVERAGE temperature of the whole air path — no radiation error, no thermal mass, "
              "millisecond response. This is how professional sonic anemometers measure "
              "temperature.",
-         confound="Wind along the path adds ±v/c error (use two opposite paths to cancel — which "
-                  "then measures the wind too); humidity shifts c ~0.3%.",
+         confound="One-way paths see a ±v/c wind error — cancel with two opposite paths, which then "
+                  "measure the wind too. An echo (out-and-back) path cancels the first-order "
+                  "term automatically, leaving only (v/c)². Humidity shifts c ~0.3%.",
          example="US-100 facing a wall at exactly 1.000 m: a thermometer with no thermometer in "
                  "it — Derived Quantities row 37, computed."),
 
@@ -572,8 +580,9 @@ FUSION_EDGES = [
          pattern="active-probe",
          requires=[("sound-pressure", 1)],
          provides="container-fullness",
-         math="f = (c/2π)·√(A/(V·L)): resonant frequency rises as headspace V shrinks; chirp "
-              "and find the peak",
+         math="f = (c/2π)·√(A/(V·L)): resonant frequency rises as headspace V shrinks. Chirp and "
+              "find the peak — needs any small speaker or buzzer as the source (glue "
+              "hardware, not a sensing capability).",
          why="Every container is a bottle you can blow across. A speaker chirps, a mic finds the "
              "resonance, and headspace volume falls out of the frequency — through the wall, no "
              "contact with the contents, movable between containers in seconds.",
@@ -606,8 +615,10 @@ FUSION_EDGES = [
              "radar, no calibration, no Doppler ambiguity. Direction comes free from beam "
              "order; length from occlusion time; that is classify-count-and-speed from two "
              "photogates.",
-         confound="Works where traffic passes one at a time; two overlapping vehicles merge "
-                  "into one long occlusion. Rain sensitivity depends on beam quality.",
+         confound="Works where traffic passes one at a time; two overlapping vehicles merge into "
+                  "one long occlusion. The two trigger points must actually see the vehicle — "
+                  "optical or ultrasonic beams, not magnet-dependent reed switches. Rain "
+                  "sensitivity depends on beam quality.",
          example="2× E18-D80NK across the drive, 2 m apart: evidence-grade 'how fast do they "
                  "really take our street', for £6."),
 
@@ -744,7 +755,8 @@ FUSION_EDGES = [
 
     dict(key="frost-triple", name="Radiative frost forecaster",
          pattern="context-gating",
-         requires=[("temperature-contact", 1), ("air-velocity", 1)],
+         requires=[("temperature-contact", 1), ("air-velocity", 1), ("dew-point", 1),
+                   ("sky-clear", 1)],
          provides="frost-tonight",
          math="Frost when: sky-facing radiative loss (clear night) + wind < 2 m/s (no mixing) + "
               "T approaching 0 with dew point < 0 (deposition not dew)",
@@ -772,10 +784,11 @@ FUSION_EDGES = [
 
     dict(key="gait-corridor", name="Passive gait-speed corridor",
          pattern="temporal",
-         requires=[("through-wall-motion", 1)],
+         requires=[("through-wall-motion", 1), ("distance-point", 1)],
          provides="gait-quality",
-         math="Walking speed from range-rate through a fixed corridor; declining weekly median "
-              "gait speed is a validated frailty predictor",
+         math="Walking speed from per-target range-rate (LD2450/RD-03D-class trackers — binary "
+              "presence radars cannot); declining weekly median gait speed is a validated "
+              "frailty predictor",
          why="Gait speed is the vital sign geriatrics calls the 'sixth vital sign', and a radar "
              "in a hallway measures it every single day without wearables, cameras, or "
              "cooperation. The TREND is the signal — no single walk matters.",

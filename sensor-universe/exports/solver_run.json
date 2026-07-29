@@ -21340,7 +21340,7 @@
    "n_sens": 42,
    "cost": 324.0,
    "kit": "NTC thermistor 10k · Photoresistor (LDR) · QMC5883L compass · AHT20 temp/humidity · HC-SR501 PIR motion · BMP280 budget barometer · ADXL345 accelerometer · INA3221 triple-channel power · ICS-43434 I2S mic · ESP32 native touch pins",
-   "lost": "Is there a flammable gas leak? · How polluted is the air right now? · Is something emitting ozone? · Is there carbon monoxide? · Is new furniture or flooring off-gassing? · Is radon accumulating?"
+   "lost": "Is radon accumulating? · Is there carbon monoxide? · Is new furniture or flooring off-gassing? · Is there a flammable gas leak? · How polluted is the air right now? · Is something emitting ozone?"
   },
   {
    "name": "🚫 Never touches the subject",
@@ -21351,7 +21351,7 @@
    "n_sens": 55,
    "cost": 851.6,
    "kit": "Reed switch · Photoresistor (LDR) · Wi-Fi CSI sensing (the router IS the sensor) · AHT20 temp/humidity · INMP441 I2S MEMS mic · QMC5883L compass · HC-SR501 PIR motion · A3144 / SS49E Hall switches · BMP280 budget barometer · MQ-135 air quality",
-   "lost": "Is this person's arousal or stress rising? · What is the blood oxygen saturation? · How is this person walking? · How much have they moved today? · Did they blink or move their eyes? · Are they likely dehydrated?"
+   "lost": "How is this person walking? · How stressed or recovered is this body? · Is this person's arousal or stress rising? · Are they likely dehydrated? · Which muscle is working, and how hard? · What is the blood oxygen saturation?"
   },
   {
    "name": "💵 Nothing over $5",
@@ -21362,7 +21362,7 @@
    "n_sens": 34,
    "cost": 73.1,
    "kit": "Piezo contact mic / disc · Reed switch · NTC thermistor 10k · Photoresistor (LDR) · MPU-6050 6-axis IMU · INA219 current/power monitor · AHT20 temp/humidity · MQ-2 smoke/LPG gas · RC522 RFID reader · QMC5883L compass",
-   "lost": "How polluted is the air right now? · Is something emitting ozone? · Is new furniture or flooring off-gassing? · Is radon accumulating? · Is this person's arousal or stress rising? · What is the blood oxygen saturation?"
+   "lost": "Is radon accumulating? · Is new furniture or flooring off-gassing? · How polluted is the air right now? · Is something emitting ozone? · How stressed or recovered is this body? · Is this person's arousal or stress rising?"
   },
   {
    "name": "🧑‍🔧 Beginner-buildable",
@@ -21373,7 +21373,7 @@
    "n_sens": 48,
    "cost": 345.6,
    "kit": "Piezo contact mic / disc · Reed switch · NTC thermistor 10k · Photoresistor (LDR) · MPU-6050 6-axis IMU · INA219 current/power monitor · AHT20 temp/humidity · MQ-2 smoke/LPG gas · RC522 RFID reader · QMC5883L compass",
-   "lost": "Is radon accumulating? · Did they blink or move their eyes? · Is the atmosphere electrically charged? · Which radioactive isotope is this? · What is making noise above human hearing? · What is transmitting nearby, and how strongly?"
+   "lost": "Is radon accumulating? · Did they blink or move their eyes? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is making noise above human hearing? · What is transmitting nearby, and how strongly?"
   },
   {
    "name": "🌦 Survives outdoors",
@@ -21384,7 +21384,7 @@
    "n_sens": 49,
    "cost": 1073.4,
    "kit": "Piezo contact mic / disc · Reed switch · NTC thermistor 10k · Photoresistor (LDR) · QMC5883L compass · A3144 / SS49E Hall switches · BMP280 budget barometer · DHT22 / AM2302 · INA3221 triple-channel power · Capacitive soil moisture v2",
-   "lost": "Is radon accumulating? · Is new furniture or flooring off-gassing? · Has breathing become irregular or stopped? · What is the heart rate? · Is this person's arousal or stress rising? · What is the blood oxygen saturation?"
+   "lost": "Is radon accumulating? · Is new furniture or flooring off-gassing? · Has breathing become irregular or stopped? · Are they likely dehydrated? · What is the blood oxygen saturation? · Is this person's arousal or stress rising?"
   }
  ],
  "irreplaceable": [
@@ -37640,7 +37640,7 @@
     "n": 13,
     "cost": 18.0,
     "declared": 79,
-    "fired": 13,
+    "fired": 11,
     "emergent": 8,
     "new_routes": 1,
     "emergent_keys": [
@@ -37658,10 +37658,8 @@
     ],
     "fired_keys": [
      "air-density-live",
-     "badge-attribution",
      "bearing-thermal",
      "compost-core",
-     "gait-corridor",
      "grid-frequency-watch",
      "house-thermal-constant",
      "liquid-id-effusivity",
@@ -37679,7 +37677,7 @@
     "n": 27,
     "cost": 62.4,
     "declared": 114,
-    "fired": 26,
+    "fired": 25,
     "emergent": 13,
     "new_routes": 3,
     "emergent_keys": [
@@ -37722,7 +37720,6 @@
      "pf-power-quality",
      "presence-two-physics",
      "psychrometric-wetbulb",
-     "pv-performance-ratio",
      "snow-sonic",
      "soil-heat-pulse",
      "soil-moisture-tc",
@@ -37738,7 +37735,7 @@
     "n": 43,
     "cost": 148.9,
     "declared": 136,
-    "fired": 36,
+    "fired": 35,
     "emergent": 15,
     "new_routes": 0,
     "emergent_keys": [
@@ -37787,7 +37784,6 @@
      "pf-power-quality",
      "presence-two-physics",
      "psychrometric-wetbulb",
-     "pv-performance-ratio",
      "sleep-two-signal",
      "snow-sonic",
      "soil-heat-pulse",
@@ -37805,7 +37801,7 @@
     "n": 58,
     "cost": 733.4,
     "declared": 151,
-    "fired": 39,
+    "fired": 38,
     "emergent": 18,
     "new_routes": 0,
     "emergent_keys": [
@@ -37860,7 +37856,6 @@
      "pm-gps-dosimeter",
      "presence-two-physics",
      "psychrometric-wetbulb",
-     "pv-performance-ratio",
      "sleep-two-signal",
      "snow-sonic",
      "soil-heat-pulse",
@@ -38156,6 +38151,32 @@
     ]
    },
    {
+    "id": "S341",
+    "name": "HLK-LD2412 24GHz presence radar",
+    "usd": 7.0,
+    "edges_gained": 4,
+    "emergent_gained": 0,
+    "gained_keys": [
+     "badge-attribution",
+     "beam-speed-trap",
+     "gait-corridor",
+     "snow-sonic"
+    ]
+   },
+   {
+    "id": "S403",
+    "name": "MEMS ultrasonic ToF (Chirp)",
+    "usd": 15.0,
+    "edges_gained": 4,
+    "emergent_gained": 1,
+    "gained_keys": [
+     "beam-speed-trap",
+     "gait-corridor",
+     "snow-sonic",
+     "sonic-thermometer"
+    ]
+   },
+   {
     "id": "S038",
     "name": "MH-Z19C budget NDIR CO2",
     "usd": 18,
@@ -38182,6 +38203,19 @@
     ]
    },
    {
+    "id": "S179",
+    "name": "DFRobot Gravity mmWave presence radar",
+    "usd": 22,
+    "edges_gained": 4,
+    "emergent_gained": 0,
+    "gained_keys": [
+     "badge-attribution",
+     "gait-corridor",
+     "sleep-two-signal",
+     "snow-sonic"
+    ]
+   },
+   {
     "id": "S036",
     "name": "SCD41 true CO2",
     "usd": 25,
@@ -38205,6 +38239,19 @@
      "co2-room-volume",
      "radon-fast-proxy",
      "window-detect"
+    ]
+   },
+   {
+    "id": "S069",
+    "name": "Seeed MR60BHA2 vital-sign radar",
+    "usd": 25,
+    "edges_gained": 4,
+    "emergent_gained": 0,
+    "gained_keys": [
+     "badge-attribution",
+     "gait-corridor",
+     "sleep-two-signal",
+     "snow-sonic"
     ]
    },
    {
@@ -38260,6 +38307,19 @@
     ]
    },
    {
+    "id": "S339",
+    "name": "Acconeer XM125 pulsed coherent radar",
+    "usd": 70.0,
+    "edges_gained": 4,
+    "emergent_gained": 0,
+    "gained_keys": [
+     "badge-attribution",
+     "gait-corridor",
+     "sleep-two-signal",
+     "snow-sonic"
+    ]
+   },
+   {
     "id": "S283",
     "name": "Telaire T6713 I2C CO2",
     "usd": 80.0,
@@ -38299,6 +38359,19 @@
     ]
    },
    {
+    "id": "S181",
+    "name": "Time-of-flight gesture radar 60GHz",
+    "usd": 110,
+    "edges_gained": 4,
+    "emergent_gained": 0,
+    "gained_keys": [
+     "badge-attribution",
+     "gait-corridor",
+     "sleep-two-signal",
+     "snow-sonic"
+    ]
+   },
+   {
     "id": "S281",
     "name": "SprintIR-W fast wide-range NDIR CO2",
     "usd": 190.0,
@@ -38309,6 +38382,18 @@
      "co2-room-volume",
      "radon-fast-proxy",
      "window-detect"
+    ]
+   },
+   {
+    "id": "S056",
+    "name": "HC-SR04 ultrasonic",
+    "usd": 1.5,
+    "edges_gained": 3,
+    "emergent_gained": 1,
+    "gained_keys": [
+     "gait-corridor",
+     "snow-sonic",
+     "sonic-thermometer"
     ]
    },
    {
@@ -38336,6 +38421,66 @@
     ]
    },
    {
+    "id": "S220",
+    "name": "Photoelectric beam sensor E18-D80NK",
+    "usd": 3,
+    "edges_gained": 3,
+    "emergent_gained": 0,
+    "gained_keys": [
+     "beam-speed-trap",
+     "gait-corridor",
+     "snow-sonic"
+    ]
+   },
+   {
+    "id": "S402",
+    "name": "40kHz ultrasonic transducer pair",
+    "usd": 3.0,
+    "edges_gained": 3,
+    "emergent_gained": 1,
+    "gained_keys": [
+     "gait-corridor",
+     "snow-sonic",
+     "sonic-thermometer"
+    ]
+   },
+   {
+    "id": "S197",
+    "name": "US-100 ultrasonic w/ temp comp",
+    "usd": 4,
+    "edges_gained": 3,
+    "emergent_gained": 1,
+    "gained_keys": [
+     "gait-corridor",
+     "snow-sonic",
+     "sonic-thermometer"
+    ]
+   },
+   {
+    "id": "S067",
+    "name": "LD2410 mmWave presence",
+    "usd": 5,
+    "edges_gained": 3,
+    "emergent_gained": 0,
+    "gained_keys": [
+     "badge-attribution",
+     "gait-corridor",
+     "snow-sonic"
+    ]
+   },
+   {
+    "id": "S057",
+    "name": "JSN-SR04T waterproof ultrasonic",
+    "usd": 6,
+    "edges_gained": 3,
+    "emergent_gained": 1,
+    "gained_keys": [
+     "gait-corridor",
+     "snow-sonic",
+     "sonic-thermometer"
+    ]
+   },
+   {
     "id": "S093",
     "name": "Ultrasonic mic experiments",
     "usd": 6,
@@ -38348,174 +38493,39 @@
     ]
    },
    {
-    "id": "S147",
-    "name": "SCT-013 CT clamp",
-    "usd": 10,
+    "id": "S063",
+    "name": "Sharp GP2Y0A21 IR distance",
+    "usd": 8,
     "edges_gained": 3,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "inrush-signature",
-     "nilm-signature",
-     "pf-power-quality"
-    ]
-   },
-   {
-    "id": "S403",
-    "name": "MEMS ultrasonic ToF (Chirp)",
-    "usd": 15.0,
-    "edges_gained": 3,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "beam-speed-trap",
-     "snow-sonic",
-     "sonic-thermometer"
-    ]
-   },
-   {
-    "id": "S382",
-    "name": "LEM LA 55-P closed-loop Hall current transducer",
-    "usd": 35.0,
-    "edges_gained": 3,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "inrush-signature",
-     "nilm-signature",
-     "pf-power-quality"
-    ]
-   },
-   {
-    "id": "S234",
-    "name": "Transit-time ultrasonic flow (clamp-on)",
-    "usd": 85,
-    "edges_gained": 3,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "leak-by-context",
-     "loop-heat-meter",
-     "sonic-thermometer"
-    ]
-   },
-   {
-    "id": "S384",
-    "name": "Flexible Rogowski coil with integrator",
-    "usd": 150.0,
-    "edges_gained": 3,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "inrush-signature",
-     "nilm-signature",
-     "pf-power-quality"
-    ]
-   },
-   {
-    "id": "S383",
-    "name": "LEM IT 60-S ULTRASTAB fluxgate current transducer",
-    "usd": 900.0,
-    "edges_gained": 3,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "inrush-signature",
-     "nilm-signature",
-     "pf-power-quality"
-    ]
-   },
-   {
-    "id": "S209",
-    "name": "KY-037/038 sound modules",
-    "usd": 1,
-    "edges_gained": 2,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "enf-timestamp",
-     "helmholtz-level"
-    ]
-   },
-   {
-    "id": "S056",
-    "name": "HC-SR04 ultrasonic",
-    "usd": 1.5,
-    "edges_gained": 2,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "snow-sonic",
-     "sonic-thermometer"
-    ]
-   },
-   {
-    "id": "S087",
-    "name": "INMP441 I2S MEMS mic",
-    "usd": 3,
-    "edges_gained": 2,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "enf-timestamp",
-     "helmholtz-level"
-    ]
-   },
-   {
-    "id": "S220",
-    "name": "Photoelectric beam sensor E18-D80NK",
-    "usd": 3,
-    "edges_gained": 2,
     "emergent_gained": 0,
     "gained_keys": [
      "beam-speed-trap",
+     "gait-corridor",
      "snow-sonic"
     ]
    },
    {
-    "id": "S400",
-    "name": "PDM MEMS microphone",
-    "usd": 3.0,
-    "edges_gained": 2,
-    "emergent_gained": 1,
+    "id": "S155",
+    "name": "VL6180X short-range ToF",
+    "usd": 8,
+    "edges_gained": 3,
+    "emergent_gained": 0,
     "gained_keys": [
-     "enf-timestamp",
-     "helmholtz-level"
+     "beam-speed-trap",
+     "gait-corridor",
+     "snow-sonic"
     ]
    },
    {
-    "id": "S402",
-    "name": "40kHz ultrasonic transducer pair",
-    "usd": 3.0,
-    "edges_gained": 2,
+    "id": "S236",
+    "name": "Bat/dolphin: 40kHz ranging array",
+    "usd": 8,
+    "edges_gained": 3,
     "emergent_gained": 1,
     "gained_keys": [
+     "gait-corridor",
      "snow-sonic",
      "sonic-thermometer"
-    ]
-   },
-   {
-    "id": "S197",
-    "name": "US-100 ultrasonic w/ temp comp",
-    "usd": 4,
-    "edges_gained": 2,
-    "emergent_gained": 1,
-    "gained_keys": [
-     "snow-sonic",
-     "sonic-thermometer"
-    ]
-   },
-   {
-    "id": "S375",
-    "name": "MAX17260 ModelGauge m5 fuel gauge",
-    "usd": 4.0,
-    "edges_gained": 2,
-    "emergent_gained": 2,
-    "gained_keys": [
-     "building-ua",
-     "which-room-energy"
-    ]
-   },
-   {
-    "id": "S378",
-    "name": "INA700 power monitor with on-die shunt",
-    "usd": 4.0,
-    "edges_gained": 2,
-    "emergent_gained": 2,
-    "gained_keys": [
-     "building-ua",
-     "which-room-energy"
     ]
    }
   ],
