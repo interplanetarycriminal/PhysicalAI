@@ -1,0 +1,1646 @@
+[
+[
+"MCP9808 precision temp",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"TMP117 ultra-precise temp",
+"≈Price USD",
+"11.0",
+"11"
+],
+[
+"MLX90614 IR thermometer",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"MLX90632 miniature IR temp",
+"≈Price USD",
+"14.0",
+"14"
+],
+[
+"MAX31865 RTD amplifier",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"MAX31855 thermocouple amp",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"Thermocouple multiplexer board",
+"≈Price USD",
+"13.0",
+"13"
+],
+[
+"BME280 climate combo",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"AHT20 temp/humidity",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"Si7021 humidity/temp",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"DHT22 / AM2302",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"HDC3022 humidity + temp",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"SHT41 humidity + temp",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"SHT31 weatherproof probe",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"SHTC3 tiny low-power RH/T",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"BMP390 precision barometer",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"DPS310 barometer",
+"What It Measures",
+"Air pressure + temp, ±2cm relative altitude class",
+"Air pressure + temp; ~±5cm relative altitude in low-noise modes"
+],
+[
+"DPS310 barometer",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"LPS22HB pressure sensor",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"MS5611 high-res altimeter",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"SDP810 differential pressure",
+"≈Price USD",
+"35.0",
+"35"
+],
+[
+"XGZP6897D low-range diff pressure",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"MPRLS ported pressure",
+"What It Measures",
+"0-25 PSI gauge pressure via a physical port you can tube",
+"0-25 PSI ABSOLUTE pressure via a physical port you can tube"
+],
+[
+"MPRLS ported pressure",
+"How It Works (Plain English)",
+"A silicone-gel-protected MEMS die behind a barbed port — you push a tube on it, so it can measure squeeze bulbs, water columns, vacuum chambers and lungs.",
+"A silicone-gel-protected MEMS die behind a barbed port — you push a tube on it, so it can measure squeeze bulbs, water columns, vacuum chambers and lungs. It reads ABSOLUTE pressure (~14.7 PSI sitting on the bench), so for every gauge measurement you must subtract atmospheric — either by maths or with a second sensor open to air."
+],
+[
+"MPRLS ported pressure",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"Electrochemical gas cells",
+"≈Price USD",
+"35.0",
+"80"
+],
+[
+"ZE08-CH2O formaldehyde",
+"≈Price USD",
+"22.0",
+"22"
+],
+[
+"MiCS-5524 CO/VOC",
+"How It Works (Plain English)",
+"Micro-machined hotplate version of the MQ concept — milliwatts instead of nearly a watt, so it actually works on batteries.",
+"A micro-machined hotplate version of the MQ concept — the heater burns milliwatts instead of nearly a watt, and it warms up in seconds rather than minutes. Still ~32mA while on, so it needs duty-cycling (not continuous operation) to be viable on a battery."
+],
+[
+"MiCS-5524 CO/VOC",
+"≈Price USD",
+"14.0",
+"14"
+],
+[
+"MiCS-6814 tri-gas",
+"≈Price USD",
+"20.0",
+"20"
+],
+[
+"AGS02MA TVOC budget",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"ENS160 air quality",
+"How It Works (Plain English)",
+"Three metal-oxide channels plus an on-chip algorithm that outputs ready-made air-quality numbers — no host-side blob library needed, unlike Bosch BSEC.",
+"A four-hotplate metal-oxide array plus an on-chip algorithm that outputs ready-made air-quality numbers — no host-side blob library needed, unlike Bosch BSEC."
+],
+[
+"ENS160 air quality",
+"≈Price USD",
+"9.0",
+"9"
+],
+[
+"SGP30 eCO2/TVOC (legacy)",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"SGP40 VOC index",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"BME688 gas + climate AI",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"MQ-131 ozone",
+"≈Price USD",
+"8.0",
+"30"
+],
+[
+"MQ-135 air quality",
+"Key Specs & Gotchas",
+"Qualitative; often mislabeled as CO2 sensor (it isn't)",
+"Qualitative; often mislabeled as a CO2 sensor (it is not). ⚠ NOT a life-safety device. Heated element: keep out of explosive atmospheres."
+],
+[
+"MQ-2 smoke/LPG gas",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"MQ-2 smoke/LPG gas",
+"Key Specs & Gotchas",
+"200-10000ppm class detection, potentiometer threshold",
+"200-10000ppm class detection, potentiometer threshold. ⚠ NOT a life-safety device — supplement, never replace, a certified alarm. Heated element: keep out of explosive atmospheres."
+],
+[
+"MQ-4 methane / natural gas",
+"Key Specs & Gotchas",
+"Qualitative; calibrate against known source for trends",
+"Qualitative; calibrate against a known source for trends. ⚠ NOT a life-safety device — supplement, never replace, a certified alarm. Heated element: keep out of explosive atmospheres."
+],
+[
+"MQ-6 LPG/propane",
+"Key Specs & Gotchas",
+"Mount near floor level for LPG!",
+"Mount near floor level — LPG is heavier than air and pools low. ⚠ NOT a life-safety device. Heated element: keep out of explosive atmospheres (see Uses)."
+],
+[
+"MQ-6 LPG/propane",
+"Common Uses",
+"Caravan/boat gas lockers, BBQ bottle storage, garage propane.",
+"Monitoring the ventilated SPACE OUTSIDE an LPG locker (low down — propane sinks), garage and plant-room air. Never inside the locker itself."
+],
+[
+"MQ-6 LPG/propane",
+"Invention Sparks",
+"A gas-locker logger proving your slow leak: weekly ppm baseline creep catches the failing regulator a sniff test misses.",
+"Mount it low in the room outside the bottle store: baseline ppm creep over weeks catches a failing regulator a sniff test misses — without putting a 300°C heater inside the explosive volume."
+],
+[
+"MH-Z19 style CH4 / propane NDIR",
+"Sensor",
+"MH-Z19 style CH4 / propane NDIR",
+"NDIR methane / hydrocarbon module"
+],
+[
+"MH-Z19 style CH4 / propane NDIR",
+"≈Price USD",
+"45.0",
+"45"
+],
+[
+"MH-Z19C budget NDIR CO2",
+"≈Price USD",
+"18.0",
+"18"
+],
+[
+"SCD30 NDIR CO2",
+"≈Price USD",
+"40.0",
+"40"
+],
+[
+"SenseAir S8 CO2",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"SCD41 true CO2",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"SCD41 true CO2",
+"Power Draw",
+"0.5mA @ 1 meas/5min single-shot",
+"0.5mA @ 1 meas/5min single-shot (~205mA peak during a measurement)"
+],
+[
+"SCD41 true CO2",
+"Key Specs & Gotchas",
+"±(40ppm+5%), tiny footprint, low-power single-shot mode",
+"±(40ppm+5%), tiny footprint, low-power single-shot mode. Set the ambient-pressure or altitude register — uncompensated readings drift with weather and are badly wrong above ~500m. SCD40 tops out at 2000ppm; SCD41 reaches 5000ppm."
+],
+[
+"Ikea VINDRIKTNING hack",
+"≈Price USD",
+"13.0",
+"13"
+],
+[
+"PMS5003 particulate",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"PMS5003 particulate",
+"Key Specs & Gotchas",
+"0-500µg/m³, 6 size bins; PMSA003I is the I2C/STEMMA version",
+"0-500µg/m³, 6 size bins; PMSA003I is the I2C/STEMMA version. Over-reads in humid air (particles swell above ~75% RH) — pair with an RH sensor and correct, or your wildfire numbers will also spike in fog."
+],
+[
+"SDS011 particulate",
+"≈Price USD",
+"20.0",
+"20"
+],
+[
+"SPS30 premium PM",
+"≈Price USD",
+"45.0",
+"45"
+],
+[
+"SPS30 premium PM",
+"Key Specs & Gotchas",
+"±10% accuracy band, fan auto-clean, MCERTS-adjacent quality",
+"±10% accuracy band, fan auto-clean, 10yr lifetime spec. NOT MCERTS certified. Like all optical PM sensors it over-reads in high humidity (hygroscopic particle growth above ~75% RH) — log RH alongside and correct."
+],
+[
+"MAX44009 ultra-low-power lux",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"TSL2561 lux sensor",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"TSL2591 high dynamic lux",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"VEML7700 high-accuracy lux",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"Photoresistor (LDR)",
+"Key Specs & Gotchas",
+"~10kΩ dark to ~1kΩ bright; CdS banned in some products (RoHS)",
+"~0.5-2MΩ in darkness, ~8-20kΩ at 10 lux, ~1kΩ in bright sun; pick the divider resistor for YOUR light range. CdS is RoHS-restricted in commercial products"
+],
+[
+"AS7331 spectral UV",
+"≈Price USD",
+"14.0",
+"27.5"
+],
+[
+"AS7331 spectral UV",
+"Key Specs & Gotchas",
+"Irradiance in µW/cm² per band",
+"Irradiance in µW/cm² per band. Genuinely separates UV-C from sunlight UV, which nothing cheaper does."
+],
+[
+"GUVA-S12SD UV analog",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"LTR-390 UV + ambient",
+"How It Works (Plain English)",
+"Two photodiodes — one filtered to UV-A — give a real UV index, the same number weather apps publish, plus lux from the same chip.",
+"Two photodiodes — one filtered to UV-A — give a UV-A irradiance count plus lux from the same chip. Note: the library's 'UV index' is an APPROXIMATION. True UVI is erythemally weighted and dominated by UV-B, which this part cannot see. Excellent for relative dose tracking; not a substitute for a UVI instrument."
+],
+[
+"LTR-390 UV + ambient",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"SI1145 UV/IR/visible",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"SI1145 UV/IR/visible",
+"Invention Sparks",
+"Quantify your sunglasses/window tint: side-by-side SI1145s prove what percentage of UV actually gets blocked.",
+"Good for relative daylight/proximity work. Do NOT use it to certify UV blocking of sunglasses or window film — it infers UVI from visible+IR rather than measuring UV, so a tint that changes visible transmission will move the reading without telling you anything about UV. Use an AS7331 for that."
+],
+[
+"APDS-9960 gesture/color/prox",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"TCS34725 RGB color",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"OPT4048 tristimulus color",
+"≈Price USD",
+"9.0",
+"9"
+],
+[
+"AS7263 NIR spectral",
+"≈Price USD",
+"27.0",
+"27"
+],
+[
+"AS7341 11-channel spectral",
+"≈Price USD",
+"14.0",
+"14"
+],
+[
+"RPLIDAR / LD19 scanning LiDAR",
+"≈Price USD",
+"40.0",
+"40"
+],
+[
+"VL53L5CX 8x8 ToF array",
+"≈Price USD",
+"20.0",
+"20"
+],
+[
+"VCNL4040 proximity + lux",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"Sharp GP2Y0A21 IR distance",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"VL53L0X ToF laser",
+"How It Works (Plain English)",
+"Times photons from an invisible 940nm laser pulse to target and back — measures actual flight time of light, immune to target color, in a chip the size of a grain of rice.",
+"Times photons from an invisible 940nm laser pulse to the target and back — it measures the actual flight time of light, in a chip the size of a grain of rice. Range depends strongly on target reflectivity (ST quotes ~2m on a white target but ~0.8m on dark grey)."
+],
+[
+"VL53L0X ToF laser",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"VL53L1X long-range ToF",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"TF-Luna LiDAR",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"A02YYUW waterproof ultrasonic",
+"≈Price USD",
+"9.0",
+"9"
+],
+[
+"JSN-SR04T waterproof ultrasonic",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"US-100 ultrasonic w/ temp comp",
+"Voltage",
+"2.4-5.5V (3.3V safe!)",
+"2.4-5.5V; output swings at VCC, so run it at 3.3V for direct GPIO (3.3V-native, unlike HC-SR04)"
+],
+[
+"US-100 ultrasonic w/ temp comp",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"MaxBotix MB7389 weather LV",
+"≈Price USD",
+"110.0",
+"110"
+],
+[
+"AM312 mini PIR",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"Panasonic EKMC PIR (quality)",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Grid-EYE AMG8833 thermal array",
+"≈Price USD",
+"35.0",
+"35"
+],
+[
+"LD1125H 24GHz respiration radar",
+"≈Price USD",
+"9.0",
+"9"
+],
+[
+"LD2410 mmWave presence",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"LD2450 multi-target tracking radar",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Seeed MR60BHA2 vital-sign radar",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"ADXL345 accelerometer",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"KX132 low-power accel",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"LIS3DH budget accel",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"BMI270 wearable IMU",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"LSM6DSOX ML-core IMU",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"MPU-6050 6-axis IMU",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"ICM-20948 9-axis IMU",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"MPU-9250 9-axis (legacy)",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"BNO055 fusion IMU",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"BNO086 high-perf fusion IMU",
+"≈Price USD",
+"22.0",
+"22"
+],
+[
+"High-g accel ADXL375",
+"≈Price USD",
+"18.0",
+"18"
+],
+[
+"ADXL355 low-noise accel",
+"≈Price USD",
+"38.0",
+"38"
+],
+[
+"ADXL355 low-noise accel",
+"Boards / Modules",
+"Adafruit 5417, EVAL-ADXL355",
+"EVAL-ADXL355Z (Analog Devices), Sparkfun/3rd-party ADXL355 boards, CJMCU-355"
+],
+[
+"ADXL355 low-noise accel",
+"Library / Driver",
+"Adafruit_ADXL355",
+"plasmapper/adxl355-arduino or a datasheet SPI driver (no Adafruit library exists)"
+],
+[
+"MMC5603 precision magnetometer",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"QMC5883L compass",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"MLX90393 wide-range 3D mag",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"TLV493D 3D magnetic",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"MAX4466 adjustable mic amp",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"MAX9814 AGC mic amp",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"DFRobot dB meter",
+"≈Price USD",
+"37.0",
+"37"
+],
+[
+"Piezo contact mic / disc",
+"Key Specs & Gotchas",
+"Sensitive to taps/flex; needs protection diodes for ESP32 ADC",
+"Sensitive to taps/flex. ⚠ A struck piezo can generate tens of volts — you MUST clamp it (two diodes to 3.3V/GND) plus a ~1MΩ bleed resistor before it touches an ESP32 ADC pin."
+],
+[
+"ICS-43434 I2S mic",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"INMP441 I2S MEMS mic",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"SPH0645 I2S mic",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"KY-037/038 sound modules",
+"≈Price USD",
+"1.0",
+"1"
+],
+[
+"Ultrasonic mic experiments",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"801S vibration sensor",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"Piezo shock/knock element",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"Geophone SM-24",
+"≈Price USD",
+"30.0",
+"30"
+],
+[
+"SW-420 vibration switch",
+"≈Price USD",
+"1.0",
+"1"
+],
+[
+"Capacitive liquid/force FDC1004",
+"≈Price USD",
+"9.0",
+"9"
+],
+[
+"Velostat pressure sheets",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"FSR402 force resistor",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"HX711 + load cell",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"Nano33-style 1kg beam scale kit",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"Strain gauge + amp",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"ESP32 native touch pins",
+"≈Price USD",
+"free",
+"0"
+],
+[
+"MPR121 12-pad cap touch",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"Water level capacitive strip",
+"Voltage",
+"5-24V (logic-safe out)",
+"5-24V"
+],
+[
+"Water level capacitive strip",
+"≈Price USD",
+"7.0",
+"7"
+],
+[
+"Water level capacitive strip",
+"Key Specs & Gotchas",
+"Through-wall, no fluid contact, IP67",
+"Through-wall, no fluid contact, IP67. ⚠ OUTPUT SWINGS TO VCC — at 12/24V it will destroy an ESP32 GPIO. Run the sensor at 5V and level-shift, or use a divider/optocoupler."
+],
+[
+"Trill flexible touch sliders",
+"≈Price USD",
+"20.0",
+"20"
+],
+[
+"Flex sensor 2.2\"",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"Bend Labs digital flex (1-axis)",
+"≈Price USD",
+"70.0",
+"70"
+],
+[
+"Conductive rubber stretch cord",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"MAX30205 clinical body temp",
+"≈Price USD",
+"9.0",
+"9"
+],
+[
+"AD8232 ECG front-end",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"BioAmp EXG Pill",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"Fingerprint reader R503",
+"How It Works (Plain English)",
+"A capacitive imaging window with a processor that stores templates and does the matching — your ESP32 just hears 'finger #3 matched' over UART.",
+"An OPTICAL imaging window with a processor that stores templates and does the matching on-module — your ESP32 just hears 'finger #3 matched' over UART. (Capacitive readers such as the GT-521F52 family work differently and are not interchangeable.)"
+],
+[
+"Fingerprint reader R503",
+"≈Price USD",
+"20.0",
+"20"
+],
+[
+"MAX86150 ECG+PPG combo",
+"≈Price USD",
+"23.0",
+"23"
+],
+[
+"MyoWare 2.0 EMG",
+"≈Price USD",
+"40.0",
+"40"
+],
+[
+"MLX90614 forehead mode",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"MAX30102 pulse oximeter",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"Pulse sensor (PPG classic)",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"Thermistor airflow (nasal) kit",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"GSR / EDA sensor",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"AS3935 lightning detector",
+"≈Price USD",
+"20.0",
+"20"
+],
+[
+"AS3935 lightning detector",
+"Invention Sparks",
+"Camera deadman: AS3935 interrupt fires a DSLR trigger within microseconds — catch the NEXT strike in the same storm cell automatically.",
+"Storm-approach dashboard: log strike rate and estimated distance to watch a cell close in, and drive a pool/sports-field evacuation siren. (For lightning PHOTOGRAPHY the AS3935 is too slow — its interrupt arrives milliseconds after event validation; dedicated optical triggers are what photographers use.) Budget real time for antenna tuning and noise-floor calibration: false triggers from switching"
+],
+[
+"Leaf wetness sensor",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"Tipping bucket rain gauge",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Snow/level laser (outdoor ToF)",
+"≈Price USD",
+"70.0",
+"70"
+],
+[
+"ML8511 / VEML6075 UV outdoor",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"Pyranometer (solar irradiance)",
+"≈Price USD",
+"60.0",
+"60"
+],
+[
+"Pyranometer (solar irradiance)",
+"Boards / Modules",
+"DFRobot Gravity, Apogee (research-grade)",
+"DFRobot Gravity SEN0562. Step up: Apogee SP-110 (~$225) or SP-510 for research-grade work — same measurement, an order of magnitude better traceability."
+],
+[
+"Wind vane",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Anemometer cup sensor",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Compost / hay temp lance",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"RS-485 soil NPK/EC probe",
+"≈Price USD",
+"40.0",
+"40"
+],
+[
+"Capacitive soil moisture v2",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"Chirp! plant sensor",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"DS18B20 soil temp spear",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"YF-S201 flow sensor",
+"Voltage",
+"5-18V (divider for echo)",
+"5-18V supply; pulse output needs a divider or level shift to 3.3V"
+],
+[
+"YF-S201 flow sensor",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"Water leak rope sensor",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"Ultrasonic liquid (through-wall)",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"eTape liquid level",
+"≈Price USD",
+"40.0",
+"40"
+],
+[
+"Non-contact liquid level XKC-Y26",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"Optical infrared water-in-fuel",
+"≈Price USD",
+"18.0",
+"18"
+],
+[
+"DS18B20 water temp + flow combo",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"Analog pH kit",
+"≈Price USD",
+"30.0",
+"30"
+],
+[
+"Analog pH kit",
+"Key Specs & Gotchas",
+"±0.1pH calibrated; probes age (~1yr), keep wet",
+"±0.1pH once calibrated. The glass electrode is a consumable — roughly 12-18 months, and it must never dry out. Two-point calibration with buffer sachets is mandatory, not optional."
+],
+[
+"Dissolved oxygen kit",
+"Sensor",
+"Dissolved oxygen kit",
+"Dissolved oxygen kit (Atlas EZO-DO)"
+],
+[
+"Dissolved oxygen kit",
+"≈Price USD",
+"170.0",
+"170"
+],
+[
+"EC / TDS sensor",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"ORP (redox) probe",
+"≈Price USD",
+"110.0",
+"110"
+],
+[
+"Turbidity sensor",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"PZEM-004T AC power module",
+"≈Price USD",
+"11.0",
+"11"
+],
+[
+"SCT-013 CT clamp",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"ZMPT101B voltage sensor",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"INA226/INA228 precision power",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"INA3221 triple-channel power",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"MAX471 / shunt + ADS1115",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"ACS712 Hall current",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"ADS1115 16-bit ADC (the analog fixer)",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"AS5600 magnetic angle",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"AS5048A 14-bit angle",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"KY-040 rotary encoder",
+"≈Price USD",
+"1.0",
+"1"
+],
+[
+"600/1024PPR optical encoder",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Draw-wire (string pot) sensor",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"Linear potentiometer / softpot",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"Inclinometer SCL3300",
+"≈Price USD",
+"35.0",
+"35"
+],
+[
+"VL6180X short-range ToF",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"u-blox M10 GNSS",
+"≈Price USD",
+"20.0",
+"20"
+],
+[
+"GPS PPS time source",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"GPS PPS time source",
+"Key Specs & Gotchas",
+"±50ns class PPS jitter on hobby modules",
+"The PPS EDGE itself is ~±50ns on hobby modules — but an ESP32 GPIO interrupt timestamp adds microseconds of latency and jitter, so end-to-end you should expect µs-class sync, not ns. Good enough for TDOA over hundreds of metres; not for ns metrology."
+],
+[
+"ZED-F9P RTK centimetre GNSS",
+"≈Price USD",
+"190.0",
+"260"
+],
+[
+"NEO-6M GPS",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"D6T thermal presence",
+"≈Price USD",
+"25.0",
+"55"
+],
+[
+"D6T thermal presence",
+"Key Specs & Gotchas",
+"4x4, ±1.5°C, human-detection app notes",
+"4x4, ±1.5°C, with Omron application notes specifically for distinguishing humans from warm backgrounds"
+],
+[
+"FLIR Lepton 3.5",
+"≈Price USD",
+"240.0",
+"240"
+],
+[
+"MLX90640 thermal camera",
+"≈Price USD",
+"45.0",
+"45"
+],
+[
+"MLX90641 thermal (16x12)",
+"≈Price USD",
+"30.0",
+"60"
+],
+[
+"Grove Vision AI v2",
+"≈Price USD",
+"16.0",
+"16"
+],
+[
+"HuskyLens AI camera",
+"≈Price USD",
+"45.0",
+"45"
+],
+[
+"HuskyLens AI camera",
+"Invention Sparks",
+"A cat-only cat door: HuskyLens face-recognises YOUR cat (and rejects the neighbour's) before the latch servo opens — the demo that explains edge AI to anyone.",
+"A pet-aware door: HuskyLens' object-tracking and tag-recognition modes reliably distinguish a tagged collar or a learned object; its FACE recognition is trained on human faces, so cat-face ID needs a custom model (Grove Vision AI V2) rather than the built-in mode. The honest build is tag-plus-shape, and it still explains edge AI to anyone."
+],
+[
+"Person Sensor (Useful Sensors)",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"OV2640 camera (ESP32-CAM)",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"OV5640 5MP autofocus cam",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"Geiger counter kit",
+"≈Price USD",
+"25.0",
+"25"
+],
+[
+"EMF / RF field probes",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"RD200 radon sensor",
+"≈Price USD",
+"180.0",
+"180"
+],
+[
+"SI4432/CC1101 sub-GHz sniffer",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"125kHz RDM6300 RFID",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"RC522 RFID reader",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"PN532 NFC controller",
+"≈Price USD",
+"6.0",
+"6"
+],
+[
+"Tire pressure TPMS receivers",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"O2 sensor (automotive narrowband)",
+"Sensor",
+"O2 sensor (automotive narrowband)",
+"Narrowband O2 sensor (HEGO)"
+],
+[
+"O2 sensor (automotive narrowband)",
+"What It Measures",
+"Exhaust oxygen (rich/lean) — combustion quality",
+"Exhaust oxygen as a rich/lean switch around stoichiometric"
+],
+[
+"O2 sensor (automotive narrowband)",
+"How It Works (Plain English)",
+"A zirconia cell generates voltage from the oxygen differential between exhaust and air — the sensor that closed-loop fuel injection is built on.",
+"A zirconia cell generates a voltage from the oxygen differential between exhaust and outside air — the sensor closed-loop fuel injection is built on. A NARROWBAND (HEGO) cell only tells you which side of stoichiometric you are on; it is not a linear O2 reading. Wideband LSU sensors look similar but are pump-cell devices that CANNOT be read with a plain ADC — they need a dedicated controller (Bosch"
+],
+[
+"O2 sensor (automotive narrowband)",
+"Voltage",
+"heater 12V",
+"sensor cell passive; heater 12V"
+],
+[
+"O2 sensor (automotive narrowband)",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"O2 sensor (automotive narrowband)",
+"Power Draw",
+"heater ~1A!",
+"heater 1-2A @12V ⚠ separate supply, not from the ESP32 rail"
+],
+[
+"O2 sensor (automotive narrowband)",
+"Key Specs & Gotchas",
+"Narrowband: rich/lean switch around stoich",
+"Narrowband switch ~0.45V at stoich. For a linear reading you need an LSU + CJ125 controller board (~$60+), not this."
+],
+[
+"O2 sensor (automotive narrowband)",
+"Boards / Modules",
+"Bosch universal + ADS1115",
+"Bosch universal HEGO + ADS1115; for wideband use an LSU4.9 + CJ125 module"
+],
+[
+"Oil/quality dielectric probe",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Photoelectric beam sensor E18-D80NK",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"Through-beam slot / photo-interrupter",
+"≈Price USD",
+"1.0",
+"1"
+],
+[
+"Color-changing material readers",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"Frustration-free moisture: plant leaf clip",
+"≈Price USD",
+"5.0",
+"5"
+],
+[
+"Conductive thread + fabric pads",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"Bat/dolphin: 40kHz ranging array",
+"≈Price USD",
+"8.0",
+"8"
+],
+[
+"Atmospheric electricity (field mill lite)",
+"≈Price USD",
+"15.0",
+"15"
+],
+[
+"ESP32 internal sensors (free!)",
+"≈Price USD",
+"free",
+"0"
+],
+[
+"ESP32 internal sensors (free!)",
+"Key Specs & Gotchas",
+"hallRead() classic only; RSSI per-packet free",
+"⚠ Reality check: the internal hall sensor was REMOVED in ESP-IDF v5 / Arduino core 3.x and is unavailable on newer chips; the internal temperature sensor reads self-heated die temperature and is near-useless as an ambient reading; RSSI is a link metric, not a calibrated sensor. Touch is the one genuinely useful freebie (classic/S2/S3 only — C3/C6/H2 have no touch peripheral)."
+],
+[
+"Ground vibration fence: fiber + photodiode",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"Soil/water nitrate ion-selective",
+"≈Price USD",
+"90.0",
+"90"
+],
+[
+"Doppler ultrasonic flow (clamp-on)",
+"Sensor",
+"Doppler ultrasonic flow (clamp-on)",
+"Transit-time ultrasonic flow (clamp-on)"
+],
+[
+"Doppler ultrasonic flow (clamp-on)",
+"≈Price USD",
+"85.0",
+"85"
+],
+[
+"Scent delivery + e-nose loop",
+"≈Price USD",
+"60.0",
+"60"
+],
+[
+"Time-of-flight spectroscopy: AS7263 trick",
+"≈Price USD",
+"35.0",
+"35"
+],
+[
+"Wi-Fi CSI sensing (the router IS the sensor)",
+"≈Price USD",
+"free",
+"0"
+],
+[
+"Acoustic emission (ultrasonic contact)",
+"≈Price USD",
+"10.0",
+"10"
+],
+[
+"Capacitive rain/condensation plate",
+"≈Price USD",
+"3.0",
+"3"
+],
+[
+"SEN0395 / mmWave 60GHz sleep radar",
+"Sensor",
+"SEN0395 / mmWave 60GHz sleep radar",
+"DFRobot Gravity mmWave presence radar"
+],
+[
+"SEN0395 / mmWave 60GHz sleep radar",
+"≈Price USD",
+"22.0",
+"22"
+],
+[
+"Time-of-flight gesture radar 60GHz",
+"≈Price USD",
+"40.0",
+"110"
+],
+[
+"FS3000 air velocity",
+"≈Price USD",
+"26.0",
+"26"
+],
+[
+"Muon detector (CosmicWatch)",
+"≈Price USD",
+"100.0",
+"100"
+],
+[
+"AS7331+photodiode flame/UV-C",
+"Sensor",
+"AS7331+photodiode flame/UV-C",
+"IR flame detector (flicker)"
+],
+[
+"AS7331+photodiode flame/UV-C",
+"What It Measures",
+"Open-flame presence via its UV/IR flicker signature",
+"Open-flame presence via near-IR flicker (~1-10Hz)"
+],
+[
+"AS7331+photodiode flame/UV-C",
+"How It Works (Plain English)",
+"Flames emit characteristic UV and flickering IR (~10Hz); tuned photodiodes catch that signature far faster than smoke can reach a ceiling detector.",
+"A near-IR phototransistor (roughly 760-1100nm) watching for the characteristic flicker of a flame — faster than waiting for smoke to reach a ceiling detector. NOTE: these cheap modules are IR-only and are blind to the UV that true UV flame detectors use; sunlight, incandescent bulbs and hot surfaces will fool them."
+],
+[
+"AS7331+photodiode flame/UV-C",
+"≈Price USD",
+"2.0",
+"2"
+],
+[
+"Scintillating gamma spectrometer",
+"≈Price USD",
+"150.0",
+"150"
+],
+[
+"MEMS hydrogen sensor",
+"Sensor",
+"MEMS hydrogen sensor",
+"MQ-8 hydrogen sensor"
+],
+[
+"MEMS hydrogen sensor",
+"What It Measures",
+"Hydrogen gas 100-10000ppm",
+"Hydrogen gas 100-10000ppm (qualitative)"
+],
+[
+"MEMS hydrogen sensor",
+"How It Works (Plain English)",
+"Doped MOX selective toward H2 — as hydrogen heating/vehicles arrive, leak sensing at the maker level arrives with it.",
+"A tin-oxide bead heated to ~300°C whose resistance drops in hydrogen. It is NOT MEMS and NOT selective — it responds strongly to alcohol and CO too, so treat it as a trend instrument, never as an identification."
+],
+[
+"MEMS hydrogen sensor",
+"≈Price USD",
+"4.0",
+"4"
+],
+[
+"MEMS hydrogen sensor",
+"Common Uses",
+"Electrolysis experiments, battery-room monitoring (H2 from charging!), hydrogen projects.",
+"Electrolysis demonstrations and hydrogen experiments in OPEN, well-ventilated benches. NOT for deployment inside a battery room, gas locker or any space where hydrogen can accumulate."
+],
+[
+"MEMS hydrogen sensor",
+"Invention Sparks",
+"Off-grid battery rooms outgas hydrogen when overcharged — a $4 sensor + vent fan interlock prevents the classic battery-shed explosion.",
+"The instructive build is a ventilated test bench that shows how fast H2 accumulates above a charging lead-acid cell — the data is the point. For an actual battery room you need a certified, intrinsically-safe H2 detector: an MQ bead runs at ~300°C and is itself an ignition source."
+],
+[
+"LDC1612 inductive sensing",
+"≈Price USD",
+"9.0",
+"9"
+],
+[
+"Thermal flow: SDP + thermistor DIY",
+"≈Price USD",
+"40.0",
+"40"
+],
+[
+"Soil tensiometer (real suction)",
+"Sensor",
+"Soil tensiometer (real suction)",
+"Watermark granular-matrix soil water sensor"
+],
+[
+"Soil tensiometer (real suction)",
+"What It Measures",
+"Soil water TENSION (what roots actually feel)",
+"Soil water tension / matric potential (what roots actually feel), 0-239 kPa"
+],
+[
+"Soil tensiometer (real suction)",
+"How It Works (Plain English)",
+"A gypsum-buffered granular matrix changes resistance with soil suction — measures how hard plants must work for water, the irrigation pro's metric.",
+"A gypsum-buffered granular matrix inside a porous shell equilibrates with the soil; its electrical resistance tracks soil suction. Strictly it is a granular-matrix resistance sensor, not a tensiometer (a true tensiometer is a water-filled tube with a pressure transducer — see the MPRLS entry), but it reports the same quantity irrigation professionals schedule on."
+],
+[
+"Soil tensiometer (real suction)",
+"≈Price USD",
+"45.0",
+"45"
+],
+[
+"Scale-hacking: NAU7802",
+"≈Price USD",
+"12.0",
+"12"
+],
+[
+"Weight-in-motion: piezo cable",
+"≈Price USD",
+"15.0",
+"15"
+]
+]

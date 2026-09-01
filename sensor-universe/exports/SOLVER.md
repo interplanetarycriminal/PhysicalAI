@@ -265,11 +265,11 @@ The solver's coverage numbers count what each sensor supports alone — a stated
 | Constraint | Eligible | Reachable | % | Kit cost | Lost entirely |
 |---|--:|--:|--:|--:|---|
 | 🔒 No privacy footprint | 350 | 150/151 | 99% | 63 parts, $903 | Did they blink or move their eyes? |
-| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is radon accumulating? · Is there carbon monoxide? · Is new furniture or flooring off-gassing? · Is there a flammable gas leak? · How polluted is the air right now? · Is something emitting ozone? |
-| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | How is this person walking? · How stressed or recovered is this body? · Is this person's arousal or stress rising? · Are they likely dehydrated? · Which muscle is working, and how hard? · What is the blood oxygen saturation? |
-| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | Is radon accumulating? · Is new furniture or flooring off-gassing? · How polluted is the air right now? · Is something emitting ozone? · How stressed or recovered is this body? · Is this person's arousal or stress rising? |
-| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is making noise above human hearing? · What is transmitting nearby, and how strongly? |
-| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is radon accumulating? · Is new furniture or flooring off-gassing? · Has breathing become irregular or stopped? · Are they likely dehydrated? · What is the blood oxygen saturation? · Is this person's arousal or stress rising? |
+| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is radon accumulating? · Is there a flammable gas leak? · How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · Is there carbon monoxide? |
+| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | Is this person's arousal or stress rising? · What is the blood oxygen saturation? · How is this person walking? · Did they blink or move their eyes? · Are they likely dehydrated? · How much have they moved today? |
+| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | Is radon accumulating? · How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · What is the heart rate? · Is this person's arousal or stress rising? |
+| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · What is making noise above human hearing? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is transmitting nearby, and how strongly? |
+| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is radon accumulating? · Is new furniture or flooring off-gassing? · What is the heart rate? · Did they blink or move their eyes? · Which muscle is working, and how hard? · Are they likely dehydrated? |
 
 ## Every outcome, and what buys it
 

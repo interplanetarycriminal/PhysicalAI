@@ -38,8 +38,40 @@ import vocab  # noqa: E402
 import sheet_lib as S  # noqa: E402
 from loader import load_all  # noqa: E402
 
-SRC = "/root/.claude/uploads/f55cc0f7-8744-54de-a2e0-8ff2f0fa91bf/86aced1a-esp32_sensor_universe_v50.xlsx"
 OUT = HERE / "esp32_sensor_universe_v55.xlsx"
+
+# The sheets this script OWNS. On a self-hosted build they are deleted from the
+# source workbook and regenerated, so the pipeline can rebase from any prior
+# version. Every other sheet is v50's and is patched in place, idempotently.
+OWNED_SHEETS = [
+    "Corrections Log", "Glue & Signal Chain", "Boards & Compute", "I2C & Wiring Reality",
+    "Physics Cheat Codes II", "Derived Instruments", "The Anti-Catalog II",
+    "Outcome Solver", "Outcome → Kit", "Solver Run", "Solver Data",
+    "Fusion Solver", "Kit Builder", "Coverage Matrix",
+]
+
+
+def _resolve_src():
+    """The upstream v50 upload no longer exists, so the build is self-hosting:
+    it starts from the newest committed workbook whose version is <= OUT's.
+    Building OUT from itself is a rebuild in place (saved atomically)."""
+    import re
+    upload = Path("/root/.claude/uploads/f55cc0f7-8744-54de-a2e0-8ff2f0fa91bf/"
+                  "86aced1a-esp32_sensor_universe_v50.xlsx")
+    if upload.exists():
+        return upload
+    want = int(re.search(r"_v(\d+)\.xlsx$", OUT.name).group(1))
+    cands = []
+    for p in HERE.glob("esp32_sensor_universe_v*.xlsx"):
+        m = re.search(r"_v(\d+)\.xlsx$", p.name)
+        if m and 50 < int(m.group(1)) <= want:
+            cands.append((int(m.group(1)), p))
+    if not cands:
+        sys.exit("no source workbook: need the v50 upload or a committed v51+ build")
+    return max(cands)[1]
+
+
+SRC = _resolve_src()
 
 CAT_BACK = {  # schema-v2 category -> the v50 taxonomy name, so the sheet stays coherent
     "Humidity & Moisture": "Humidity + Temp", "CO2": "CO2 (true)",
@@ -82,11 +114,23 @@ COLMAP = {
 }
 
 
+def _differs(old, new):
+    """Idempotence: 95 and 95.0 are the same price; a rebase must find no change."""
+    try:
+        return abs(float(old) - float(new)) > 1e-9
+    except (TypeError, ValueError):
+        return str(old) != str(new)
+
+
 def main():
     records, _ = load_all(persist_ids=False)
     mine = {r["n"]: r for r in records if r.get("catalog") == "sensor"}
 
     wb = load_workbook(SRC)
+    dropped = [n for n in OWNED_SHEETS if n in wb.sheetnames]
+    for n in dropped:
+        del wb[n]
+    print(f"Source: {SRC.name}" + (f" — regenerating {len(dropped)} owned sheets" if dropped else ""))
     ws = wb["Sensor Catalog"]
     hdr = {ws.cell(row=3, column=c).value: c for c in range(1, ws.max_column + 1)}
 
@@ -109,7 +153,7 @@ def main():
                 continue
             cell = ws.cell(row=r, column=hdr[col_name])
             old = cell.value
-            if str(old) != str(new):
+            if _differs(old, new):
                 changes.append((v50_name, col_name, str(old or "")[:400], str(new)[:400]))
                 cell.value = new
 
@@ -172,7 +216,9 @@ def main():
     # cells on Idea Forge. Forcing a full recalculation on open means Excel
     # repopulates them immediately and the user never sees a blank.
     wb.calculation.fullCalcOnLoad = True
-    wb.save(OUT)
+    tmp = OUT.with_suffix(".tmp.xlsx")     # atomic: a failed build never corrupts SRC/OUT
+    wb.save(tmp)
+    tmp.replace(OUT)
     print(f"\nWrote {OUT}")
     print(f"  {len(wb.sheetnames)} sheets (v50 had 56)")
     return changes
@@ -1247,6 +1293,16 @@ def add_fusion_solver(wb, sol):
 
 
 def add_corrections_log(wb, changes, added=0):
+    # Self-hosted builds start from an already-corrected catalog, so the diff
+    # pass finds little or nothing. The v50 history (recovered from the v55
+    # sheet) is the base; anything genuinely new is appended after it.
+    import json
+    hist_path = HERE / "data" / "corrections_v50.json"
+    if hist_path.exists():
+        hist = [tuple(c) for c in json.loads(hist_path.read_text())]
+        seen = {(h[0], h[1]) for h in hist}
+        changes = hist + [c for c in changes if (c[0], c[1]) not in seen]
+        added = added or 167
     ws = wb.create_sheet("Corrections Log")
     S.sheet_defaults(ws, tab_color="A8412F")
     ncols = 5

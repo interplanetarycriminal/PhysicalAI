@@ -21340,7 +21340,7 @@
    "n_sens": 42,
    "cost": 324.0,
    "kit": "NTC thermistor 10k · Photoresistor (LDR) · QMC5883L compass · AHT20 temp/humidity · HC-SR501 PIR motion · BMP280 budget barometer · ADXL345 accelerometer · INA3221 triple-channel power · ICS-43434 I2S mic · ESP32 native touch pins",
-   "lost": "Is radon accumulating? · Is there carbon monoxide? · Is new furniture or flooring off-gassing? · Is there a flammable gas leak? · How polluted is the air right now? · Is something emitting ozone?"
+   "lost": "Is radon accumulating? · Is there a flammable gas leak? · How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · Is there carbon monoxide?"
   },
   {
    "name": "🚫 Never touches the subject",
@@ -21351,7 +21351,7 @@
    "n_sens": 55,
    "cost": 851.6,
    "kit": "Reed switch · Photoresistor (LDR) · Wi-Fi CSI sensing (the router IS the sensor) · AHT20 temp/humidity · INMP441 I2S MEMS mic · QMC5883L compass · HC-SR501 PIR motion · A3144 / SS49E Hall switches · BMP280 budget barometer · MQ-135 air quality",
-   "lost": "How is this person walking? · How stressed or recovered is this body? · Is this person's arousal or stress rising? · Are they likely dehydrated? · Which muscle is working, and how hard? · What is the blood oxygen saturation?"
+   "lost": "Is this person's arousal or stress rising? · What is the blood oxygen saturation? · How is this person walking? · Did they blink or move their eyes? · Are they likely dehydrated? · How much have they moved today?"
   },
   {
    "name": "💵 Nothing over $5",
@@ -21362,7 +21362,7 @@
    "n_sens": 34,
    "cost": 73.1,
    "kit": "Piezo contact mic / disc · Reed switch · NTC thermistor 10k · Photoresistor (LDR) · MPU-6050 6-axis IMU · INA219 current/power monitor · AHT20 temp/humidity · MQ-2 smoke/LPG gas · RC522 RFID reader · QMC5883L compass",
-   "lost": "Is radon accumulating? · Is new furniture or flooring off-gassing? · How polluted is the air right now? · Is something emitting ozone? · How stressed or recovered is this body? · Is this person's arousal or stress rising?"
+   "lost": "Is radon accumulating? · How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · What is the heart rate? · Is this person's arousal or stress rising?"
   },
   {
    "name": "🧑‍🔧 Beginner-buildable",
@@ -21373,7 +21373,7 @@
    "n_sens": 48,
    "cost": 345.6,
    "kit": "Piezo contact mic / disc · Reed switch · NTC thermistor 10k · Photoresistor (LDR) · MPU-6050 6-axis IMU · INA219 current/power monitor · AHT20 temp/humidity · MQ-2 smoke/LPG gas · RC522 RFID reader · QMC5883L compass",
-   "lost": "Is radon accumulating? · Did they blink or move their eyes? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is making noise above human hearing? · What is transmitting nearby, and how strongly?"
+   "lost": "Is radon accumulating? · Did they blink or move their eyes? · What is making noise above human hearing? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is transmitting nearby, and how strongly?"
   },
   {
    "name": "🌦 Survives outdoors",
@@ -21384,7 +21384,7 @@
    "n_sens": 49,
    "cost": 1073.4,
    "kit": "Piezo contact mic / disc · Reed switch · NTC thermistor 10k · Photoresistor (LDR) · QMC5883L compass · A3144 / SS49E Hall switches · BMP280 budget barometer · DHT22 / AM2302 · INA3221 triple-channel power · Capacitive soil moisture v2",
-   "lost": "Is radon accumulating? · Is new furniture or flooring off-gassing? · Has breathing become irregular or stopped? · Are they likely dehydrated? · What is the blood oxygen saturation? · Is this person's arousal or stress rising?"
+   "lost": "Is radon accumulating? · Is new furniture or flooring off-gassing? · What is the heart rate? · Did they blink or move their eyes? · Which muscle is working, and how hard? · Are they likely dehydrated?"
   }
  ],
  "irreplaceable": [

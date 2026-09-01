@@ -21,7 +21,7 @@ Plus known data debt: 126/151 outcomes lack "what fools it" notes; ~100 records 
 2. **Safety invariants:** never site a heated MQ/pellistor gas sensor inside a flammable volume; every combustible-gas / fire / life-safety-adjacent entry carries "NOT a life-safety device — supplement, never replace, a certified alarm"; never call an output logic-safe/3.3V-safe when its supply exceeds 3.6 V; medical-adjacent entries are "awareness aids", never devices.
 3. **Physics only.** Every number must be checkable (constant, formula, datasheet-class figure). When a formula is uncertain, write `math="VERIFY: …"` rather than a plausible guess — the owner would rather see a gap than a lie.
 4. **Derived values are computed, never authored** (prices tiers, BOM totals, closures, coverage). Author only source fields.
-5. **IDs are frozen** (`data/ids.json`). Never renumber. Never edit the upstream v50 source workbook (`SRC` in `patch_v50.py`).
+5. **IDs are frozen** (`data/ids.json`). Never renumber. **The build is self-hosting:** the upstream v50 upload no longer exists, so `patch_v50.py` starts from the newest committed `esp32_sensor_universe_vNN.xlsx` whose version ≤ `OUT`, deletes the sheets it owns (`OWNED_SHEETS`), and regenerates them; v50's own sheets are patched in place, idempotently. To make v56: bump `OUT`, run the build (it rebases from v55). Never hand-edit a committed workbook. The Corrections Log's v50 history lives in `data/corrections_v50.json`. **Any new sheet you add must be appended to `OWNED_SHEETS`** or the next rebase will duplicate it.
 6. **The gate after every change**, in this order — all must pass before a commit:
    ```
    python3 validate.py                        # data contract → exit 0

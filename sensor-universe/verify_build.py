@@ -42,15 +42,14 @@ def check(name, ok, detail=""):
 # 1 · integrity + inventory
 check("zip integrity", zipfile.ZipFile(OUT).testzip() is None)
 wb = openpyxl.load_workbook(OUT)
-wb50 = openpyxl.load_workbook(V50)
-new_names = set(wb.sheetnames) - set(wb50.sheetnames)
-check("no v50 sheet lost", not (set(wb50.sheetnames) - set(wb.sheetnames)))
-v55_sheets = {"Corrections Log", "Glue & Signal Chain", "Boards & Compute",
-              "I2C & Wiring Reality", "Physics Cheat Codes II", "Derived Instruments",
-              "The Anti-Catalog II", "Outcome Solver", "Outcome → Kit", "Solver Run",
-              "Solver Data", "Fusion Solver", "Kit Builder", "Coverage Matrix"}
-check("all v55 sheets present", v55_sheets <= new_names,
-      str(v55_sheets - new_names) if not v55_sheets <= new_names else f"{len(new_names)} added")
+if str(V50) != str(Path(OUT).resolve()) and Path(V50).exists():
+    wb_src = openpyxl.load_workbook(V50)
+    check("no source sheet lost", not (set(wb_src.sheetnames) - set(wb.sheetnames)))
+owned = set(patch_v50.OWNED_SHEETS)
+check("all owned sheets present", owned <= set(wb.sheetnames),
+      str(owned - set(wb.sheetnames)) or f"{len(owned)} owned + {len(wb.sheetnames) - len(owned)} inherited")
+check("no duplicated owned sheet (rebase artefact)",
+      not any(n.rstrip("0123456789") in owned and n not in owned for n in wb.sheetnames))
 
 # 2 · Sensor Catalog contiguity + filter
 ws = wb["Sensor Catalog"]
