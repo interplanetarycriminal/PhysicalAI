@@ -22,10 +22,17 @@ from openpyxl.utils import get_column_letter  # noqa: E402
 from openpyxl.worksheet.formula import ArrayFormula  # noqa: E402
 
 import fusion  # noqa: E402
+import iface_derive  # noqa: E402
 import loader  # noqa: E402
 import outcome_solver as osv  # noqa: E402
 import patch_v50  # noqa: E402
+import schema  # noqa: E402
 import vocab  # noqa: E402
+
+try:
+    from enrich_iface import ENRICH_IFACE  # noqa: E402
+except ModuleNotFoundError:
+    ENRICH_IFACE = {}
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else str(patch_v50.OUT)
 V50 = patch_v50.SRC
@@ -175,6 +182,73 @@ with open(HERE / "exports" / "fusion_edges.csv") as f:
     check("fusion_edges.csv rows", sum(1 for _ in f) == len(fusion.FUSION_EDGES) + 1)
 j = json.load(open(HERE / "exports" / "solver_run.json"))
 check("solver_run.json fusion object", j.get("fusion", {}).get("n_edges") == len(fusion.FUSION_EDGES))
+
+# 9 · ESP32 interface fields
+IF = iface_derive.IFACE_FIELDS
+ENUMS = {f: getattr(schema, schema.FIELDS[f][1].split(":")[1]) for f in IF
+         if schema.FIELDS[f][1].startswith("enum:")}
+
+
+def flag(pred):
+    """`id.field=value` for every sensor the predicate rejects. Detail, not truth."""
+    return [f"{r['id']}.{f}={r[f]!r}" for r in sensors for f in IF
+            if f in r and pred(r, f, r[f])]
+
+
+def typed(f, v):
+    kind = schema.FIELDS[f][1]
+    if kind == "int":
+        return isinstance(v, int) and not isinstance(v, bool)
+    if kind == "float":
+        return isinstance(v, (int, float)) and not isinstance(v, bool)
+    return isinstance(v, str)          # str and every enum:NAME
+
+
+absent = [f"{r['id']}.{f}" for r in sensors for f in IF if f not in r]
+check("iface fields present on every sensor (explicit nulls included)", not absent,
+      str(absent[:5]) if absent else f"{len(IF)} fields × {len(sensors)} sensors")
+bad = flag(lambda r, f, v: v is not None and not typed(f, v))
+check("iface field types match the schema", not bad, str(bad[:3]))
+bad = flag(lambda r, f, v: f in ENUMS and v is not None and v not in ENUMS[f])
+check("iface enum values in their enum", not bad, str(bad[:3]))
+bad = [f"{r['id']}:{r['iface_primary']}∉{r.get('iface')}" for r in sensors
+       if r.get("iface_primary") and r["iface_primary"] not in (r.get("iface") or [])]
+check("iface_primary is one of the record's own iface entries", not bad, str(bad[:3]))
+bad = [f"{r['id']}:{r['v_min']}-{r['v_max']}" for r in sensors
+       if r.get("v_min") is not None and r.get("v_max") is not None
+       and not (0.5 <= r["v_min"] <= r["v_max"] <= 250)]
+check("v_min ≤ v_max, both within 0.5-250V", not bad, str(bad[:3]))
+bad = [f"{r['id']}:{r['iface_primary']}/cs={r['cs_pins']}" for r in sensors
+       if (r.get("iface_primary") == "I2C" and r.get("cs_pins") not in (0, None))
+       or (r.get("iface_primary") == "SPI" and r.get("cs_pins") is not None
+           and r["cs_pins"] < 1)]
+check("cs_pins agrees with the bus (0 on I2C, ≥1 on SPI)", not bad, str(bad[:3]))
+bad = [f"{r['id']}:{r['rate_hz']}" for r in sensors
+       if r.get("rate_hz") is not None and not (0 < r["rate_hz"] < 1e7)]
+check("rate_hz in (0, 1e7)", not bad, str(bad[:3]))
+bad = [f"{r['id']}:peak {r['i_peak_ua']} < active {r['pwr_ua']}" for r in sensors
+       if r.get("i_peak_ua") is not None and r.get("pwr_ua") is not None
+       and r["i_peak_ua"] < r["pwr_ua"]]
+check("i_peak_ua ≥ pwr_ua", not bad, str(bad[:3]))
+bad = [f"{r['id']}:ChipSelect on {r.get('iface_primary')}" for r in sensors
+       if r.get("addr_mode") == "ChipSelect" and r.get("iface_primary") != "SPI"]
+bad += [f"{r['id']}:{r['addr_mode']} with no i2c_addr" for r in sensors
+        if r.get("addr_mode") in ("Fixed", "Strappable", "Programmable")
+        and not (r.get("i2c_addr") or "").strip()]
+check("addr_mode consistent with the bus and i2c_addr", not bad, str(bad[:3]))
+bad = [r["id"] for r in sensors if r.get("driver_status") == "Verified"
+       and not (isinstance(r.get("esp32_driver"), str) and r["esp32_driver"].strip())]
+check("driver_status='Verified' names a driver", not bad, str(bad[:3]))
+bad = [r["id"] for r in sensors
+       if r.get("level_shift") == "Direct" and r.get("logic_3v3") is False]
+check("level_shift='Direct' never on a part that is not 3.3V-safe", not bad, str(bad[:3]))
+
+for f in IF:                            # a report, not a check — it always prints
+    filled = [r for r in sensors if r.get(f) is not None]
+    auth = sum(1 for r in filled if ENRICH_IFACE.get(r["id"], {}).get(f) is not None)
+    print(f"      {f}: {len(filled)}/{len(sensors)} filled "
+          f"({auth} authored, {len(filled) - auth} derived)")
+
 
 print()
 if fails:

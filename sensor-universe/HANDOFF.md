@@ -9,6 +9,8 @@
 2. **How do I actually build it?** — the fusion instruments have math and confounds but no bench recipe (wiring, firmware steps, calibration, acceptance test).
 3. **Which cheap *groupings* are most generative?** — the solver ranks single sensors; nothing ranks pairs/triples by what they unlock together.
 
+**Added since v55: the ESP32 interface field set.** `data/schema.py` carries eleven optional interface fields (`iface_primary`, `v_min`, `v_max`, `logic_v`, `level_shift`, `addr_mode`, `cs_pins`, `i_peak_ua`, `rate_hz`, `esp32_driver`, `driver_status`) plus the `LEVEL_SHIFT`, `ADDR_MODE` and `DRIVER_STATUS` enums. The loader guarantees all eleven are present on every record — explicitly `None` where nothing is known. Nine are derived by `data/iface_derive.py` from text already in the record; `esp32_driver` and `driver_status` are **authored-only, with partial coverage**, written as JSON and compiled into `data/enrich_iface.py` (the loader's fourth overlay) by `tools/gen_enrich_iface.py`. `verify_build.py` section 9 gates the field set and prints per-field coverage.
+
 Plus known data debt: 126/151 outcomes lack "what fools it" notes; ~100 records imply a hazard they don't declare; 238 legacy sensors carry a prose `spec` instead of structured range/accuracy; 127 vendor SKUs/library names are flagged VERIFY by the audit.
 
 **Why a cheaper model.** Sessions with the expensive model are scarce. Everything below is scoped so a cheaper model can execute it *mechanically against gates*, with invention and physics judgement explicitly reserved. Tasks are tagged **[H]** (Haiku-class: mechanical, fully specified) or **[S]** (Sonnet-class: templated authoring with a validator gate).
@@ -39,6 +41,8 @@ Plus known data debt: 126/151 outcomes lack "what fools it" notes; ~100 records 
 |---|---|
 | `data/schema.py` | The contract: 36 fields, 11 enums (`MODALITY, CONTACT, PRIVACY, POWER_CLASS, ENVIRONMENT, CALIBRATION, LIFECYCLE, HAZARD, CONFIDENCE, MATURITY, INTERFACE`) |
 | `data/vocab.py` | Controlled vocabularies: `CATEGORY`(31) `THEME`(16) `PHENOMENON`(99) `INFERENCE`(151: key→(question, domain), 13 domains) `CONSTRAINT`(16) `FUSION`(9 patterns) |
+| `data/iface_derive.py` | Conservative parsers for the ESP32 interface fields (`parse_volts`, `parse_rate_hz`, `parse_peak_ua`, `derive_*`). Ambiguity → `None`, never a guess |
+| `data/enrich_iface.py` | GENERATED authored interface overlay — rebuild with `tools/gen_enrich_iface.py`, never hand-edit |
 | `data/loader.py` | `load_all()` → (records, seeds). Loads `part1…part13`, other catalogs, applies `enrich_core → enrich → enrich_manual` overlays, migrates categories, assigns IDs, derives `_tier/_power_class` |
 | `data/fusion.py` | `EMERGENT`(26) + `FUSION_EDGES`(52) + `matrix_capabilities()`, `covers()`, `topo_edges()`. Edge schema in the module docstring |
 | `data/outcome_solver.py` | `index, greedy_cover, trace_kit, solve, closure, minimise, greedy_budget, build` |

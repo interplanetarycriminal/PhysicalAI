@@ -5,12 +5,14 @@ Load order matters:
     2. legacy category/theme names migrated to the schema-v2 vocabulary
     3. stable IDs attached from ids.json (assigned once, never renumbered)
     4. enrichment overlay merged in by ID  (the ~17 schema-v2 fields)
-    5. derived fields computed  (tier, power class — never authored)
+    5. derived fields computed  (tier, power class, the ESP32 interface set —
+       never authored, and never allowed to overwrite an authored value)
 """
 import json
 import re
 from pathlib import Path
 
+import iface_derive
 import schema
 import vocab
 
@@ -235,7 +237,8 @@ def load_all(persist_ids=True):
     # agent-authored overlay, so the latter refines rather than being shadowed.
     overlay = {}
     for mod_name, var in (("enrich_core", "ENRICH_CORE"), ("enrich", "ENRICH"),
-                          ("enrich_manual", "ENRICH_MANUAL")):
+                          ("enrich_manual", "ENRICH_MANUAL"),
+                          ("enrich_iface", "ENRICH_IFACE")):
         mod = _import(mod_name)
         if mod is None:
             continue
@@ -255,6 +258,14 @@ def load_all(persist_ids=True):
         r.setdefault("phenomena", [])
         r.setdefault("inferences", [])
         r.setdefault("confidence", "High")
+        # ESP32 interface set. Authored (enrich_iface) wins; everything else is
+        # derived where the record's own text supports it. Every field ends up
+        # PRESENT — explicitly None where nothing could be derived or authored,
+        # because "nobody has checked this" is data too.
+        derived = iface_derive.derive_all(r)
+        for f in iface_derive.IFACE_FIELDS:
+            if r.get(f) is None:
+                r[f] = derived.get(f)
 
     seeds_mod = _import("seeds")
     seeds = list(getattr(seeds_mod, "SEEDS", []) if seeds_mod else [])

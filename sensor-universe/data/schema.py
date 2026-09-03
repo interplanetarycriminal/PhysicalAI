@@ -127,6 +127,33 @@ INTERFACE = {
     "Builtin": "Internal to the SoC — no external wiring",
 }
 
+# What has to sit between this part's signal lines and a 3.3V ESP32 GPIO.
+LEVEL_SHIFT = {
+    "Direct":           "Wire it straight to a 3.3V GPIO — no extra parts",
+    "Divider":          "Needs a resistor divider or equivalent attenuation on the ESP32 input",
+    "Shifter":          "Needs a bidirectional level shifter, or open-drain pull-ups to 3.3V",
+    "Isolator":         "Needs a transceiver or galvanic isolation first (RS-485, CAN, mains)",
+    "Analog-front-end": "Needs an amplifier, bias network or external ADC first",
+}
+
+# How the device is picked out on its bus — the thing that decides how many you can stack.
+ADDR_MODE = {
+    "Fixed":        "One factory address, not changeable",
+    "Strappable":   "Address selected by an address pin, jumper or solder blob",
+    "Programmable": "Address set in software/registers, or a wide selectable range",
+    "ROM-unique":   "Every device carries a unique factory serial (1-Wire, some CAN/RF)",
+    "ChipSelect":   "No address — a dedicated CS/SS line selects it",
+    "NotAddressed": "Point-to-point link with no device selection at all",
+}
+
+# Confidence in the ESP32 driver situation, which is not the same as ecosystem MATURITY.
+DRIVER_STATUS = {
+    "Verified":   "A named library known to work on ESP32 (Arduino-ESP32, ESP-IDF or ESPHome)",
+    "Generic":    "No driver needed — an ESP32 peripheral API does it (ADC, PCNT, RMT)",
+    "Community":  "A driver exists but is unmaintained, or the ESP32 port quality is unknown",
+    "None-known": "No ESP32 driver identified",
+}
+
 CATALOG = {
     "sensor":   "Something that measures the world",
     "actuator": "Something that changes the world",
@@ -168,6 +195,24 @@ FIELDS = {
     "i2c_addr":  (False, "str",   "I2C address(es); feeds the conflict map"),
     "pins":      (False, "int",   "GPIO/wires consumed beyond power"),
     "esp32_compat": (False, "str", "Variant caveats (touch/DAC/PSRAM/camera needs)"),
+
+    # --- ESP32 interface (structured; the prose lives in iface/v/lib/esp32_compat)
+    "iface_primary": (False, "enum:INTERFACE",
+                     "The bus you actually wire when the part offers a choice"),
+    "v_min":     (False, "float", "Supply minimum in volts — the computable `v`"),
+    "v_max":     (False, "float", "Supply maximum in volts"),
+    "logic_v":   (False, "str",   "Signal-line logic level as wired: 3.3V, 5V TTL, "
+                                  "0-3.3V analog"),
+    "level_shift": (False, "enum:LEVEL_SHIFT",
+                   "What must sit between these signal lines and an ESP32 GPIO"),
+    "addr_mode": (False, "enum:ADDR_MODE", "How the device is selected on its bus"),
+    "cs_pins":   (False, "int",   "Select lines beyond the shared bus (0 on I2C)"),
+    "i_peak_ua": (False, "float", "Peak/burst draw in µA — what the rail must survive"),
+    "rate_hz":   (False, "float", "Max sample/update rate in Hz — computable `rate`"),
+    "esp32_driver": (False, "str",
+                    "A known-good ESP32 driver: library, source and framework"),
+    "driver_status": (False, "enum:DRIVER_STATUS",
+                     "Confidence in the ESP32 driver situation"),
 
     # constraints
     "contact":   (True,  "enum:CONTACT", "Proximity required to the subject"),

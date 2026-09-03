@@ -80,6 +80,36 @@ dict(
    example. 5 = you are writing drivers and validating your own results. A $45
    NPU camera is not a 1 and a 400V Geiger kit is not a 2.
 
+## The ESP32 interface fields
+
+Eleven optional fields carry the wiring answer in a form you can filter on. The
+prose stays where it is — `iface`, `v`, `lib`, `esp32_compat` — these are its
+computable twin.
+
+| field | kind | what it says |
+|---|---|---|
+| `iface_primary` | `enum:INTERFACE` | The bus you actually wire when the part offers a choice |
+| `v_min` / `v_max` | `float` | Supply range in volts — the computable form of `v` |
+| `logic_v` | `str` | Logic level of the signal lines as wired: `"3.3V"`, `"5V TTL"`, `"0-3.3V analog"` |
+| `level_shift` | `enum:LEVEL_SHIFT` | What must sit between those lines and an ESP32 GPIO |
+| `addr_mode` | `enum:ADDR_MODE` | How the device is selected on its bus — this is what decides how many you can stack |
+| `cs_pins` | `int` | Dedicated select lines beyond the shared bus (0 on I2C, 1 on SPI) |
+| `i_peak_ua` | `float` | Peak/burst draw in µA — what the 3.3V rail must survive |
+| `rate_hz` | `float` | Maximum sample/update rate in Hz — the computable form of `rate` |
+| `esp32_driver` | `str` | A specific known-good driver: library name, source and framework |
+| `driver_status` | `enum:DRIVER_STATUS` | Confidence in the ESP32 driver situation |
+
+**The rule.** Author a value only when you have verified it against a datasheet
+or a real driver, and put it in the authored JSON that `tools/gen_enrich_iface.py`
+turns into `data/enrich_iface.py`. Anything unverified stays an explicit `None`,
+which the loader guarantees is present on every record — a null here means
+"nobody has checked", and that is data. Everything else comes from
+`data/iface_derive.py`, which re-reads `v`, `rate`, `pwr`, `iface`, `i2c_addr`,
+`logic_3v3` and `hazard` and refuses anything ambiguous. **Derived values are
+never authored by hand**, and an authored value always beats a derived one.
+`esp32_driver` and `driver_status` have no derivation at all: they are authored
+or they are `None`.
+
 ## What good prose looks like
 
 - **`how`** — 2-4 sentences of real physics in plain English. Explain the
