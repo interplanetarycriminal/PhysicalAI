@@ -26,7 +26,7 @@ measures neither. A dusk-to-dawn head is a correct answer to a question nobody h
 | --- | --- | --- |
 | A passing cloud, and its own lamp's reflection | CdS has light-history memory and a decay of hundreds of ms to seconds, so a step change smears and the cell hunts around the threshold | `S049` `fools`: "It has memory: a cell stored in darkness reads several tens of percent different from an identical cell that has been in light, and takes minutes to settle. Decay back to dark resistance takes hundreds of milliseconds to seconds, so it smears fast events and cannot see chopped or modulated light." |
 | A headlight, or any mains-lit neighbour | 100/120 Hz ripple rides on the divider output and pushes it across the comparator threshold | `S049` `fools`: "Mains-lit rooms put a 100/120Hz ripple on the output; average over a whole mains cycle or your threshold chatters." |
-| Sodium, LED and incandescent light of the same apparent brightness | Its response peaks around 540 nm and is nearly blind to IR, so the spectrum of what is lighting it changes the answer | `S049` `fools`: "Its spectral response peaks around 540nm and it is nearly blind to infrared, so it badly under-reads incandescent, halogen and IR sources and over-reads green LEDs — it is not a lux meter and never was." |
+| Sodium, LED and incandescent light of the same apparent brightness | Its response peaks around 540 nm and is nearly blind to IR, so the spectrum of what is lighting it changes the answer | `S049` `fools`: "Its spectral response peaks around 540nm and it is nearly blind to infrared, so it badly under-reads incandescent, halogen and IR sources and over-reads green LEDs - it is not a lux meter and never was." |
 | A dirty lens, a spider web, condensation | Surface leakage across the two electrodes is in parallel with the film, and it drifts one way only | `S049` `fools`: "Outdoors the bare cell fogs and the surface leakage across the two electrodes drifts the reading toward 'bright'." |
 | Ageing | The film loses sensitivity, so the switch-on point walks later every year with no error indication | `S049` `consumable`: "None as such, but CdS cells lose sensitivity after years of strong UV; outdoors a bare cell also grows a leakage path across the electrodes from condensation" |
 | Two "identical" units in the same street | ±50 % part-to-part spread within one batch, so no two heads agree on when dusk was | `S049` `fools`: "Part-to-part spread is enormous (+/-50% in one batch), so every cell needs its own calibration and cells are not interchangeable." |
@@ -94,8 +94,8 @@ and cannot tell you it has gone blind.
   the node is coin-cell-viable — but then you have one presence channel and the fusion collapses.
   For a true battery build the atlas's low-power lux part is `S194` MAX44009 at 0.65 µA, $3.
 - **Warm-up.** `S067` `warmup`: "A few seconds electrically, but allow ~30s of an empty, quiet room
-  for the static-clutter baseline to settle — and repeat it after moving any furniture."
-  `S203` `warmup`: "~30 s stabilisation after power-up before the output can be trusted."
+  for the static-clutter baseline to settle - and repeat it after moving any furniture"
+  `S203` `warmup`: "~30 s stabilisation after power-up before the output can be trusted".
 - **Enclosure is the calibration.** `S045` `fools`: "Mounting it behind acrylic or a diffuser changes
   the calibration by 20-50%, so measure your own window rather than trusting the datasheet." The
   AS7341 is worse: its interference filters "blue-shift with the angle of incoming light."

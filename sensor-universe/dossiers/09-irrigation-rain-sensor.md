@@ -106,20 +106,20 @@ from decision-maker to one term in a budget.
   one bundled in. `S128` alone is a third of the build.
 - **Two long warm-ups before any of it means anything.** `S186` `warmup`: "A new sensor must be
   wetted and dried through 2-3 cycles before it settles, and needs about a week in the ground for
-  soil-to-sensor contact to establish." `S015` `warmup`: the cap "slows the 63% step response to
+  soil-to-sensor contact to establish…" `S015` `warmup`: the cap "slows the 63% step response to
   ~20-30s."
 - **Consumables and service, everywhere.** `S186` `consumable`: the gypsum wafer "dissolves slowly —
   expect 3-7 years in ordinary soil, markedly less in saline soil." `S121` `consumable`: "Cheap cups
   get sticky within 2-3 outdoor years — the failure is a rising start-up threshold, not a dead
   sensor." `S123` `consumable`: the funnel "needs clearing of leaves, pollen and insects every few
   months." `S128` `consumable`: "Expect a few percent per year of soiling drift and plan a
-  recalibration every ~2 years."
+  recalibration every ~2 years…"
 - **Calibration burden.** `S186` is `One-point` but only after AC excitation is built correctly —
   `requires`: "You MUST alternate the polarity… DC excitation polarises the electrodes and
   electrolyses the block, destroying the sensor within weeks." `S128` is the dataset's only
   `Periodic`-calibration part in this stack. `S138` is `One-point` and needs a bucket and a stopwatch.
 - **Siting is now an engineering job.** `S121` `fools`: "Siting dominates everything else: any
-  obstacle within about ten times its own height upwind ruins the reading." `S015` outdoors and
+  obstacle within about ten times its own height upwind ruins the reading…" `S015` outdoors and
   unshielded "reads 5-15 °C high, and since RH is referenced to that temperature the humidity number
   is garbage too." `S128` needs level mounting and a clear horizon.
 - **The valve has a hard precondition.** `A009` `fools`: "Servo-assisted valves need minimum inlet

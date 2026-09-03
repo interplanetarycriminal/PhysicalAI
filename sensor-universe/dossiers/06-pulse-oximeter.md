@@ -89,7 +89,7 @@ route through the R-curve at all, so the two channels fail for different reasons
 
 ## What this costs you
 - **It refuses to answer more often than the incumbent does.** That is the design, and users hate it.
-- **Warm-up.** `S368`: "2-10s for automatic gain control and the probe to settle on a finger."
+- **Warm-up.** `S368`: "2-10s for automatic gain control and the probe to settle on a finger".
   `S370`: "a skin patch takes 5-15 minutes to reach equilibrium after application". `S205`'s gyro
   needs its CRT self-trim at every power-up, and the ~8 kB Bosch config blob must be uploaded on
   every boot or you silently get accelerometer-only.
@@ -100,7 +100,7 @@ route through the R-curve at all, so the two channels fail for different reasons
   20–50 mA LED bursts that will brown out a coin cell. This is a LiPo build.
 - **Consumables and wear.** Gel electrodes for the ECG channel are single-use. `S112`: "the optical
   window scratches and skin oil films it — a clouded window silently loses perfusion index over
-  months of wear."
+  months of wear".
 - **Privacy.** `S112` and `S217` are both `privacy: Identifiable`. A single-lead ECG is biometric —
   the atlas notes on `S362` that "a single-lead ECG is sufficient to identify a person in a closed
   set — the stored waveform is biometric data, not anonymous telemetry." Keep it on-device.

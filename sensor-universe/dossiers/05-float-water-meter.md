@@ -99,7 +99,7 @@ sealed and legal.
   needs pipe outside diameter, **wall thickness** and material entered by hand; a 1 mm wall error
   gives a confidently wrong number. Cast iron often returns no signal at all.
 - **Consumables.** `S234` `consumable`: "Ultrasonic couplant is the consumable... Silicone grease
-  dries out and signal quality falls over weeks to months outdoors." Plan a re-grease schedule.
+  dries out and signal quality falls over weeks to months outdoors…" Plan a re-grease schedule.
 - **Drift.** `S234` `calibration: One-point`, and it "will happily report tens of litres per hour
   unless you perform a zero calibration with flow stopped — and that zero must be redone seasonally."
 - **Power.** This is a mains build, not a coin cell: `S234` draws `pwr_ua: 167000` (2 W at 12–24 V),

@@ -112,7 +112,7 @@ metre-accurate position, which is the difference between one hole in the wall an
   puck runs three years on a coin cell.
 - **The acoustic channel is the fragile one.** `S091` `fools`: "What it really measures is the bond:
   blu-tack, tape, cyanoacrylate and epoxy differ by more than 20 dB… and any bond that ages shifts
-  your baseline." `S232` `consumable`: "Couplant is the consumable and it dominates repeatability.
+  your baseline…" `S232` `consumable`: "Couplant is the consumable and it dominates repeatability.
   Silicone grease or ultrasound gel dries out in days to weeks and the reading falls as it does,
   which looks exactly like a machine getting healthier."
 - **The flow meter has costs of its own.** `S138` `consumable`: plastic impeller and one bearing,

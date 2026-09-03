@@ -87,12 +87,12 @@ about the blocked flue, which the incumbent cannot detect at all.
 - **Price.** $152 against about $8 for the thing it replaces. That is a nineteen-fold price increase
   for a device that is explicitly not certified.
 - **Consumables.** `S033`: "The cell IS the consumable: 1-2 years of life from the day the shorting
-  clip comes off, used or not. Budget ~$25-60 per cell per replacement." `S040`: fan bearing and
+  clip comes off, used or not. Budget ~$25-60 per cell per replacement". `S040`: fan bearing and
   laser diode, "realistically 1-2 years running 24/7." The Am-241 chamber has a ten-year service
   life and no moving parts.
 - **Warm-up.** Nothing here is instantly ready. `S024`: "~60s for a valid raw signal; ~1h before the
   index means anything; ~24h for a settled baseline." `S033`: "up to 24-48 h for a cell that has
-  just had its shipping shorting clip removed." `S040`: 30 s of fan every time it wakes.
+  just had its shipping shorting clip removed". `S040`: 30 s of fan every time it wakes.
 - **Power.** The PM fan is 100 mA whenever it runs and cannot be a battery device; the incumbent
   lives nine years on one 9 V cell. This is a mains build with a duty-cycled fan, or nothing.
 - **Calibration.** `S033` and `S024` are `Reference` and `Periodic` respectively; the CO cell needs

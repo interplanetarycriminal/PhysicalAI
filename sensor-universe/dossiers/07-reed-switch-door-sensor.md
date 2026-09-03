@@ -104,7 +104,7 @@ even asks: whether anyone actually came through.
   properly shielded static port."
 - **The piezo is a bad outdoor sensor.** `S097` `fools`: "PVDF is pyroelectric as well as
   piezoelectric — a warm hand near it, a draught, or sunlight moving across it produces a slow
-  signal indistinguishable from a slow bend."
+  signal indistinguishable from a slow bend…"
 - **Privacy.** Every part here is `privacy: None` or `Aggregate`, which is the good news: this
   counts passages without identifying anyone. But a whole-house pressure log is a fine-grained
   record of when people moved between rooms, and should be treated as such.

@@ -92,7 +92,7 @@ boiler stops chasing an air number that nobody's body cares about — and the sa
 - **Placement becomes an engineering problem.** The MLX90640 must have a clear line of sight —
   `S161` `requires`: "1MHz I2C, and enough RAM for the frame plus the calibration parameter set",
   and `S071` `requires` "A completely unobstructed line of sight. Ordinary glass, acrylic and
-  polycarbonate are opaque in the 8-14um band." No pretty enclosure window. No dust on the lens.
+  polycarbonate are opaque in the 8-14um band…" No pretty enclosure window. No dust on the lens.
 - **Warm-up and self-heating everywhere.** `S161` `fools`: "The chip's own temperature enters the
   calculation, so it needs minutes to stabilise after power-up and drifts if mounted next to
   anything warm." `S012` `fools`: "an ESP32 on the same board raises the temperature channel 1-3°C,
