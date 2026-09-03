@@ -127,6 +127,16 @@ INTERFACE = {
     "Builtin": "Internal to the SoC — no external wiring",
 }
 
+# --------------------------------------------------------------------------- physics layer
+# How complete this record's physics layer is. Every sensor carries one: records
+# with no authored physics entry default to "unfilled" at load time, so coverage
+# is a fact about the data rather than a promise about it.
+PX_STATUS = ["filled", "partial", "unfilled"]
+
+# Where a physics-layer claim comes from. Ordered loosely by how specific the
+# source is to THIS part: a datasheet figure beats a textbook derivation.
+PX_REF_KIND = ["datasheet", "appnote", "standard", "paper", "textbook", "measurement"]
+
 CATALOG = {
     "sensor":   "Something that measures the world",
     "actuator": "Something that changes the world",
@@ -213,6 +223,28 @@ FIELDS = {
     # progressively split into range/accuracy/resolution/fools/consumable. Kept
     # so nothing is lost in the migration; not required on new records.
     "spec":      (False, "text",  "LEGACY free-text specs and gotchas"),
+
+    # ----------------------------------------------------------------- physics layer
+    # What the transducer ACTUALLY responds to, as opposed to what the label on the
+    # part says it measures. A capacitive RH sensor does not measure humidity: it
+    # measures the dielectric permittivity of a polymer film that happens to sorb
+    # water. Every entry here is optional; `px_status` says how much of it is real.
+    # Authored in data/physics_layer.py, keyed by frozen id, and overlaid at load
+    # time — never in the part files.
+    "px_status":     (False, "enum:PX_STATUS", "How complete this record's physics layer is"),
+    "px_measurand":  (False, "str",  "The physical quantity the transducer actually responds to"),
+    "px_units":      (False, "str",  "SI units of px_measurand"),
+    "px_effect":     (False, "str",  "Named physical effect relied on (Seebeck, piezoresistance, Mie scattering…)"),
+    "px_chain":      (False, "csv",  "Energy-domain path of the transduction, e.g. Radiant,Electrical"),
+    "px_cross":      (False, "vocablist:PHYSQTY", "Quantities that also move the output and are normally called noise"),
+    "px_cross_note": (False, "text", "Per cross term: mechanism, sign, magnitude"),
+    "px_range":      (False, "str",  "Quantitative range in px_units — may differ from the labelled range"),
+    "px_resolution": (False, "str",  "Noise floor / LSB in px_units"),
+    "px_bandwidth":  (False, "str",  "-3 dB bandwidth or response time constant (NOT `rate`, which is sample rate)"),
+    "px_drift":      (False, "str",  "Long-term stability and tempco"),
+    "px_implies":    (False, "text", "What a signal from this sensor implies about the world beyond its label"),
+    "px_ref":        (False, "str",  "Citation: document title + revision + URL"),
+    "px_ref_kind":   (False, "enum:PX_REF_KIND", "What kind of source px_ref is"),
 }
 
 REQUIRED = [k for k, v in FIELDS.items() if v[0]]

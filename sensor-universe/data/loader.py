@@ -5,7 +5,8 @@ Load order matters:
     2. legacy category/theme names migrated to the schema-v2 vocabulary
     3. stable IDs attached from ids.json (assigned once, never renumbered)
     4. enrichment overlay merged in by ID  (the ~17 schema-v2 fields)
-    5. derived fields computed  (tier, power class — never authored)
+    5. physics-layer overlay merged in by id (sensors only; wins on conflict)
+    6. derived fields computed  (tier, power class — never authored)
 """
 import json
 import re
@@ -244,6 +245,17 @@ def load_all(persist_ids=True):
     for r in records:
         for k, v in (overlay.get(r["id"]) or {}).items():
             r[k] = v
+
+    # physics-layer overlay, applied by id AFTER the three enrichment overlays so
+    # it wins on conflict. Sensors only — glue, actuators and boards transduce
+    # nothing, so a physics layer on them would be a category error. Every sensor
+    # comes out carrying a px_status; those with no authored entry are "unfilled".
+    px_mod = _import("physics_layer")
+    if px_mod is not None:
+        for r in records:
+            if r.get("catalog", "sensor") != "sensor":
+                continue
+            r.update(px_mod.overlay(r["id"]))
 
     # derived — computed, never authored
     for r in records:

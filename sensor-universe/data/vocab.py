@@ -546,3 +546,78 @@ FUSION = {
    "the liquid around it. A ranging ping at a FIXED distance: the flight time reads air "
    "temperature. The Combination Grammar's Active Interrogation family, as a fusion kind."),
 }
+
+# --------------------------------------------------------------------------- physical quantities
+# PHYSQTY — the controlled vocabulary for the physics layer's cross-sensitivity
+# field (`px_cross` in schema.FIELDS, kind `vocablist:PHYSQTY`). These are the
+# quantities that ALSO move a sensor's output and are normally dismissed as
+# noise; naming them is how the atlas records what actually fools a transducer.
+#
+# Deliberately physical, like PHENOMENON, but read from the other direction:
+# PHENOMENON is what a part is FOR, PHYSQTY is what it cannot help responding to.
+#
+# TO EXTEND: append the new token to the list below, inside its physical group
+# (or start a new group with a comment). Tokens are lowercase-hyphenated, one
+# quantity each, no application-level words. Nothing else needs changing — the
+# validator resolves `vocablist:PHYSQTY` through getattr(vocab, "PHYSQTY"), so a
+# token is legal the moment it appears here.
+PHYSQTY = [
+    # thermal
+    "temperature",
+    "temperature-of-electronics",
+    "self-heating",
+    "thermal-gradient",
+    # moisture
+    "humidity",
+    "condensation",
+    "water-vapour",
+    # fluid / atmosphere
+    "pressure",
+    "altitude",
+    "airflow",
+    "wind",
+    # chemistry
+    "gas-composition",
+    "co2",
+    "voc",
+    "oxygen",
+    "ph",
+    "salinity-conductivity",
+    "contamination-poisoning",
+    "dust-fouling",
+    # radiant
+    "ambient-light",
+    "sunlight-load",
+    "ir-radiation",
+    "uv-radiation",
+    "surface-emissivity",
+    "target-reflectivity",
+    "target-colour",
+    "target-geometry",
+    "multipath",
+    # electromagnetic
+    "magnetic-field",
+    "electric-field",
+    "emi-rf",
+    "ionizing-radiation",
+    # electrical front-end
+    "supply-voltage",
+    "ground-noise",
+    "reference-drift",
+    "contact-resistance",
+    "cable-capacitance",
+    "body-capacitance",
+    # mechanical
+    "mechanical-stress",
+    "vibration",
+    "acoustic-noise",
+    "orientation-gravity",
+    "acceleration",
+    "rotation",
+    "soil-density",
+    "precipitation",
+    # time
+    "aging-drift",
+    "hysteresis",
+    "clock-drift",
+]
