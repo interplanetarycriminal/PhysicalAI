@@ -13,6 +13,7 @@ under any constraint and get the kit that buys them.
     python3 solve.py --max-usd 5                 cheapest parts only
     python3 solve.py --privacy-safe --no-contact stack constraints
     python3 solve.py --by count                  fewest PARTS instead of cheapest
+    python3 solve.py --groups                    rank sensor SETS, not sensors
     python3 solve.py --export                    write exports/ for use elsewhere
 
 --export is the answer to "how do I serve this context elsewhere": it writes the
@@ -99,6 +100,69 @@ def report(res, INFERENCE, title, constraints, by):
     return "\n".join(L)
 
 
+# ---------------------------------------------------------------------- groups
+
+# The four rankings best_groups() returns, and the CSV's `objective` label for
+# each. Kept here because export() and --groups must write the same file.
+GROUP_RANKINGS = (("by_score", "score", "Score"),
+                  ("by_part", "per_part", "Outcomes per part"),
+                  ("by_dollar", "per_dollar", "Outcomes per dollar"),
+                  ("by_pin", "per_pin", "Outcomes per pin"))
+
+GROUP_COLS = ["rank", "objective", "sensor_ids", "sensors", "n_parts", "usd", "pins",
+              "declared", "emergent", "score", "lift", "per_part", "per_dollar",
+              "per_pin", "emergent_keys", "new_routes", "fired_edges", "notes",
+              "reasoning"]
+
+
+def write_groups(groups, path):
+    """Write every ranking to one CSV, in rank order. Returns the row count."""
+    rows = 0
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(GROUP_COLS)
+        for name, obj, _label in GROUP_RANKINGS:
+            for i, g in enumerate(groups[name], 1):
+                w.writerow([i, obj, "|".join(g["ids"]), "|".join(g["names"]),
+                            g["n_parts"], g["usd"], g["pins"], g["declared"],
+                            g["emergent"], g["score"], g["lift"], g["per_part"],
+                            g["per_dollar"], g["per_pin"],
+                            "|".join(g["emergent_keys"]), "|".join(g["new_routes"]),
+                            "|".join(g["fired_keys"]), "|".join(g["notes"]),
+                            g["reasoning"]])
+                rows += 1
+    return rows
+
+
+def groups_report(groups, title):
+    """The three set rankings as markdown: per part, per dollar, per pin."""
+    p = groups["params"]
+    cap = f"${p['max_usd']:g} per part" if p["max_usd"] is not None else "none"
+    L = [f"# {title}", "",
+         f"- **Pool** — {p['pool']} sensors, price cap {cap}",
+         f"- **Set size** — {p['min_k']} to {p['max_k']} parts",
+         f"- **Searched** — {p['searched']:,} sets, {p['rejected']} rejected as "
+         f"unbuildable on one ESP32",
+         f"- **Method** — pairs exhaustive; k≥3 is a beam search (beam {p['beam']}, "
+         f"extension pool {p['extension_pool']}), so these are the best sets FOUND, "
+         f"not proven optima",
+         f"- **Elapsed** — {p['seconds']}s", ""]
+    for name, obj, label in GROUP_RANKINGS[1:]:
+        L += ["", f"## Best sets by {label.lower()}", "",
+              f"| # | Set | Parts | $ | Pins | Declared | +Emergent | Score | Lift | "
+              f"{label} | What only the set reaches |",
+              "|--:|---|--:|--:|--:|--:|--:|--:|--:|--:|---|"]
+        for i, g in enumerate(groups[name][:15], 1):
+            L.append(f"| {i} | {' + '.join(g['names'])} | {g['n_parts']} | "
+                     f"${g['usd']:g} | {g['pins']} | {g['declared']} | "
+                     f"+{g['emergent']} | **{g['score']}** | +{g['lift']} | "
+                     f"{g[obj]:g} | {', '.join(g['new_emergent_keys']) or '—'} |")
+    L += ["", "", "## Why these sets, in words", ""]
+    for g in groups["groups"][:8]:
+        L.append(f"- {g['reasoning']}")
+    return "\n".join(L)
+
+
 # ---------------------------------------------------------------------- export
 
 def export(records, INFERENCE, sol):
@@ -130,6 +194,7 @@ def export(records, INFERENCE, sol):
                           count_notes=sol["minimise_notes_count"],
                           minimised_kit=dict(sensors=sol["kit_cost_min_len"],
                                              usd=round(sol["cost_cost_min"], 2))),
+        groups=sol.get("groups"),
         fusion=(dict(
             n_edges=sol["fusion"]["n_edges"], n_emergent=sol["fusion"]["n_emergent"],
             tier_closures=sol["fusion"]["tier_closures"],
@@ -211,6 +276,10 @@ def export(records, INFERENCE, sol):
     # 7 · the servable narrative
     (EXPORTS / "SOLVER.md").write_text(markdown(sol, INFERENCE))
 
+    # 8 · the ranked sensor SETS — the only export that prices a kit in pins
+    if sol.get("groups"):
+        write_groups(sol["groups"], EXPORTS / "best_groups.csv")
+
     return sorted(p.name for p in EXPORTS.iterdir())
 
 
@@ -280,6 +349,24 @@ def markdown(sol, INFERENCE):
             L.append(f"| {e['name']} | {e['pattern']} | {needs} | {kind}: {e['provides']} | "
                      f"{e['math']} |")
 
+    if sol.get("groups"):
+        gr = sol["groups"]
+        L += ["", "## The most generative SETS", "",
+              f"Every ranking above scores parts one at a time. This one scores SETS, "
+              f"which is where the fusion edges actually pay out. {gr['params']['searched']:,} "
+              f"sets of {gr['params']['min_k']}–{gr['params']['max_k']} parts were searched "
+              f"(pairs exhaustively, larger sets by beam search) and priced in ESP32 pins as "
+              f"well as dollars, because a shared I2C bus is paid once and a set that will not "
+              f"fit on the board is not an answer.", "",
+              "| Set | Parts | $ | Pins | Declared | +Emergent | Score | Lift | "
+              "What only the set reaches |",
+              "|---|--:|--:|--:|--:|--:|--:|--:|---|"]
+        for g in gr["groups"][:15]:
+            L.append(f"| {' + '.join(g['names'])} | {g['n_parts']} | ${g['usd']:g} | "
+                     f"{g['pins']} | {g['declared']} | +{g['emergent']} | "
+                     f"**{g['score']}** | +{g['lift']} | "
+                     f"{', '.join(g['new_emergent_keys']) or '—'} |")
+
     L += ["", "## What a fixed budget buys", "",
           "| Budget | Parts | Outcomes | % | Spent |", "|--:|--:|--:|--:|--:|"]
     for b in sol["budget_frontier"]:
@@ -341,6 +428,10 @@ def main():
                    help="hard spend cap: maximise outcomes under $N instead of covering all")
     p.add_argument("--fusion", action="store_true",
                    help="also report which fusion instruments the resulting kit unlocks")
+    p.add_argument("--groups", action="store_true",
+                   help="rank sensor SETS (2-6 parts) by outcomes per part, "
+                        "per dollar and per pin")
+    p.add_argument("--k", type=int, default=6, help="largest set size to search")
     p.add_argument("--export", action="store_true", help="write exports/ and exit")
     p.add_argument("--json", action="store_true", help="emit this run as JSON")
     a = p.parse_args()
@@ -365,6 +456,16 @@ def main():
         print(f"exports/ written — {len(names)} files")
         for n in names:
             print(f"  {n:<26} {(EXPORTS / n).stat().st_size:>9,} bytes")
+        return
+
+    if a.groups:
+        S = osv.index(records, INF)
+        groups = osv.best_groups(S, records=records, max_k=a.k, max_usd=a.max_usd)
+        title = f"Sensor SETS — the most generative groupings (up to {a.k} parts)"
+        print(groups_report(groups, title))
+        EXPORTS.mkdir(exist_ok=True)
+        rows = write_groups(groups, EXPORTS / "best_groups.csv")
+        print(f"\n_{rows} rows written to exports/best_groups.csv_")
         return
 
     keys = None

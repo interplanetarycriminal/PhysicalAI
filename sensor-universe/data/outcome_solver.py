@@ -17,6 +17,8 @@ Two greedy objectives are run, and the difference between them is the finding:
 v50 already documents how to COMBINE sensors (Derived Quantities, Combination
 Grammar, Fusion Patterns). Nothing computes what to BUY. That is this.
 """
+import re
+import time
 from collections import Counter, defaultdict
 
 try:
@@ -252,6 +254,501 @@ def solve(records, INFERENCE, keys=None, by_cost=True, predicate=None):
                 pct=len(cov) / max(len(target), 1))
 
 
+# ---------------------------------------------------------------- wiring model
+# A SET is not the sum of its parts. Two I2C sensors do not cost four GPIO
+# lines, they cost two, because the bus is shared. Everything below models that,
+# because "outcomes per pin" rewards exactly the wrong sets if the pin count is
+# the naive sum.
+
+# Shared buses: (lines the FIRST device on the bus costs, lines each EXTRA one
+# costs). SPI is three shared lines plus one chip-select per device.
+SHARED_BUS = {"I2C": (2, 0), "SPI": (3, 1), "1-Wire": (1, 0), "I2S": (3, 0)}
+
+# Charged per device, no shared setup — there is no UART fabric to share.
+PER_DEVICE_BUS = {"UART": 2}
+
+# An ESP32 has three hardware UARTs and the console normally eats one.
+MAX_UART_DEVICES = 2
+
+# A plausible GPIO budget for one board, and for one part inside a set.
+GPIO_BUDGET = 26
+MAX_PART_PINS = 12
+
+# `esp32_compat` is prose, so it is mined for FLAGS and never for arithmetic.
+# (key, exclusive, note, keywords). `exclusive` means the ESP32 has exactly one
+# of the resource, so two members both wanting it makes the set unbuildable.
+ESP32_COMPAT_FLAGS = [
+    ("camera", True,
+     "parallel camera interface, of which an ESP32 has one",
+     ("camera interface", "parallel camera", "dvp", "esp32-cam", "camera bus")),
+    ("adc2-wifi", False,
+     "ADC1 only — ADC2 is dead while Wi-Fi is running",
+     ("adc2",)),
+    ("psram", False,
+     "PSRAM wanted — an S3 or WROVER variant, not a plain ESP32",
+     ("psram",)),
+    ("touch-pin", False,
+     "a capacitive touch channel is consumed",
+     ("touch pin", "touch-pin", "touch pad", "touch channel")),
+    ("level-shift", False,
+     "a level translator is needed — not a 3.3V-native signal",
+     ("level shift", "level-shift", "level translator", "not 5v tolerant",
+      "5v-tolerant")),
+    ("dac", False,
+     "a true DAC pin is needed, and the original ESP32 has two",
+     ("dac",)),
+]
+
+# Phrasing that means the catalog itself says the part does not work here.
+ESP32_UNUSABLE = ("not compatible", "won't work", "will not work", "incompatible")
+
+# Free-text i2c_addr mining. The repo's older regex found only "0x[0-9A-Fa-f]{2}",
+# which reads '0x18-0x1F via A0/A1/A2' as the two endpoints and silently loses
+# the six addresses between them. Ranges are expanded here instead.
+I2C_ADDR_RE = re.compile(r"0x([0-9A-Fa-f]{2})")
+I2C_RANGE_RE = re.compile(r"0x([0-9A-Fa-f]{2})\s*[-–—]\s*0x([0-9A-Fa-f]{2})")
+
+# Any of these in the address text means the address can be MOVED. The list is
+# deliberately generous: calling a rigid part flexible only costs a caveat,
+# while calling a flexible part rigid throws away a buildable set.
+I2C_FLEX_WORDS = (" or ", "/", "jumper", "selectable", "strap", "addr", "add0",
+                  "solder", "reprogram", "eeprom", "resistor", "mux", "default",
+                  "pulled", "tied", "variant", "settable", "configurable")
+
+
+def i2c_addresses(text):
+    """Every 7-bit address a part can answer on, and whether it can be moved.
+
+    The addresses matter because two parts stuck on the same one cannot share a
+    bus, and that is a hardware fact no coverage score knows about. Ranges are
+    expanded rather than read as endpoints, so '0x18-0x1F via A0/A1/A2' yields
+    eight addresses and not two.
+
+    text — the record's free-text `i2c_addr` field, or None
+
+    Returns (sorted list of ints, flexible bool).
+    """
+    t = text or ""
+    addrs = set()
+    for lo, hi in I2C_RANGE_RE.findall(t):
+        a, b = int(lo, 16), int(hi, 16)
+        if a <= b and b - a <= 32:
+            addrs |= set(range(a, b + 1))
+    addrs |= {int(a, 16) for a in I2C_ADDR_RE.findall(t)}
+    low = t.lower()
+    return sorted(addrs), (len(addrs) > 1 or any(w in low for w in I2C_FLEX_WORDS))
+
+
+def esp32_unusable(record):
+    """True when the record's own prose says it will not work on an ESP32."""
+    low = (record.get("esp32_compat") or "").lower()
+    return any(w in low for w in ESP32_UNUSABLE)
+
+
+# The compat prose says "no DAC or touch needed" at least as often as it says a
+# part wants one, and a bare substring search reads those two the same way. A
+# negator this close in front of a keyword cancels the hit.
+NEGATORS = ("no ", "not ", "nothing", "without", "never", "n't", "free of")
+NEG_WINDOW = 48
+
+
+def compat_flags(record):
+    """Which ESP32_COMPAT_FLAGS keys this one record trips, by keyword.
+
+    Every hit is checked against the words immediately before it, because the
+    catalog states a part's INDIFFERENCE to a resource as often as its need for
+    one, and a flag raised on "no DAC or touch involved" is worse than no flag.
+    """
+    low = (record.get("esp32_compat") or "").lower()
+    hit = set()
+    for key, _x, _n, words in ESP32_COMPAT_FLAGS:
+        for w in words:
+            i = low.find(w)
+            while i >= 0:
+                if not any(g in low[max(0, i - NEG_WINDOW):i] for g in NEGATORS):
+                    hit.add(key)
+                    break
+                i = low.find(w, i + 1)
+            if key in hit:
+                break
+    if "Camera" in (record.get("iface") or []):
+        hit.add("camera")
+    return hit
+
+
+_WIRING = {}
+
+
+def part_wiring(record):
+    """Per-part wiring facts, memoised by catalog id.
+
+    The set ranker asks these questions of the same few hundred parts a hundred
+    thousand times over, and re-running two regexes and six substring scans each
+    time is most of the runtime. Records do not change within a run, so the
+    answer is cached against `id`.
+
+    Returns dict(buses, uart, plain, addr, movable, flags).
+    """
+    w = _WIRING.get(record["id"])
+    if w is not None:
+        return w
+    ifaces = list(record.get("iface") or [])
+    plain = [i for i in ifaces if i not in SHARED_BUS and i not in PER_DEVICE_BUS]
+    addrs, flexible = i2c_addresses(record.get("i2c_addr"))
+    w = dict(
+        buses=frozenset(i for i in ifaces if i in SHARED_BUS),
+        uart=("UART" in ifaces),
+        # the authored fallback, used whenever the part's interface is one this
+        # model does not represent (Analog, Digital, Pulse, PWM, CAN, USB...)
+        plain=((int(record.get("pins") or 0), plain[0] if plain else "direct")
+               if (plain or not ifaces) else None),
+        addr=(addrs[0] if "I2C" in ifaces and len(addrs) == 1 else None),
+        movable=(flexible or any(i != "I2C" for i in ifaces)),
+        flexible=flexible,
+        flags=compat_flags(record))
+    _WIRING[record["id"]] = w
+    return w
+
+
+def pin_cost(recs, plan=False):
+    """GPIO lines one ESP32 actually spends on a SET, not the sum of `pins`.
+
+    Summing the authored per-part `pins` charges the I2C bus once per device,
+    which makes an all-I2C set look three times more expensive than it is. Here
+    a shared bus is paid once for the set and then per device, and a part
+    listing several interfaces takes whichever is cheapest GIVEN what the rest
+    of the set has already opened — which is why the choice cannot be made part
+    by part. Only the buses some member actually offers are considered, so all
+    open/shut combinations are enumerated exactly and the cheapest consistent
+    one wins; ties break on bus name then part id, so the answer is
+    deterministic.
+
+    recs — catalog records for the whole set
+    plan — return the full assignment instead of just the integer
+
+    Returns an int, or dict(pins, buses, assign, uart) when `plan` is set.
+    """
+    ws = [part_wiring(r) for r in recs]
+    present = sorted({b for w in ws for b in w["buses"]})
+    best = None
+    for mask in range(1 << len(present)):
+        opened = [present[i] for i in range(len(present)) if mask >> i & 1]
+        total, assign, ok = sum(SHARED_BUS[b][0] for b in opened), [], True
+        for r, w in zip(recs, ws):
+            opts = [(SHARED_BUS[b][1], b) for b in opened if b in w["buses"]]
+            if w["uart"]:
+                opts.append((PER_DEVICE_BUS["UART"], "UART"))
+            if w["plain"] is not None:
+                opts.append(w["plain"])
+            if not opts:
+                ok = False        # its only bus is shut in this combination
+                break
+            c, b = min(opts)
+            assign.append((r["id"], b))
+            total += c
+        if not ok:
+            continue
+        cand = (total, tuple(opened), tuple(sorted(assign)))
+        if best is None or cand < best:
+            best = cand
+    if best is None:                                  # nothing modelled at all
+        best = (sum(int(r.get("pins") or 0) for r in recs), (), ())
+    if not plan:
+        return best[0]
+    assign = dict(best[2])
+    return dict(pins=best[0], buses=list(best[1]), assign=assign,
+                uart=sum(1 for b in assign.values() if b == "UART"))
+
+
+def group_flags(recs, plan=None):
+    """Can this SET actually be built on one ESP32, and what has to be said?
+
+    Coverage says what a set could know; this says whether you can wire it. Two
+    rules reject outright — two parts welded to the same I2C address with no
+    second bus between them, and two parts each wanting the one exclusive
+    resource — because those sets do not exist in hardware. Everything softer
+    becomes a caveat, because a false rejection silently deletes a good answer
+    while a false caveat only costs a sentence.
+
+    recs — catalog records for the whole set
+    plan — a `pin_cost(..., plan=True)` result, if the caller already has one
+
+    Returns (ok bool, notes list of str).
+    """
+    ok, notes = True, []
+
+    # --- I2C address collisions
+    by_addr = defaultdict(list)
+    for r in recs:
+        w = part_wiring(r)
+        if w["addr"] is not None:
+            by_addr[w["addr"]].append((r, w))
+    for addr, members in sorted(by_addr.items()):
+        if len(members) < 2:
+            continue
+        stuck = [m for m in members if not m[1]["movable"]]
+        who = " and ".join(m[0]["n"] for m in members)
+        if len(stuck) >= 2:
+            ok = False
+            notes.append(f"unbuildable — {who} are both fixed at 0x{addr:02x} "
+                         f"with no second bus between them")
+        else:
+            m = [m for m in members if m[1]["movable"]][0]
+            how = ("move its address jumper" if m[1]["flexible"]
+                   else "put it on its other bus")
+            notes.append(f"0x{addr:02x} clash between {who} — {how} for {m[0]['n']}")
+
+    # --- exclusive ESP32 resources
+    seen = defaultdict(list)
+    for r in recs:
+        for k in part_wiring(r)["flags"]:
+            seen[k].append(r)
+    for key, exclusive, note, _words in ESP32_COMPAT_FLAGS:
+        hits = seen.get(key)
+        if not hits:
+            continue
+        who = ", ".join(h["n"] for h in hits)
+        if exclusive and len(hits) > 1:
+            ok = False
+            notes.append(f"unbuildable — two parts want the same single "
+                         f"resource ({note}): {who}")
+        else:
+            notes.append(f"{note} — {who}")
+
+    # --- pin budget
+    plan = pin_cost(recs, plan=True) if plan is None else plan
+    if plan["uart"] > MAX_UART_DEVICES:
+        notes.append(f"{plan['uart']} UART devices — an ESP32 has three hardware "
+                     f"UARTs and the console usually takes one")
+    if plan["pins"] > GPIO_BUDGET:
+        ok = False
+        notes.append(f"unbuildable — {plan['pins']} GPIO lines, past the "
+                     f"{GPIO_BUDGET}-line budget for one board")
+    return ok, notes
+
+
+def _bus_phrase(plan):
+    """'all of it sits on I2C' / 'it spans I2C + UART' — for the prose line."""
+    buses = sorted(set(plan["assign"].values()))
+    if not buses:
+        return "it wires straight to GPIO"
+    if len(buses) == 1:
+        return f"all of it sits on {buses[0]}"
+    return "it spans " + " + ".join(buses)
+
+
+def _reason(g, plan, by_key):
+    """Generate the group's prose FROM its numbers, never from a template bank.
+
+    Every clause has to be recoverable from the group dict, so the sentence
+    cannot drift away from the computation the way authored prose does. It
+    names the fusion edges the set fires that no member fires alone, the
+    emergent keys those edges provide, the solo-versus-together reach, and what
+    the thing costs in dollars and pins.
+    """
+    who = " + ".join(g["names"])
+    named = [by_key[k]["name"] for k in g["new_edge_keys"] if k in by_key]
+    bits = []
+    if named:
+        bits.append("fires " + ", ".join(named[:3])
+                    + (f" and {len(named) - 3} more" if len(named) > 3 else ""))
+    if g["new_emergent_keys"]:
+        bits.append("unlocking " + ", ".join(g["new_emergent_keys"][:4]))
+    n_new = len(g["new_routes"])
+    if n_new:
+        bits.append(f"plus {n_new} new route{'s' if n_new != 1 else ''} to "
+                    f"outcomes it declares nowhere")
+    head = (", ".join(bits) if bits else
+            "adds cover without firing anything its members do not fire alone")
+    s = (f"{who}: the set {head} — {g['score']} outcomes together against "
+         f"{g['solo_best_score']} for its best single member, a lift of "
+         f"{g['lift']}. It costs {g['pins']} ESP32 pins and ${g['usd']:g}; "
+         f"{_bus_phrase(plan)}.")
+    if g["notes"]:
+        s += f" Caveat: {g['notes'][0]}."
+    return s
+
+
+def best_groups(S, edges=None, records=None, min_k=2, max_k=6, max_usd=None,
+                beam=30, top=30, cand_cap=120):
+    """Rank sensor SETS, not sensors, by what the set knows that no member does.
+
+    Every other ranking in this module scores parts one at a time, which the
+    fusion layer itself calls a lower bound. A set is worth more than its
+    members when an edge fires across it, and the whole question is which cheap
+    sets do that. Exhaustive search dies immediately — 405 choose 6 is about
+    7e12 — so pairs are enumerated in FULL and k=3..max_k is a beam search
+    seeded from the best pairs. That is a stated DEVIATION from an exact
+    answer: a set outside the beam at k=3 can never be found at k=6, so these
+    are the best sets FOUND, not proven optima. Breadth is traded for time on
+    purpose, and the parameters that set the trade are arguments.
+
+    The beam keeps `beam` survivors under EACH objective rather than one merged
+    ranking, so a two-dollar pair and a fifty-dollar six-part set both live to
+    the next level instead of the wide sets crowding the cheap ones out. Sets
+    are extended only by parts some edge's `requires` actually mentions (plus
+    the widest-reaching parts, to keep plain coverage reachable), capped at
+    `cand_cap`. Every candidate list is sorted before use and every tie breaks
+    on (score desc, usd asc, ids), so a run is reproducible and
+    `verify_build.py` can re-derive the top row independently.
+
+    Sets are also checked against the hardware, which is what makes this a
+    shopping list rather than an arithmetic exercise: shared buses are paid
+    once (`pin_cost`), and I2C address collisions or exclusive ESP32 resources
+    reject a set outright (`group_flags`).
+
+    S        — the bipartite index from `index()`: sensor id -> (record, outcomes)
+    edges    — fusion edges; defaults to fusion.FUSION_EDGES
+    records  — the full catalog, optional; used only to confirm ids resolve
+    min_k    — smallest set size to report
+    max_k    — largest set size to search
+    max_usd  — PER-PART price cap, matching solve.py's --max-usd, not a set total
+    beam     — survivors kept per objective at each level
+    top      — rows per ranking
+    cand_cap — hard cap on the extension candidate pool
+
+    Returns dict(groups, by_score, by_part, by_dollar, by_pin, params).
+    """
+    t0 = time.time()
+    edges = fusion.FUSION_EDGES if edges is None else edges
+    by_key = {e["key"]: e for e in edges}
+    catalog_ids = {r["id"] for r in records} if records else None
+
+    # ---- the candidate pool: affordable, wireable, and actually in the catalog
+    pool = {}
+    for sid, (r, inf) in S.items():
+        if catalog_ids is not None and sid not in catalog_ids:
+            continue
+        usd = r.get("usd") if isinstance(r.get("usd"), (int, float)) else 1e9
+        if max_usd is not None and usd > max_usd:
+            continue
+        if int(r.get("pins") or 0) > MAX_PART_PINS or esp32_unusable(r):
+            continue
+        pool[sid] = (r, inf)
+
+    # ---- what each part reaches on its own, so `lift` means something
+    solo = {}
+    for sid, (r, inf) in pool.items():
+        cl = closure([r], edges)
+        solo[sid] = dict(declared=len(inf), score=len(inf) + len(cl["emergent"]),
+                         fired=set(cl["fired_keys"]),
+                         emergent_keys=set(cl["emergent"]))
+
+    # ---- who can even create emergence: parts an edge's `requires` mentions
+    atoms = {c for e in edges for c, _m in e["requires"]}
+    order = sorted(pool, key=lambda s: (-solo[s]["score"],
+                                        pool[s][0].get("usd") or 0, s))
+    ext = [s for s in order if fusion.covers(pool[s][0]) & atoms][:cand_cap]
+    for s in order:                       # keep the widest reach in regardless
+        if len(ext) >= cand_cap:
+            break
+        if s not in ext:
+            ext.append(s)
+    ext = sorted(set(ext), key=lambda s: (-solo[s]["score"],
+                                          pool[s][0].get("usd") or 0, s))
+
+    seen, stats = {}, dict(evaluated=0, rejected=0)
+
+    def evaluate(ids):
+        """Score one set, or None when the hardware says it cannot be built."""
+        fs = frozenset(ids)
+        if fs in seen:
+            return seen[fs]
+        seen[fs] = None
+        recs = [pool[s][0] for s in ids]
+        plan = pin_cost(recs, plan=True)
+        ok, notes = group_flags(recs, plan=plan)
+        if not ok:
+            stats["rejected"] += 1
+            return None
+        stats["evaluated"] += 1
+        cl = closure(recs, edges)
+        declared = set()
+        for s in ids:
+            declared |= pool[s][1]
+        solo_fired = set().union(*(solo[s]["fired"] for s in ids))
+        solo_em = set().union(*(solo[s]["emergent_keys"] for s in ids))
+        best_solo = max(solo[s]["score"] for s in ids)
+        usd = round(sum((pool[s][0].get("usd") or 0) for s in ids), 2)
+        score = len(declared) + len(cl["emergent"])
+        g = dict(
+            ids=sorted(ids), names=[pool[s][0]["n"] for s in sorted(ids)],
+            n_parts=len(ids), usd=usd, pins=plan["pins"], buses=plan["buses"],
+            declared=len(declared), emergent=len(cl["emergent"]),
+            emergent_keys=list(cl["emergent"]),
+            new_emergent_keys=sorted(set(cl["emergent"]) - solo_em),
+            new_routes=list(cl["new_routes"]),
+            fired_keys=list(cl["fired_keys"]),
+            new_edge_keys=sorted(set(cl["fired_keys"]) - solo_fired),
+            score=score,
+            solo_best=max(solo[s]["declared"] for s in ids),
+            solo_best_score=best_solo, lift=score - best_solo,
+            per_part=round(score / len(ids), 3),
+            per_dollar=round(score / max(usd, 0.5), 3),
+            per_pin=round(score / max(plan["pins"], 1), 3),
+            notes=notes)
+        g["reasoning"] = _reason(g, plan, by_key)
+        seen[fs] = g
+        return g
+
+    OBJ = (("by_score", "score"), ("by_part", "per_part"),
+           ("by_dollar", "per_dollar"), ("by_pin", "per_pin"))
+
+    def rank(gs, field, n):
+        return sorted(gs, key=lambda g: (-g[field], g["usd"], g["ids"]))[:n]
+
+    def survivors(gs):
+        """Union of the top `beam` under each objective — see the docstring."""
+        keep = {}
+        for _name, field in OBJ:
+            for g in rank(gs, field, beam):
+                keep[tuple(g["ids"])] = g
+        return [keep[k] for k in sorted(keep)]
+
+    # ---- k = 2, exhaustive: 405 parts is 81,810 pairs, which is affordable
+    ids = sorted(pool)
+    level = []
+    for i, a in enumerate(ids):
+        for b in ids[i + 1:]:
+            g = evaluate((a, b))
+            if g is not None:
+                level.append(g)
+    found = {tuple(g["ids"]): g for g in level} if min_k <= 2 else {}
+
+    # ---- k = 3..max_k, beam search over the extension pool
+    for k in range(3, max_k + 1):
+        nxt = {}
+        for g in survivors(level):
+            have = set(g["ids"])
+            for s in ext:
+                if s in have:
+                    continue
+                ng = evaluate(tuple(sorted(have | {s})))
+                if ng is not None:
+                    nxt[tuple(ng["ids"])] = ng
+        if not nxt:
+            break
+        level = list(nxt.values())
+        if k >= min_k:
+            found.update(nxt)
+
+    all_found = list(found.values())
+    out = dict(params=dict(min_k=min_k, max_k=max_k, max_usd=max_usd, beam=beam,
+                           top=top, cand_cap=cand_cap, pool=len(pool),
+                           extension_pool=len(ext), searched=len(seen),
+                           evaluated=stats["evaluated"],
+                           rejected=stats["rejected"], n_edges=len(edges)))
+    union = {}
+    for name, field in OBJ:
+        out[name] = rank(all_found, field, top)
+        for g in out[name]:
+            union[tuple(g["ids"])] = g
+    out["groups"] = sorted(union.values(),
+                           key=lambda g: (-g["score"], g["usd"], g["ids"]))
+    out["params"]["seconds"] = round(time.time() - t0, 2)
+    return out
+
+
 def build(records, INFERENCE):
     ALL = set(INFERENCE)
     S = index(records, INFERENCE)
@@ -452,6 +949,14 @@ def build(records, INFERENCE):
                                            new_routes=base["new_routes"]),
                    full_fired=len(full["fired_keys"]))
 
+    # ---------------------------------------------------------------- groups
+    # Everything above ranks parts. This ranks SETS, which is the only place the
+    # fusion edges can actually pay out, and it prices each set in pins as well
+    # as dollars because a set that will not fit on the board is not an answer.
+    groups = None
+    if fusion is not None:
+        groups = best_groups(S, records=records)
+
     # budget frontier: the best reachable at hard spend caps
     budget_frontier = []
     for b in (10, 25, 50, 100, 250):
@@ -467,7 +972,7 @@ def build(records, INFERENCE):
                 cost_count=sum((r.get("usd") or 0) for _, r, _ in kit_count),
                 cost_cost=sum((r.get("usd") or 0) for _, r, _ in kit_cost),
                 trace_cost=trace_cost, trace_count=trace_count,
-                fusion=fus, budget_frontier=budget_frontier,
+                fusion=fus, groups=groups, budget_frontier=budget_frontier,
                 minimise_notes_cost=min_notes_cost,
                 minimise_notes_count=min_notes_count,
                 kit_cost_min_len=len(kit_cost_min),

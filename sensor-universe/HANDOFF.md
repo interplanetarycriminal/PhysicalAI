@@ -115,6 +115,15 @@ Rules: `bom` must satisfy the edge's `requires` under `fusion.covers()` (validat
 **Task 3.3** `solve.py --groups [--k 3] [--max-usd N]` CLI; `exports/groups.csv`; SOLVER.md section.
 **Done when:** the sheet names concrete cheap pairs with their emergent unlocks; independent recount in `verify_build.py` for the top row. Commit as v58.
 
+**Status — Tasks 3.1 and 3.3 are DONE. Task 3.2 is deliberately NOT done, so there is no version bump and the workbook is untouched (still v55).**
+`data/outcome_solver.py` gained `best_groups()` and the wiring model it needs (`pin_cost`, `group_flags`, `i2c_addresses`, `compat_flags`), wired into `build()` as `sol["groups"]`. `solve.py` gained `--groups [--k N] [--max-usd N]` as a terminal mode, writes `exports/best_groups.csv` from both `--groups` and `--export`, and adds a "The most generative SETS" section to `exports/SOLVER.md`. `verify_build.py` gained `# 8 · best_groups sanity` — nine checks that re-derive the pin model, the rigid-I2C rule and the closure recount independently rather than re-calling the solver. Deviations from the task as written, all deliberate:
+- **Sets of 2–6 parts, not pairs and triples.** Pairs are still exhaustive (81,810 closures, ~4 s); k=3..6 is a beam search (beam 30, extension pool 120) seeded from the best pairs, so larger sets are the best sets FOUND, not proven optima. Exhaustive search dies immediately past k=2.
+- **Three objectives, not two** — outcomes per part, per dollar and per PIN. The pin objective needed a real model of ESP32 wiring (I2C/SPI/1-Wire/I2S buses paid once for the set, not once per device), which is what turns the ranking into a shopping list.
+- **`exports/best_groups.csv`, not `exports/groups.csv`** — the filename matches the function.
+- **Constraints the written task did not ask for**: `iface` (set pin cost), `i2c_addr` (two rigid parts on one address reject the set; a flexible one becomes a "move this jumper" note) and `esp32_compat` (keyword flags with negation handling, exclusive resources reject).
+- **`--max-usd` is read as a PER-PART cap**, matching the existing `build_predicate` semantics, not a set total.
+Task 3.2 (the `patch_v50.py` section "7 · THE MOST GENERATIVE PAIRS AND TRIPLES") stays open: it is the only piece that touches the workbook, and it is what would earn the v58 bump.
+
 ---
 
 ## Phase 4 — Executable physics: `physlib`  [H]  → no version bump (repo only)

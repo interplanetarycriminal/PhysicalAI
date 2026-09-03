@@ -232,6 +232,28 @@ The solver's coverage numbers count what each sensor supports alone — a stated
 | Per-use appliance cost meter | context-gating | energy-accumulated + cycle-complete | NEW: cost-per-use | Cost/use = (E_end − E_start over one detected cycle) × tariff; distribution over cycles reveals degradation |
 | Radon early-warning proxy | context-gating | pressure-absolute + air-changes-hour | NEW: radon-risk-rising | Risk rising when P falling > 3 hPa/6 h (soil-gas pressure gradient reverses) AND measured ACH < 0.4 |
 
+## The most generative SETS
+
+Every ranking above scores parts one at a time. This one scores SETS, which is where the fusion edges actually pay out. 121,012 sets of 2–6 parts were searched (pairs exhaustively, larger sets by beam search) and priced in ESP32 pins as well as dollars, because a shared I2C bus is paid once and a set that will not fit on the board is not an answer.
+
+| Set | Parts | $ | Pins | Declared | +Emergent | Score | Lift | What only the set reaches |
+|---|--:|--:|--:|--:|--:|--:|--:|---|
+| DS18B20 digital temp probe + BME688 gas + climate AI + MPU-6050 6-axis IMU + DFRobot Gravity mmWave presence radar + US-100 ultrasonic w/ temp comp + INA3221 triple-channel power | 6 | $49.5 | 7 | 64 | +9 | **73** | +58 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-map, thermal-time-constant, wet-bulb-heat-stress |
+| MLX90614 IR thermometer + BME688 gas + climate AI + MPU-6050 6-axis IMU + DFRobot Gravity mmWave presence radar + US-100 ultrasonic w/ temp comp + INA3221 triple-channel power | 6 | $55 | 6 | 65 | +8 | **73** | +58 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+| DS18B20 digital temp probe + BME688 gas + climate AI + INA219 current/power monitor + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 + MPU-9250 9-axis (legacy) | 6 | $62 | 5 | 65 | +8 | **73** | +56 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-map, thermal-time-constant, wet-bulb-heat-stress |
+| MLX90614 IR thermometer + SHT31 weatherproof probe + MPU-6050 6-axis IMU + DFRobot Gravity mmWave presence radar + US-100 ultrasonic w/ temp comp + INA3221 triple-channel power | 6 | $52 | 6 | 63 | +9 | **72** | +57 | black-ice-risk, condensation-risk, energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+| BME688 gas + climate AI + MPU-6050 6-axis IMU + Ultrasonic mic experiments + DFRobot Gravity mmWave presence radar + US-100 ultrasonic w/ temp comp + INA3221 triple-channel power | 6 | $53 | 7 | 63 | +9 | **72** | +57 | energy-waste-unoccupied, presence-verified, recording-authenticity, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+| BME688 gas + climate AI + MPU-6050 6-axis IMU + DFRobot Gravity mmWave presence radar + US-100 ultrasonic w/ temp comp + DS18B20 water temp + flow combo + INA3221 triple-channel power | 6 | $57 | 7 | 63 | +9 | **72** | +57 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-map, thermal-time-constant, wet-bulb-heat-stress |
+| BME688 gas + climate AI + A3144 / SS49E Hall switches + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 + MPU-9250 9-axis (legacy) + BL0940 calibration-free mains metering IC | 6 | $58.9 | 7 | 61 | +11 | **72** | +55 | building-heat-loss, cost-per-use, energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-map, thermal-time-constant, wet-bulb-heat-stress |
+| DS18B20 digital temp probe + BME688 gas + climate AI + LDC1612 inductive sensing + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 + BL0940 calibration-free mains metering IC | 6 | $62 | 7 | 61 | +11 | **72** | +55 | building-heat-loss, cost-per-use, energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-map, thermal-time-constant, wet-bulb-heat-stress |
+| DS18B20 digital temp probe + BME688 gas + climate AI + INA219 current/power monitor + LDC1612 inductive sensing + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 | 6 | $63 | 5 | 65 | +7 | **72** | +55 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+| MLX90614 IR thermometer + SCD41 true CO2 + MPU-6050 6-axis IMU + DFRobot Gravity mmWave presence radar + US-100 ultrasonic w/ temp comp + INA3221 triple-channel power | 6 | $65 | 6 | 62 | +10 | **72** | +57 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+| BME688 gas + climate AI + Ultrasonic mic experiments + INA219 current/power monitor + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 + MPU-9250 9-axis (legacy) | 6 | $65.5 | 5 | 63 | +9 | **72** | +55 | energy-waste-unoccupied, presence-verified, recording-authenticity, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+| MLX90614 IR thermometer + BME688 gas + climate AI + INA219 current/power monitor + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 + MPU-9250 9-axis (legacy) | 6 | $67.5 | 4 | 65 | +7 | **72** | +55 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+| BME688 gas + climate AI + LDC1612 inductive sensing + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 + MPU-9250 9-axis (legacy) + BL0940 calibration-free mains metering IC | 6 | $67.5 | 6 | 61 | +11 | **72** | +55 | building-heat-loss, cost-per-use, energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-map, thermal-time-constant, wet-bulb-heat-stress |
+| BME688 gas + climate AI + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 + MPU-9250 9-axis (legacy) + DS18B20 water temp + flow combo + BL0940 calibration-free mains metering IC | 6 | $68.5 | 7 | 61 | +11 | **72** | +55 | building-heat-loss, cost-per-use, energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-map, thermal-time-constant, wet-bulb-heat-stress |
+| DS18B20 digital temp probe + BME688 gas + climate AI + ICM-20948 9-axis IMU + INA219 current/power monitor + DFRobot Gravity mmWave presence radar + Scale-hacking: NAU7802 | 6 | $69 | 5 | 65 | +7 | **72** | +55 | energy-waste-unoccupied, presence-verified, soil-water-volumetric, thermal-time-constant, wet-bulb-heat-stress |
+
 ## What a fixed budget buys
 
 | Budget | Parts | Outcomes | % | Spent |
@@ -265,11 +287,11 @@ The solver's coverage numbers count what each sensor supports alone — a stated
 | Constraint | Eligible | Reachable | % | Kit cost | Lost entirely |
 |---|--:|--:|--:|--:|---|
 | 🔒 No privacy footprint | 350 | 150/151 | 99% | 63 parts, $903 | Did they blink or move their eyes? |
-| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is radon accumulating? · Is there a flammable gas leak? · How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · Is there carbon monoxide? |
-| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | Is this person's arousal or stress rising? · What is the blood oxygen saturation? · How is this person walking? · Did they blink or move their eyes? · Are they likely dehydrated? · How much have they moved today? |
-| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | Is radon accumulating? · How polluted is the air right now? · Is new furniture or flooring off-gassing? · Is something emitting ozone? · What is the heart rate? · Is this person's arousal or stress rising? |
-| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · What is making noise above human hearing? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is transmitting nearby, and how strongly? |
-| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is radon accumulating? · Is new furniture or flooring off-gassing? · What is the heart rate? · Did they blink or move their eyes? · Which muscle is working, and how hard? · Are they likely dehydrated? |
+| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is new furniture or flooring off-gassing? · Is something emitting ozone? · Is there carbon monoxide? · How polluted is the air right now? · Is radon accumulating? · Is there a flammable gas leak? |
+| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | How stressed or recovered is this body? · Are they likely dehydrated? · Which muscle is working, and how hard? · How is this person walking? · How much have they moved today? · Is this person's arousal or stress rising? |
+| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | Is new furniture or flooring off-gassing? · Is something emitting ozone? · How polluted is the air right now? · Is radon accumulating? · How stressed or recovered is this body? · Which muscle is working, and how hard? |
+| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · What is transmitting nearby, and how strongly? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is making noise above human hearing? |
+| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is radon accumulating? · Is new furniture or flooring off-gassing? · Did they blink or move their eyes? · Has breathing become irregular or stopped? · How stressed or recovered is this body? · What is the heart rate? |
 
 ## Every outcome, and what buys it
 
@@ -736,8 +758,8 @@ Hubs cover many outcomes and are replaceable. Keys cover few and are the only ro
 | Rotary torque sensor | 180.0 | 3 outcomes | High-range EC probe for salinity (K=10) | 70.0 | 0.06 |
 | PDM MEMS microphone | 3.0 | 4 outcomes | ADS1292R 2-channel ECG + respiration front end | 70.0 | 0.06 |
 | MLX90641 thermal (16x12) | 60 | 5 outcomes | ZED-X20P all-band centimetre GNSS | 90.0 | 0.06 |
-| HC-SR04 ultrasonic | 1.5 | 8 outcomes | ANT-B10 Bluetooth angle-of-arrival anchor | 90.0 | 0.06 |
-| VL53L0X ToF laser | 5 | 8 outcomes | Vibrating-fork level switch | 90.0 | 0.06 |
+| VL53L0X ToF laser | 5 | 8 outcomes | ANT-B10 Bluetooth angle-of-arrival anchor | 90.0 | 0.06 |
+| HC-SR04 ultrasonic | 1.5 | 8 outcomes | Vibrating-fork level switch | 90.0 | 0.06 |
 | OPT4048 tristimulus color | 9 | 4 outcomes | ORP (redox) probe | 110 | 0.05 |
 | SX1262 sub-GHz transceiver | 8.0 | 2 outcomes | ADXL1002 wideband analog vibration sensor | 95.0 | 0.05 |
 | RV4145A ground-fault / residual current detector | 2.0 | 3 outcomes | SenXor MI0801 CMOS thermal imager | 95.0 | 0.05 |
