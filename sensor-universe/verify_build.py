@@ -11,7 +11,7 @@ import json
 import re
 import sys
 import zipfile
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -258,6 +258,54 @@ for g in GG:
         bad.append(g["ids"])
 check("no group collides two rigid I2C addresses", not bad,
       str(bad[:3]) if bad else f"{len(GG)} groups clean")
+
+# ...but that check alone has no teeth: every rigid collision scores far too low
+# to reach a top-30 ranking, so GG is clean whether or not `outcome_solver`
+# enforces the rule. Give it an oracle. Re-derive the colliding pairs from the
+# catalog here, then make the ranker prove it rejects each one, on a two-part
+# universe where no better set can crowd it out of the answer.
+gp = GR["params"] if GR else {}
+gpool = {}
+for sid, (r, inf) in osv.index(records, vocab.INFERENCE).items():
+    usd = r.get("usd") if isinstance(r.get("usd"), (int, float)) else 1e9
+    if gp.get("max_usd") is not None and usd > gp["max_usd"]:
+        continue
+    if int(r.get("pins") or 0) > osv.MAX_PART_PINS or osv.esp32_unusable(r):
+        continue
+    gpool[sid] = (r, inf)
+
+rigid = defaultdict(list)
+for sid, (r, _inf) in gpool.items():
+    a = fixed_addr2(r)
+    if a is not None:
+        rigid[a].append(sid)
+rigid_pairs = sorted((a, x, y) for a, ids in rigid.items()
+                     for x, y in itertools.combinations(sorted(ids), 2))
+# a named pair to anchor the oracle: two thermal arrays welded to 0x33, one
+# interface each, no jumper word anywhere in either address string
+anchor = [(a, x, y) for a, x, y in rigid_pairs
+          if "MLX90640" in gpool[x][0]["n"] and "MLX90641" in gpool[y][0]["n"]]
+check("MLX90640 + MLX90641 re-derive as a rigid 0x33 collision",
+      len(gpool) == gp.get("pool") and len(anchor) == 1 and anchor[0][0] == 0x33,
+      f"pool {len(gpool)} vs {gp.get('pool')}, {len(rigid_pairs)} rigid pairs, "
+      f"anchor {[(x, y) for _a, x, y in anchor]}")
+
+survived = []
+for a, x, y in rigid_pairs:
+    res = osv.best_groups({x: gpool[x], y: gpool[y]},
+                          records=[gpool[x][0], gpool[y][0]], min_k=2, max_k=2)
+    if res["groups"] or res["params"]["rejected"] != 1:
+        survived.append((f"0x{a:02x}", x, y, len(res["groups"]),
+                         res["params"]["rejected"]))
+check("the ranker really rejects every rigid I2C collision",
+      bool(rigid_pairs) and not survived,
+      str(survived[:3]) if survived else
+      f"{len(rigid_pairs)} pairs, each rejected 1-for-1 on its own universe")
+
+hit = [(name, g["ids"]) for name in RANKINGS for g in GR[name]
+       for _a, x, y in anchor if x in g["ids"] and y in g["ids"]]
+check("no ranking row contains the rigid 0x33 pair", not hit,
+      str(hit[:3]) if hit else f"{sum(len(GR[n]) for n in RANKINGS)} rows scanned")
 
 bad = []
 for name in RANKINGS:
