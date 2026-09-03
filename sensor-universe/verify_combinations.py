@@ -375,6 +375,86 @@ def main():
     bad_k = [r["ids"] for r in rows if r.get("k") != len(r["ids"])]
     check("Fix 7 · every row states its own k", not bad_k, "")
 
+    # -- 4b2 · round three: is the partner observing the same thing, here? --
+    # Fix 8 — a relayed measurement cannot compensate
+    rl = [(r["id"], p2) for r in sensors for p2 in (r.get("phenomena") or [])
+          if p2 in vocab.PHENOMENON and cmb.relayed(r, p2)]
+    check("Fix 8 · relayed phenomena are identified", bool(rl),
+          f"{len(rl)} across the catalog: "
+          + ", ".join(f"{i}/{p2}" for i, p2 in rl[:4]))
+    check("Fix 8 · the TPMS receiver's relayed pressure is blocked",
+          bool(cmb.relayed(by_id["S223"], "pressure-absolute"))
+          if "S223" in by_id else True,
+          "a value arriving by 433 MHz from inside a wheel is not a barometer")
+    check("Fix 8 · a receiver's OWN measurement is NOT blocked — RSSI at this "
+          "antenna is measured here",
+          not cmb.relayed(by_id["S275"], "rf-power") if "S275" in by_id else True)
+    check("Fix 8 · an output protocol is not a relay — the Modbus meter's own "
+          "shunt still counts",
+          not cmb.relayed(by_id["S257"], "voltage") if "S257" in by_id else True)
+    if "S223" in by_id and "S279" in by_id:
+        s223 = cmb.score_combo([by_id["S223"], by_id["S279"]], prep, boards)
+        check("Fix 8 · TPMS + STC31 has NO compensation channel left",
+              not s223["compensation"]["channels"]
+              and s223["compensation"]["n_refused"] >= 2,
+              f"{s223['compensation']['n_refused']} refused, "
+              f"{len(s223['compensation']['channels'])} kept")
+
+    # Fix 9 — the incidental test, applied to the CORRECTOR
+    n_ref = 0
+    for r2 in rows[:400]:
+        f2 = cmb.score_combo([by_id[i] for i in r2["ids"]], prep, boards)
+        n_ref += f2["compensation"]["n_refused"]
+    check("Fix 9 · corrector-side refusals fire on real rows", n_ref > 0,
+          f"{n_ref} channels refused across the top 400 rows")
+
+    # Fix 10 — differential credit needs a shared locus
+    oi = [(r["id"], p2) for r in sensors for p2 in (r.get("phenomena") or [])
+          if p2 in vocab.PHENOMENON and cmb.own_internals(r, p2)]
+    check("Fix 10 · own-internals channels are identified", bool(oi),
+          f"{len(oi)}: " + ", ".join(f"{i}/{p2}" for i, p2 in oi))
+    check("Fix 10 · a real contact thermometer is NOT flagged — the DS18B20's "
+          "die IS its sensing element",
+          not cmb.own_internals(by_id["S001"], "temperature-contact")
+          if "S001" in by_id else True)
+    # THE PINNED REGRESSION. Round one scored this redundant and was accidentally
+    # right; round two scored it a full differential pair and was wrong. It must
+    # be NEITHER: a thermocouple tip at a kiln and a die behind an isolation
+    # barrier are not a pair on `temperature-contact` at all.
+    if "S004" in by_id and "S381" in by_id:
+        s4 = cmb.score_combo([by_id["S004"], by_id["S381"]], prep, boards)
+        tc = [x for x in s4["shared_measurand"]["shared"]
+              if x["phenomenon"] == "temperature-contact"]
+        check("Fix 10 · PINNED: MAX31855 + BL0940 scores ZERO on "
+              "`temperature-contact` — neither differential nor redundant",
+              bool(tc) and tc[0]["weight"] == 0.0
+              and tc[0]["kind"] == "no-shared-locus",
+              (f"kind {tc[0]['kind']}, weight {tc[0]['weight']} — "
+               f"{tc[0]['locus_reasons'][0] if tc[0]['locus_reasons'] else ''}")
+              if tc else "channel missing entirely")
+    # and the good differential must survive
+    if "S013" in by_id and "S218" in by_id:
+        s5 = cmb.score_combo([by_id["S013"], by_id["S218"]], prep, boards)
+        tc = [x for x in s5["shared_measurand"]["shared"]
+              if x["phenomenon"] == "temperature-contact"]
+        check("Fix 10 · a REAL differential survives — BME280 (bandgap) vs a "
+              "bare bead thermistor (thermoresistive), both in the room",
+              bool(tc) and tc[0]["kind"] == "differential",
+              tc[0]["kind"] if tc else "missing")
+    bad_locus = [(f2["ids"], x["phenomenon"]) for f2 in full
+                 for x in f2["shared_measurand"]["shared"]
+                 if x["kind"] == "no-shared-locus" and x["weight"] != 0.0]
+    check("Fix 10 · a refused locus always scores zero, never redundancy",
+          not bad_locus, str(bad_locus[:2]) if bad_locus else "")
+
+    # Fix 3 extension — the authenticity cue
+    if "S192" in by_id:
+        _f3, rej3 = cmb.extract_interferents(by_id["S192"], with_rejects=True)
+        check("Fix 3+ · the BMP280's counterfeit chip-ID sentence no longer "
+              "founds a humidity channel",
+              "humidity" not in _f3 and "humidity" in rej3,
+              str(rej3.get("humidity", "STILL MATCHING — the guard regressed")))
+
     # -- 4c · THE PHYSICS-LAYER GATE --------------------------------------
     # The px_* preference chain is designed against a schema on another branch.
     # Nothing here may quietly depend on it: this run must have come out of the

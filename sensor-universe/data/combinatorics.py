@@ -462,6 +462,22 @@ REJECT_NEARBY = {
     # "co-located" is not carbon monoxide (belt and braces; the pattern is
     # already case-sensitive)
     "gas-cross-sensitivity": r"co-locat|co-occur",
+    # Round three, an extension of Fix 3. The single sentence that put a row
+    # this project's own write-up REJECTS at rank 1: the BMP280's fools says
+    # "the cheap boards labelled BME280 are very often a BMP280 with no humidity
+    # sensor at all, so read the chip-ID register ... before you trust a humidity
+    # number from a $2 board". That is a statement about COUNTERFEIT PARTS, not
+    # about humidity confounding a barometer, and it is a kind of false positive
+    # no effect-word guard can reach — the words around it are ordinary.
+    #
+    # An effect-word REQUIRE guard was tried first and measured: the narrow
+    # version dropped 14 humidity matches of which 13 were true positives; the
+    # wide version dropped 1, and it was a true positive, while letting this one
+    # back in. Vocabulary cannot separate them. Authenticity CAN: a clause about
+    # chip IDs, clones and relabelled dies is not a claim about physics.
+    # Measured: rejects exactly 1 of the 89 humidity matches in the catalog.
+    "humidity": r"chip-?ID|counterfeit|clones? shipping|relabel|"
+                r"no humidity sensor|\(no humidity\)|labelled BME280",
 }
 _REJECT_RE = {k: re.compile(v, re.I) for k, v in REJECT_NEARBY.items()}
 
@@ -1036,6 +1052,152 @@ def has_physics_layer(record):
     """True when this record carries enough of the parallel branch's physics
     layer for the px path to be preferred over the prose path."""
     return bool(record.get("px_cross")) and bool(record.get("px_measurand"))
+
+
+# ---------------------------------------------------------------- 1c · LOCUS
+# Round three. Three of the round-two rejects were one missing concept: is this
+# partner actually observing the same physical thing, IN THE SAME PLACE? A
+# mechanism test answers "can it transduce this quantity"; it says nothing about
+# where the quantity was transduced. Two of the three cases are mechanical to
+# close and are closed here; the third (two indoor parts 30 cm apart in
+# different air) is not answerable from this schema and is left alone.
+
+# --- Fix 8 · a RELAYED measurement cannot compensate ------------------------
+# A TPMS receiver reports `pressure-absolute`. That pressure is inside somebody's
+# wheel and arrives by 433 MHz radio; it cannot feed the compensation register of
+# a CO2 cell sitting on your desk. The test reuses the mechanism cues already
+# built rather than a second lexicon: a part carrying a RELAY mechanism does not
+# transduce anything outside that mechanism's `serves` list, so any OTHER
+# phenomenon it lists reached it as someone else's number.
+RELAY_MECHANISMS = {"RF receive/decode"}
+
+# One bus case the RF cues cannot see: OBD-II is the car's own transducers read
+# out over CAN. The cue is deliberately narrow — an output protocol is not a
+# relay. The Eastron SDM120 speaks Modbus and is NOT caught, correctly: its
+# shunt is inside the DIN module, so it measures where it sits.
+BUS_RELAY_CUE = re.compile(
+    r"\bOBD-?II\b|\bJ1962\b|standard diagnostic interface|"
+    r"the (?:vehicle|car)'?s own sensors", re.I)
+
+# A relay mechanism ALONE is not enough, and the first cut of this test proved
+# it: `RF receive/decode` also covers RSSI, which is a real measurement made at
+# THIS antenna. Blocking on the mechanism alone wrongly killed the Wi-Fi +
+# magnetic fingerprint node's own magnetometer and the ESP32's own touch
+# channel. The part must also name an EXTERNAL ORIGINATOR — somebody else's
+# transducer, whose reading arrives as a message.
+THIRD_PARTY_CUE = re.compile(
+    r"broadcasts?\s+(?:unencrypted|on\s+\d)|rtl_433|in-wheel\s+sender|"
+    r"\bfrom\s+in-wheel\b|reads\s+your\s+own\s+wheels|"
+    r"(?:someone|somebody)\s+else'?s|third[- ]party\s+(?:sensor|transducer)|"
+    r"\bremote\s+(?:transducer|sender|node)\s+(?:reports?|sends?)", re.I)
+RELAY_TEXT_FIELDS = ("how", "meas", "n", "sub")
+
+
+def relayed(record, phenomenon, cache=None):
+    """-> reason string when `phenomenon` reaches this part as a value measured
+    somewhere else, else None. Such a phenomenon can never found a compensation
+    channel: the corrector is not where the correction is needed."""
+    found = cache if cache is not None else mechanisms(record)
+    relays = RELAY_MECHANISMS & set(found)
+    text = "  ".join(str(record.get(f) or "") for f in RELAY_TEXT_FIELDS)
+    bus = BUS_RELAY_CUE.search(text)
+    third = THIRD_PARTY_CUE.search(text)
+    if not bus and not (relays and third):
+        return None
+    # anything this part genuinely transduces itself is fine
+    own = {m for m in found if m not in RELAY_MECHANISMS}
+    if any(phenomenon in MECHANISM_SERVES.get(m, ()) for m in own):
+        return None
+    if any(phenomenon in MECHANISM_SERVES.get(m, ()) for m in relays):
+        return None          # rf-power at THIS antenna is measured here
+    how = (f"it reads a bus (matched {bus.group(0)!r})" if bus else
+           f"it decodes another device's transmission (matched "
+           f"{third.group(0)!r}) and its own mechanism {sorted(relays)[0]!r} "
+           f"does not transduce `{phenomenon}`")
+    return (f"`{phenomenon}` is RELAYED, not measured here — {how}; the number "
+            f"was measured elsewhere and arrived as a message")
+
+
+# --- Fix 10 · a channel that reads the part's OWN INTERNALS ------------------
+# A BL0940's `meas` says "internal/external temperature"; an INA700's says "die
+# temperature". Round one scored MAX31855 (Seebeck, at a kiln tip) against
+# BL0940 (bandgap, on a die behind an isolation barrier) as REDUNDANT — both
+# `Electrical` — and was accidentally right. Round two's mechanism test scored
+# it DIFFERENTIAL and was wrong: the mechanisms really do differ, and the two
+# channels are still not observing the same thing in the same place.
+#
+# The cue is read from `meas` and `how` only. `fools` is excluded on purpose:
+# almost every part discusses die temperature there as a confound, and matching
+# that would flag the whole catalog. MAX31855's "adds cold-junction
+# compensation" does not match — an internals word must be bound to the
+# phenomenon's own stem within a few characters.
+_INTERNALS = r"(?:die|on-die|on-chip|internal|junction|package)"
+_INTERNALS_RE = {
+    k: re.compile(
+        _INTERNALS + r"[/\w-]{0,12}\s?(?:" + "|".join(
+            p.lstrip("\\b") for p in _stem_patterns(k)) + r")"
+        + r"|(?:" + "|".join(p.lstrip("\\b") for p in _stem_patterns(k))
+        + r")\s+of (?:the |its )?(?:own )?" + _INTERNALS,
+        re.I)
+    for k in vocab.PHENOMENON}
+
+# MEASURED CORRECTION, and the important one. The first cut read `meas` AND
+# `how`, and flagged 22 of 956 listings — of which only four were right. `how`
+# is the wrong field: it describes MECHANISM, and a legitimate contact
+# thermometer explains itself by naming its die. The DS18B20's how says "a tiny
+# chip measures its own die temperature"; the MAX30208's says "an on-die
+# temperature-dependent voltage"; the MLX90621's says "an on-chip temperature
+# sensor measures the die itself". All three are real thermometers pointed at
+# the world, and blocking them would have been a serious regression.
+#
+# The brief says "one part's measurand is explicitly of its own internals", and
+# the measurand is `meas`. Reading `meas` alone: the DS18B20 says "Temperature
+# -55 to +125°C", the MAX30208 says "Skin or body temperature", the MLX90621
+# says "64 pixels of absolute surface temperature" — none flagged; while the
+# INA700 says "die temperature", the BL0940 says "internal/external
+# temperature" and the ESP32 says "die temp" — all three flagged. `self` and
+# "its own" were also dropped as cue words: they matched "self-balancing
+# robots" and "Self-contained LiDAR".
+INTERNALS_TEXT_FIELDS = ("meas",)
+
+
+def own_internals(record, phenomenon):
+    """-> the matched phrase when the record says this channel reads the part's
+    OWN die, package or internals, else None. Such a channel is a compensation
+    input, not a reference: it tells you about the chip, not about the world."""
+    if phenomenon not in _INTERNALS_RE:
+        return None
+    text = "  ".join(str(record.get(f) or "") for f in INTERNALS_TEXT_FIELDS)
+    m = _INTERNALS_RE[phenomenon].search(text)
+    return m.group(0).strip() if m else None
+
+
+# Contact classes that cannot be observing one quantity at one place. Reuses
+# CONTACT_INCOMPATIBLE below for the physical-impossibility cases and adds the
+# `Through-barrier`/`Immersed` pair, which can share a wall but never a medium.
+def shared_locus(a, b, phenomenon, inc_a=None, inc_b=None):
+    """-> (True, []) when two parts could plausibly be observing `phenomenon`
+    at the same place, else (False, [reasons]). Refusing is scored as ZERO on
+    that channel — not as redundancy. Two parts that are not observing the same
+    thing are not a pair on it at all, and calling them redundant credits them
+    with 15% of a claim neither is making."""
+    why = []
+    for rec, inc, tag in ((a, inc_a, "a"), (b, inc_b, "b")):
+        if inc is not None and phenomenon in inc:
+            why.append(f"`{phenomenon}` is incidental for {rec['n']}")
+        rel = relayed(rec, phenomenon)
+        if rel:
+            why.append(f"{rec['n']}: {rel}")
+        oi = own_internals(rec, phenomenon)
+        if oi:
+            why.append(f"{rec['n']} describes this channel as its own internals "
+                       f"(matched {oi!r} in `meas`) — a compensation input, "
+                       f"not a reference")
+    pair = frozenset((a.get("contact"), b.get("contact")))
+    if pair in CONTACT_INCOMPATIBLE:
+        why.append(f"contact classes cannot share a locus "
+                   f"({a.get('contact')} vs {b.get('contact')})")
+    return (not why), why
 
 
 # ===========================================================================
@@ -1962,8 +2124,17 @@ def score_combo(recs, prep=None, boards=None, with_esp32=True):
             mech_a = mechanisms_for(a["rec"], p, a["mechanisms"])
             mech_b = mechanisms_for(b["rec"], p, b["mechanisms"])
             differ = bool(mech_a) and bool(mech_b) and not (set(mech_a) & set(mech_b))
+            # Fix 10. Different mechanisms are not enough — the two parts must be
+            # able to be observing the same thing in the same place. When they
+            # cannot, the channel scores ZERO, not the redundancy weight: they
+            # are not a pair on it at all, and 15% of a claim neither is making
+            # is still 15% too much.
+            locus_ok, locus_why = shared_locus(a["rec"], b["rec"], p,
+                                               a["incidental"], b["incidental"])
             if inc_a or inc_b:
                 kind, w = "incidental", 0.0
+            elif not locus_ok:
+                kind, w = "no-shared-locus", 0.0
             elif differ:
                 kind, w = "differential", 1.0
             elif mech_a and mech_b:
@@ -1980,6 +2151,7 @@ def score_combo(recs, prep=None, boards=None, with_esp32=True):
                 incidental_a=inc_a, incidental_b=inc_b,
                 incidental_reason=(a["incidental_why"].get(p) if inc_a
                                    else b["incidental_why"].get(p) if inc_b else None),
+                locus_ok=locus_ok, locus_reasons=locus_why,
                 kind=kind, weight=w))
 
     # ---- compensation ----------------------------------------------------
@@ -1995,6 +2167,7 @@ def score_combo(recs, prep=None, boards=None, with_esp32=True):
     compensation = []
     self_compensated = 0
     seen_channels = {}
+    refused = []
     comp_raw = 0.0
     for a, b in combinations(members, 2):
         for fooled, corrector in ((a, b), (b, a)):
@@ -2013,19 +2186,44 @@ def score_combo(recs, prep=None, boards=None, with_esp32=True):
                 if phen in fooled["phenomena"]:
                     self_compensated += 1
                     continue          # it already measures its own confounder
+                # ---- round three: the corrector must actually be a reference
+                # Fix 8 — a relayed measurement cannot compensate: the quantity
+                # was not measured where the corrector sits.
+                # Fix 9 — the incidental test, applied symmetrically. Fix 1
+                # guarded the FOOLED side only; a die register is no more a
+                # reference when it is doing the correcting. Same rule, both
+                # ends: a fuel gauge's die temperature is not an outdoor
+                # reference, and a metering IC's is not a cold-junction one.
+                # These REFUSE the channel rather than attenuating it — a
+                # channel founded on the wrong quantity is not a weak channel,
+                # it is not a channel.
+                bad = relayed(corrector["rec"], phen, corrector["mechanisms"])
+                if not bad and phen in corrector["incidental"]:
+                    bad = (f"`{phen}` is incidental for {corrector['rec']['n']} — "
+                           + (corrector["incidental_why"].get(phen) or "")
+                           + " — a register is not a reference")
+                if not bad:
+                    oi = own_internals(corrector["rec"], phen)
+                    if oi:
+                        bad = (f"{corrector['rec']['n']} reports `{phen}` as its own "
+                               f"internals (matched {oi!r} in `meas`) — a "
+                               f"compensation input, not a reference")
+                if bad:
+                    refused.append(dict(
+                        fooled_id=fooled["rec"]["id"], fooled=fooled["rec"]["n"],
+                        corrector_id=corrector["rec"]["id"],
+                        corrector=corrector["rec"]["n"],
+                        interferent=key, phenomenon=phen, reason=bad))
+                    continue
                 sig = (fooled["rec"]["id"], key, corrector["rec"]["id"])
                 if sig in seen_channels:
                     if phen not in seen_channels[sig]["phenomena"]:
                         seen_channels[sig]["phenomena"].append(phen)
                     continue
                 verdict, why = co_location(fooled["rec"], corrector["rec"])
-                inc = phen in corrector["incidental"]
                 w = 1.0
                 notes = []
-                if inc:
-                    w *= SYNERGY_MULTIPLICITY_INCIDENTAL
-                    notes.append(f"`{phen}` is incidental for {corrector['rec']['n']} — "
-                                 + (corrector["incidental_why"].get(phen) or ""))
+                inc = False
                 if verdict == "doubtful":
                     w *= CO_LOCATION_ATTENUATION
                     notes.extend(why)
@@ -2141,6 +2339,7 @@ def score_combo(recs, prep=None, boards=None, with_esp32=True):
                                            if s["weight"] > 0})),
         compensation=dict(score=round(comp_norm, 4), raw=round(comp_raw, 3),
                           channels=compensation, self_compensated=self_compensated,
+                          refused=refused, n_refused=len(refused),
                           source_counts=dict(px=n_px, prose=len(compensation) - n_px),
                           doubtful=sum(1 for c in compensation
                                        if c["co_location"] == "doubtful")),
@@ -2292,6 +2491,7 @@ def slim(s):
                   for c in s["compensation"]["channels"]],
         source_counts=s["compensation"]["source_counts"],
         doubtful=s["compensation"]["doubtful"],
+        n_refused=s["compensation"]["n_refused"],
         self_compensated=s["compensation"]["self_compensated"])
     out["failure_independence"] = dict(
         score=s["failure_independence"]["score"],

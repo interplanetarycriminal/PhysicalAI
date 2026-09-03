@@ -195,11 +195,16 @@ def why(rows, prep, boards, by_id, top):
             elif x["kind"] == "incidental":
                 L.append(f"- ! `{x['phenomenon']}` is shared on paper only — "
                          f"{x['incidental_reason']}")
+            elif x["kind"] == "no-shared-locus":
+                L.append(f"- ✗ `{x['phenomenon']}` scores ZERO — the two are not "
+                         f"observing it in the same place: {x['locus_reasons'][0]}")
             elif x["kind"] == "unverified":
                 L.append(f"- ! `{x['phenomenon']}` shared, but the mechanism is unreadable "
                          f"for "
                          + (x["a"] if not x["mechanism_a"] else x["b"])
                          + " — scored as redundancy, not a differential pair")
+        for c in s["compensation"]["refused"][:3]:
+            L.append(f"- ✗ refused: {c['corrector']} → {c['fooled']} — {c['reason']}")
         for t in s["time"]["taus"]:
             L.append(f"- τ({t['id']}) = "
                      + (f"{t['tau']:g}s ({t['confidence']}"
@@ -297,6 +302,10 @@ def explain(ids, prep, boards, by_id):
                  f"weight {c['weight']:g}")
         for n in c["notes"]:
             L.append(f"  - ! {n}")
+    for c in s["compensation"]["refused"]:
+        L.append(f"- ✗ REFUSED: **{c['corrector']}** (`{c['corrector_id']}`) offered "
+                 f"`{c['phenomenon']}` against **{c['fooled']}**'s *{c['interferent']}* "
+                 f"— {c['reason']}")
     if s["compensation"]["self_compensated"]:
         L.append(f"- ({s['compensation']['self_compensated']} further channel(s) discarded: "
                  f"the fooled part already measures that interferent itself)")
@@ -315,6 +324,8 @@ def explain(ids, prep, boards, by_id):
                      f"{x['modality_b']})")
         if x["incidental_reason"]:
             L.append(f"  - ! {x['incidental_reason']}")
+        for r2 in x["locus_reasons"]:
+            L.append(f"  - ✗ no shared locus: {r2}")
 
     L += ["", "## Failure independence", ""]
     for p in s["failure_independence"]["pairs"]:
@@ -423,7 +434,7 @@ def _row(rank, r):
                      f"@{c['weight']:g}{'' if c['co_location'] == 'plausible' else '?'}"
                      for c in comp["channels"]),
             "|".join(sorted({c["source"] for c in comp["channels"]})),
-            comp.get("doubtful", 0),
+            comp.get("doubtful", 0), comp.get("n_refused", 0),
             r["failure_independence"]["score"],
             "" if t["decades"] is None else round(t["decades"], 3),
             t["mode"], t.get("confidence", ""),
@@ -441,7 +452,7 @@ def _row(rank, r):
 HEADER = ["rank", "k", "ids", "parts", "usd", "total", "percentile_within_k",
           "synergy", "emergent_keys", "new_route_keys", "multiplicity_incidental_keys",
           "shared_phenomena", "shared_kinds", "compensation_channels",
-          "compensation_source", "compensation_doubtful",
+          "compensation_source", "compensation_doubtful", "compensation_refused",
           "failure_independence", "tau_decades", "time_mode", "tau_confidence",
           "tau_lower_bound", "novelty", "esp32_verdict", "boards_that_fit",
           "family_signature", "deduped_into", "equivalent_swaps",
