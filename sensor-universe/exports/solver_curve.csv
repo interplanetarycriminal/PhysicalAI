@@ -1,0 +1,98 @@
+objective,rank,sensor_id,sensor,usd,gain,cumulative_outcomes,pct,cumulative_usd,usd_per_outcome_gained,outcomes_bought
+by_cost,1,S091,Piezo contact mic / disc,0.5,14,14,0.0927,0.5,0.036,air-leak|bearing-failing|cycle-complete|drift-from-baseline|glass-broken|intrusion|machine-duty-cycle|machine-running|machine-state|object-dropped|someone-present|tamper-detected|unusual-sound|water-leak
+by_cost,2,S085,Reed switch,0.5,10,24,0.1589,1.0,0.05,container-fullness|door-state|entered-or-left|flow-rate|is-raining|object-count|object-present|rotation-speed|tank-level|water-used-total
+by_cost,3,S006,NTC thermistor 10k,0.3,4,28,0.1854,1.3,0.075,frost-tonight|object-temperature|overheating|water-hot-enough
+by_cost,4,S049,Photoresistor (LDR),0.2,4,32,0.2119,1.5,0.05,crossed-boundary|device-left-on|light-dose-daily|sky-clear
+by_cost,5,S072,MPU-6050 6-axis IMU,2,8,40,0.2649,3.5,0.25,am-i-level|gait-quality|imbalance|object-moved|posture|step-count|structure-moved|tremor-present
+by_cost,6,S228,Wi-Fi CSI sensing (the router IS the sensor),0,4,44,0.2914,3.5,0.0,breathing-rate|how-many-people|person-fell|through-wall-motion
+by_cost,7,S144,INA219 current/power monitor,2.5,8,52,0.3444,6.0,0.312,abnormal-current|battery-charge|battery-health|energy-budget-node|phantom-load|power-now|solar-performance|which-appliance
+by_cost,8,S189,AHT20 temp/humidity,2,6,58,0.3841,8.0,0.333,air-stuffy|coating-cured|disease-pressure|heat-island|mould-risk|too-dry
+by_cost,9,S026,MQ-2 smoke/LPG gas,2,5,63,0.4172,10.0,0.4,cooking-detected|gas-leak|smoke-present|stove-left-on|voc-event
+by_cost,10,S174,RC522 RFID reader,2,5,68,0.4503,12.0,0.4,asset-location|authorised-to-use|object-identity|occupancy-duration|who-is-it
+by_cost,11,S081,QMC5883L compass,2,4,72,0.4768,14.0,0.5,hidden-wiring|magnetic-anomaly|vehicle-approaching|which-way-facing
+by_cost,12,S192,BMP280 budget barometer,1.5,3,75,0.4967,15.5,0.5,how-high|returned-to-spot|storm-approaching
+by_cost,13,S001,DS18B20 digital temp probe,2.5,4,79,0.5232,18.0,0.625,compost-active|food-fresh|soil-ready-to-plant|thermal-energy-moved
+by_cost,14,S129,Capacitive soil moisture v2,2,3,82,0.543,20.0,0.667,growth-rate|moisture-content|plant-thirsty
+by_cost,15,S056,HC-SR04 ultrasonic,1.5,2,84,0.5563,21.5,0.75,consumable-remaining|obstacle-ahead
+by_cost,16,S065,HC-SR501 PIR motion,1.5,2,86,0.5695,23.0,0.75,no-movement-alarm|routine-broken
+by_cost,17,S029,MQ-135 air quality,2.5,3,89,0.5894,25.5,0.833,livestock-wellbeing|smell-signature|ventilation-adequate
+by_cost,18,S084,A3144 / SS49E Hall switches,0.4,1,90,0.596,25.9,0.4,wind-conditions
+by_cost,19,S318,TCS3200 frequency-output colour sensor,4.0,4,94,0.6225,29.9,1.0,colour-match|fruit-ripe|object-material|water-clarity
+by_cost,20,S322,BPW34 PIN photodiode,1.0,1,95,0.6291,30.9,1.0,radiation-dose
+by_cost,21,S112,MAX30102 pulse oximeter,6,5,100,0.6623,36.9,1.2,blood-oxygen|heart-rate|heart-variability|sleep-stage-proxy|stress-arousal
+by_cost,22,S213,ADS1115 16-bit ADC (the analog fixer),3,2,102,0.6755,39.9,1.5,water-nutrients|water-ph
+by_cost,23,S381,BL0940 calibration-free mains metering IC,1.5,1,103,0.6821,41.4,1.5,energy-cost
+by_cost,24,S067,LD2410 mmWave presence,5,3,106,0.702,46.4,1.667,person-asleep|someone-still-present|where-in-room
+by_cost,25,S093,Ultrasonic mic experiments,6,3,109,0.7219,52.4,2.0,arc-or-discharge|lubrication-failing|ultrasonic-activity
+by_cost,26,S157,NEO-6M GPS,8,4,113,0.7483,60.4,2.0,how-far-travelled|how-fast-moving|vehicle-speed|where-am-i
+by_cost,27,S180,IR flame detector (flicker),2,1,114,0.755,62.4,2.0,fire-present
+by_cost,28,S197,US-100 ultrasonic w/ temp comp,4,2,116,0.7682,66.4,2.0,flood-rising|snow-depth
+by_cost,29,S407,PIN photodiode radiation detector,2.0,1,117,0.7748,68.4,2.0,cosmic-flux
+by_cost,30,S028,MQ-7 carbon monoxide,2.5,1,118,0.7815,70.9,2.5,co-present
+by_cost,31,S125,ML8511 / VEML6075 UV outdoor,6,2,120,0.7947,76.9,3.0,solar-resource|uv-exposure
+by_cost,32,S135,EC / TDS sensor,12,4,124,0.8212,88.9,3.0,concentration-liquid|contamination|filter-clogged|soil-fertility
+by_cost,33,S149,ZMPT101B voltage sensor,3,1,125,0.8278,91.9,3.0,power-quality
+by_cost,34,S218,Thermistor airflow (nasal) kit,3,1,126,0.8344,94.9,3.0,breathing-stopped
+by_cost,35,S220,Photoelectric beam sensor E18-D80NK,3,1,127,0.8411,97.9,3.0,perimeter-crossed
+by_cost,36,S173,SI4432/CC1101 sub-GHz sniffer,4,1,128,0.8477,101.9,4.0,rf-activity
+by_cost,37,S353,Vertical float level switch (reed),4.0,1,129,0.8543,105.9,4.0,pump-dry
+by_cost,38,S178,LDC1612 inductive sensing,9,2,131,0.8675,114.9,4.5,material-type|object-genuine
+by_cost,39,S098,HX711 + load cell,5,1,132,0.8742,119.9,5.0,hive-state
+by_cost,40,S391,Azoteq IQS7211 / IQS263 proximity + touch,6.0,1,133,0.8808,125.9,6.0,are-they-looking
+by_cost,41,S099,FSR402 force resistor,7,1,134,0.8874,132.9,7.0,muscle-effort
+by_cost,42,S007,MLX90614 IR thermometer,8,1,135,0.894,140.9,8.0,body-temp-trend
+by_cost,43,S109,"Flex sensor 2.2""",8,1,136,0.9007,148.9,8.0,joint-angle
+by_cost,44,S236,Bat/dolphin: 40kHz ranging array,8,1,137,0.9073,156.9,8.0,map-surroundings
+by_cost,45,S340,RD-03D 24GHz multi-target tracking radar,9.0,1,138,0.9139,165.9,9.0,queue-length
+by_cost,46,S116,GSR / EDA sensor,10,1,139,0.9205,175.9,10.0,hydration-proxy
+by_cost,47,S357,Gypsum soil moisture block,10.0,1,140,0.9272,185.9,10.0,soil-tension
+by_cost,48,S043,Ikea VINDRIKTNING hack,13,1,141,0.9338,198.9,13.0,particulate-level
+by_cost,49,S237,Atmospheric electricity (field mill lite),15,1,142,0.9404,213.9,15.0,atmospheric-charge
+by_cost,50,S124,AS3935 lightning detector,20,1,143,0.947,233.9,20.0,lightning-distance
+by_cost,51,S034,ZE08-CH2O formaldehyde,22,1,144,0.9536,255.9,22.0,formaldehyde-level
+by_cost,52,S119,BioAmp EXG Pill,25,1,145,0.9603,280.9,25.0,blink-or-eye-move
+by_cost,53,S050,AS7331 spectral UV,27.5,1,146,0.9669,308.4,27.5,water-sanitised
+by_cost,54,S201,MQ-131 ozone,30,1,147,0.9735,338.4,30.0,ozone-present
+by_cost,55,S305,IIS3DWB wideband vibration sensor,45.0,1,148,0.9801,383.4,45.0,belt-slipping
+by_cost,56,S406,SiPM photodetector module,60.0,1,149,0.9868,443.4,60.0,which-isotope
+by_cost,57,S143,ORP (redox) probe,110,1,150,0.9934,553.4,110.0,water-oxygen
+by_cost,58,S171,RD200 radon sensor,180,1,151,1.0,733.4,180.0,radon-level
+by_count,1,S182,Scale-hacking: NAU7802,12,16,16,0.106,12.0,0.75,consumable-remaining|container-fullness|drift-from-baseline|gait-quality|growth-rate|hive-state|livestock-wellbeing|machine-state|object-count|object-dropped|object-present|occupancy-duration|plant-thirsty|posture|someone-present|tank-level
+by_count,2,S087,INMP441 I2S MEMS mic,3,12,28,0.1854,15.0,0.25,air-leak|bearing-failing|cooking-detected|cycle-complete|device-left-on|glass-broken|intrusion|machine-running|person-asleep|stove-left-on|unusual-sound|which-appliance
+by_count,3,S181,Time-of-flight gesture radar 60GHz,110,10,38,0.2517,125.0,11.0,breathing-rate|heart-rate|how-fast-moving|how-many-people|map-surroundings|obstacle-ahead|person-fell|someone-still-present|tremor-present|where-in-room
+by_count,4,S178,LDC1612 inductive sensing,9,9,47,0.3113,134.0,1.0,door-state|hidden-wiring|magnetic-anomaly|material-type|object-genuine|object-material|rotation-speed|structure-moved|tamper-detected
+by_count,5,S001,DS18B20 digital temp probe,2.5,8,55,0.3642,136.5,0.312,compost-active|food-fresh|frost-tonight|object-temperature|overheating|soil-ready-to-plant|thermal-energy-moved|water-hot-enough
+by_count,6,S023,BME688 gas + climate AI,15,8,63,0.4172,151.5,1.875,air-stuffy|mould-risk|smell-signature|smoke-present|storm-approaching|too-dry|ventilation-adequate|voc-event
+by_count,7,S144,INA219 current/power monitor,2.5,8,71,0.4702,154.0,0.312,abnormal-current|battery-charge|battery-health|energy-budget-node|machine-duty-cycle|phantom-load|power-now|solar-performance
+by_count,8,S075,BNO086 high-perf fusion IMU,22,7,78,0.5166,176.0,3.143,am-i-level|how-far-travelled|joint-angle|object-moved|returned-to-spot|step-count|which-way-facing
+by_count,9,S169,Grove Vision AI v2,16,6,84,0.5563,192.0,2.667,crossed-boundary|entered-or-left|fruit-ripe|object-identity|queue-length|vehicle-approaching
+by_count,10,S134,Analog pH kit,30,5,89,0.5894,222.0,6.0,concentration-liquid|contamination|soil-fertility|water-ph|water-sanitised
+by_count,11,S138,YF-S201 flow sensor,5,5,94,0.6225,227.0,1.0,flow-rate|pump-dry|routine-broken|water-leak|water-used-total
+by_count,12,S112,MAX30102 pulse oximeter,6,4,98,0.649,233.0,1.5,blood-oxygen|heart-variability|sleep-stage-proxy|stress-arousal
+by_count,13,S125,ML8511 / VEML6075 UV outdoor,6,4,102,0.6755,239.0,1.5,coating-cured|sky-clear|solar-resource|uv-exposure
+by_count,14,S232,Acoustic emission (ultrasonic contact),10,4,106,0.702,249.0,2.5,arc-or-discharge|imbalance|lubrication-failing|ultrasonic-activity
+by_count,15,S033,Electrochemical gas cells,80,3,109,0.7219,329.0,26.667,co-present|gas-leak|ozone-present
+by_count,16,S123,Tipping bucket rain gauge,12,3,112,0.7417,341.0,4.0,disease-pressure|flood-rising|is-raining
+by_count,17,S157,NEO-6M GPS,8,3,115,0.7616,349.0,2.667,asset-location|vehicle-speed|where-am-i
+by_count,18,S167,Person Sensor (Useful Sensors),10,3,118,0.7815,359.0,3.333,are-they-looking|authorised-to-use|who-is-it
+by_count,19,S187,Muon detector (CosmicWatch),100,3,121,0.8013,459.0,33.333,cosmic-flux|how-high|radiation-dose
+by_count,20,S294,PMS7003 laser particle counter,20.0,3,124,0.8212,479.0,6.667,filter-clogged|fire-present|particulate-level
+by_count,21,S048,TSL2591 high dynamic lux,7,2,126,0.8344,486.0,3.5,light-dose-daily|water-clarity
+by_count,22,S051,TCS34725 RGB color,7,2,128,0.8477,493.0,3.5,colour-match|water-nutrients
+by_count,23,S067,LD2410 mmWave presence,5,2,130,0.8609,498.0,2.5,no-movement-alarm|through-wall-motion
+by_count,24,S119,BioAmp EXG Pill,25,2,132,0.8742,523.0,12.5,blink-or-eye-move|muscle-effort
+by_count,25,S124,AS3935 lightning detector,20,2,134,0.8874,543.0,10.0,lightning-distance|rf-activity
+by_count,26,S148,PZEM-004T AC power module,11,2,136,0.9007,554.0,5.5,energy-cost|power-quality
+by_count,27,S186,Watermark granular-matrix soil water sensor,45,2,138,0.9139,599.0,22.5,moisture-content|soil-tension
+by_count,28,S238,Ground vibration fence: fiber + photodiode,10,2,140,0.9272,609.0,5.0,perimeter-crossed|wind-conditions
+by_count,29,S002,TMP117 ultra-precise temp,11,1,141,0.9338,620.0,11.0,body-temp-trend
+by_count,30,S034,ZE08-CH2O formaldehyde,22,1,142,0.9404,642.0,22.0,formaldehyde-level
+by_count,31,S057,JSN-SR04T waterproof ultrasonic,6,1,143,0.947,648.0,6.0,snow-depth
+by_count,32,S069,Seeed MR60BHA2 vital-sign radar,25,1,144,0.9536,673.0,25.0,breathing-stopped
+by_count,33,S116,GSR / EDA sensor,10,1,145,0.9603,683.0,10.0,hydration-proxy
+by_count,34,S239,Dissolved oxygen kit (Atlas EZO-DO),170,1,146,0.9669,853.0,170.0,water-oxygen
+by_count,35,S158,u-blox M10 GNSS,20,1,147,0.9735,873.0,20.0,heat-island
+by_count,36,S171,RD200 radon sensor,180,1,148,0.9801,1053.0,180.0,radon-level
+by_count,37,S188,Scintillating gamma spectrometer,150,1,149,0.9868,1203.0,150.0,which-isotope
+by_count,38,S237,Atmospheric electricity (field mill lite),15,1,150,0.9934,1218.0,15.0,atmospheric-charge
+by_count,39,S305,IIS3DWB wideband vibration sensor,45.0,1,151,1.0,1263.0,45.0,belt-slipping
