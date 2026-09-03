@@ -31,7 +31,7 @@ Plus known data debt: 126/151 outcomes lack "what fools it" notes; ~100 records 
    ```
 7. **Excel constraints (openpyxl 3.1.5):** no pivot tables, no sparklines, no `XLOOKUP/FILTER/UNIQUE`; `_xlfn.` prefix for `TEXTJOIN/IFS/SWITCH`; never a native Table + `ws.auto_filter` on one sheet; never merge cells inside a filter/table range or among formula rows; `column_dimensions.group()` before `set_widths`; formula-bearing sheets need ASCII names; formulas are raw `"="` strings and `wb.calculation.fullCalcOnLoad` is already set.
 8. **Style:** follow `patch_v50.py`'s `add_*` pattern (`_banner` → `S.section` → hand-rolled header row → data rows; yellow `FFF3C4` = editable, blue `EAF0F6` = computed; tab colours per topic; `freeze_panes` row 4). Helpers live in `sheet_lib.py` (`S.cell`, `S.section`, `S.price_bars`, `S.flag_text`, `S.DataBarRule`, `S.FormulaRule`).
-9. **Commit per task** with a descriptive message; push to `claude/tender-euler-1e2bss`. One version bump per phase, not per task.
+9. **Commit per task** with a descriptive message. **Work starts from a fresh branch cut off `main`**, and pushes to that branch. (`claude/tender-euler-1e2bss` was the branch of PR #1, merged into `main` on 2026-09-03; it is closed and must never be reused.) One version bump per phase, not per task.
 10. **When a task is ambiguous, do the bounded interpretation and log the ambiguity** in the commit message. Do not widen scope.
 
 ### Codebase map (read these first, in this order)
@@ -45,10 +45,87 @@ Plus known data debt: 126/151 outcomes lack "what fools it" notes; ~100 records 
 | `solve.py` | CLI (`--want/--domain/--by/--budget/--fusion/--max-usd/…/--export`) + `export()` → `exports/` (8 files) |
 | `patch_v50.py` | The build: loads v50, corrects 274 catalog cells, appends 167 sensors contiguously, adds 14 sheets, fixes Idea Forge, saves OUT |
 | `validate.py` / `audit_workbook.py` | Data gate / content gate (`EXEMPT_SHEETS` for sheets that legitimately discuss hazards) |
+| `data/physics_layer.py` | The physics layer: `PX`, id → `px_*` fields. The single source of per-sensor physics. See “The physics layer” below |
+| `px_report.py` | Physics-layer gate + coverage report. Exits non-zero on a `filled` record that is not actually filled |
 | `data/inference_notes.py` | 25/151 outcomes with `{fools, unlocks, market}` |
 | `data/seeds.py`, `data/seeds_extra.py` | 88 invention seeds with `sensor_ids` |
 | `data/derived_instruments.py` | 14 first-principles instruments (8-tuples; `parts` field is prose) |
 | `exports/` | `solver_run.json`, `SOLVER.md`, `coverage_matrix.csv`, `fusion_edges.csv`, … regenerated every build |
+
+---
+
+## The physics layer (`px_*`)
+
+Every other field describes a part the way its vendor describes it — "humidity
+sensor", "distance sensor". That is a label, not a mechanism, and it is what
+makes a sensor surprise you in the field. The physics layer records what the
+transducer *actually* responds to, so the atlas can say what a signal implies
+about the world rather than only what the box says it means.
+
+**The 14 fields** (`data/schema.py`, all optional, enums `PX_STATUS` and `PX_REF_KIND`):
+
+| Field | What it is for |
+|---|---|
+| `px_status` | `filled` / `partial` / `unfilled` — how complete this record is |
+| `px_measurand` | The physical quantity the transducer really responds to (often not the labelled one) |
+| `px_units` | SI units of `px_measurand`. `px_range`, `px_resolution` and `px_bandwidth` are all expressed in these |
+| `px_effect` | The named physical effect relied on (Seebeck, piezoresistance, Mie scattering, NDIR absorption…) |
+| `px_chain` | Energy-domain path of the transduction, a **csv string** e.g. `"Radiant,Electrical"` |
+| `px_cross` | **A list of `vocab.PHYSQTY` tokens** — the quantities that also move the output and are normally dismissed as noise |
+| `px_cross_note` | Per cross term: mechanism, sign, magnitude. The length of this field is the deliverable; never shorten it |
+| `px_range` | Quantitative range in `px_units` — may differ from the labelled range |
+| `px_resolution` | Noise floor / LSB in `px_units` |
+| `px_bandwidth` | −3 dB bandwidth or response time constant. **Not `rate`**, which is sample rate: a part reporting at 10 Hz through a 30 s thermal time constant is not a 10 Hz instrument, and conflating the two is how people build filters that lie |
+| `px_drift` | Long-term stability and tempco |
+| `px_implies` | What a signal implies about the world beyond the label. Also the deliverable; never shorten it |
+| `px_ref` | Citation: document title + revision + URL |
+| `px_ref_kind` | What kind of source `px_ref` is (`datasheet`, `appnote`, …) |
+
+**The status convention.** `filled` requires *all* of measurand, units, effect,
+range, resolution, bandwidth, drift, implies **and** a citation (`px_ref` +
+`px_ref_kind`). Anything less is `partial`. A sensor with no entry at all loads
+as `{"px_status": "unfilled"}` — coverage is honest by construction, not by 405
+hand-written stubs. Never invent a number, a document title or a URL: if the
+mechanism is known but the figure is not, write `"VERIFY: …"` and leave the
+record `partial`. A gap is worth more than a plausible lie.
+
+**Where the data lives.** `data/physics_layer.py`, and nowhere else. Never put
+`px_*` values in `data/part*.py` or in an enrichment overlay — `loader.load_all()`
+applies the physics overlay *after* the three enrichment overlays, so a
+physics-layer entry wins on conflict, and a stray `px_*` elsewhere would be
+silently overwritten. Entries are grouped by research group and sorted by frozen
+id inside each group. Coverage counts are computed by `coverage()`, never authored.
+
+**Extending `PHYSQTY`.** If a real cross term has no token, append it to the
+`PHYSQTY` list at the end of `data/vocab.py`, inside its physical group (or start
+a new group with a comment). Tokens are lowercase-hyphenated, one quantity each,
+no application-level words, and each must be genuinely distinct from its
+neighbours — `creep` (load-history-dependent, recoverable) is not `aging-drift`
+(irreversible, time-only) and not `hysteresis` (load-cycle path dependence).
+Nothing else needs changing: the validator resolves `vocablist:PHYSQTY` through
+`getattr(vocab, "PHYSQTY")`, so a token is legal the moment it appears there.
+
+**The gate.** `python3 px_report.py` exits non-zero if any record claims `filled`
+while missing a core field or a citation, and prints the coverage table. Run it
+alongside `validate.py` after any change to the layer.
+
+**Current coverage.** 40 of 405 sensors, spanning all ten modalities: 36 `filled`,
+4 `partial`, 365 `unfilled`.
+
+**Known data debt.** Four `partial` records carry a `VERIFY:`-prefixed `px_ref`
+because no versioned manufacturer datasheet exists for the part: **S047**
+(GUVA-S12SD UV), **S070** (RCWL-0516 Doppler), **S094** (SW-420 vibration),
+**S129** (capacitive soil-moisture board). These are commodity modules sold
+without a document to cite. Leave them as they are until a real source is found;
+do not "fix" them by inventing a citation.
+
+**Deliberate, unstarted follow-up.** The `px_*` fields are not surfaced in the
+workbook at all — no Physics sheet, no `px_` columns on the Master Catalog. That
+was a scoping decision, not an oversight: the workbook was deliberately not
+touched by the physics-layer commits, so `verify_build.py` still passes unchanged
+against `esp32_sensor_universe_v55.xlsx`. Adding a sheet or columns is real work
+for a later phase — and remember rule 5: any new sheet must be appended to
+`OWNED_SHEETS`.
 
 ---
 

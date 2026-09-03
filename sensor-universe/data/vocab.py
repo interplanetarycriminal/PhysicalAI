@@ -585,8 +585,10 @@ PHYSQTY = [
     "salinity-conductivity",
     "contamination-poisoning",
     "dust-fouling",
+    "aerosol-size-distribution",
     # radiant
     "ambient-light",
+    "light-flicker",
     "sunlight-load",
     "ir-radiation",
     "uv-radiation",
@@ -619,5 +621,6 @@ PHYSQTY = [
     # time
     "aging-drift",
     "hysteresis",
+    "creep",
     "clock-drift",
 ]
