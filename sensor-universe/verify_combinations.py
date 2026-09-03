@@ -223,6 +223,189 @@ def main():
     check("no tau is invented from an empty field", not bad_basis,
           str(bad_basis[:3]) if bad_basis else "")
 
+    # -- 4b · the round-two fixes actually fire ---------------------------
+    # Each of these asserts that a fix CHANGED something on the real data. A
+    # fix that quietly matches nothing is worse than no fix, because it reads
+    # as a guarantee in the report.
+
+    # Fix 3 — negation and effect-word guards
+    guarded, rejects_seen = 0, {}
+    for r in sensors:
+        _found, rej = cmb.extract_interferents(r, with_rejects=True)
+        for k, whys in rej.items():
+            for _lit, why in whys:
+                guarded += 1
+                tag = why.split(" '")[0].split(" (")[0]
+                rejects_seen[tag] = rejects_seen.get(tag, 0) + 1
+    check("Fix 3 · the negation/effect-word guards reject real matches", guarded > 0,
+          f"{guarded} rejections across {len(sensors)} sensors: "
+          + ", ".join(f"{k} x{v}" for k, v in sorted(rejects_seen.items(),
+                                                     key=lambda kv: -kv[1])[:3]))
+    bmp = by_id.get("S192")
+    if bmp:
+        _f, rej = cmb.extract_interferents(bmp, with_rejects=True)
+        # The named regression: BMP280's fools text says a fake BME280 arrives
+        # "with no humidity sensor at all". The negation guard must reject that
+        # occurrence. It does NOT follow that `humidity` disappears from the
+        # record — the same prose later says "before you trust a humidity number
+        # from a $2 board", which survives the guard and is a DIFFERENT kind of
+        # false positive (topical, not negated). That residue is measured in the
+        # report, not silently asserted away here.
+        check("Fix 3 · BMP280's 'with no humidity sensor' occurrence is rejected",
+              any("negated" in why for _lit, why in rej.get("humidity", [])),
+              str(rej.get("humidity", "NOT REJECTED — the guard regressed")))
+
+    # Fix 1 — incidental capabilities
+    inc_parts = {r["id"]: cmb.incidental_capabilities(r) for r in sensors}
+    n_inc = sum(len(v) for v in inc_parts.values())
+    n_listed = sum(len([p for p in (r.get("phenomena") or []) if p in vocab.PHENOMENON])
+                   for r in sensors)
+    check("Fix 1 · incidental capabilities are found", 0 < n_inc < n_listed,
+          f"{n_inc} of {n_listed} phenomenon listings ({100 * n_inc / n_listed:.0f}%)")
+    whole = [r["id"] for r in sensors
+             if inc_parts[r["id"]]
+             and len(inc_parts[r["id"]]) ==
+             len([p for p in (r.get("phenomena") or []) if p in vocab.PHENOMENON])]
+    # A part flagged wholly incidental measures NOTHING it says it is for, which
+    # is normally a stem miss. Six survive and each was read: S235 is a bench rig
+    # whose phenomena belong to its constituent parts, S366 is an EEG front end
+    # whose EOG/EMG really are side channels, and the rest are genuinely marginal
+    # (optical flow as `displacement-linear`). The gate is a ceiling, not zero.
+    check("Fix 1 · almost no part is WHOLLY incidental", len(whole) <= 8,
+          f"{len(whole)} of {len(sensors)}: {whole}")
+    fuel = by_id.get("S375")
+    if fuel:
+        check("Fix 1 · MAX17260's die-temperature register is incidental",
+              "temperature-contact" in inc_parts["S375"],
+              "the multiplicity halo depends on this being caught")
+
+    # the discount reaches the score
+    disc = [r for r in rows if r["synergy"].get("multiplicity_incidental_keys")]
+    check("Fix 1 · the incidental discount fires on real rows", bool(disc),
+          f"{len(disc):,} of {len(rows):,} rows carry a near-zero multiplicity key")
+
+    # Fix 2 — transduction mechanisms
+    full = [cmb.score_combo([by_id[i] for i in r["ids"]], prep, boards)
+            for r in rows[:60]]
+    bad_diff = []
+    for s2 in full:
+        for x in s2["shared_measurand"]["shared"]:
+            ma, mb = set(x["mechanism_a"] or []), set(x["mechanism_b"] or [])
+            if x["kind"] == "differential" and (not ma or not mb or (ma & mb)):
+                bad_diff.append((s2["ids"], x["phenomenon"]))
+            if x["weight"] == 1.0 and x["kind"] != "differential":
+                bad_diff.append((s2["ids"], x["phenomenon"], "full weight, not differential"))
+            if (x["incidental_a"] or x["incidental_b"]) and x["weight"] != 0.0:
+                bad_diff.append((s2["ids"], x["phenomenon"], "incidental but paid"))
+    check("Fix 2 · full shared-measurand credit needs two DIFFERENT known mechanisms",
+          not bad_diff, str(bad_diff[:2]) if bad_diff else
+          f"{sum(len(s2['shared_measurand']['shared']) for s2 in full)} channels checked "
+          f"over the top 60 rows")
+    n_mech = sum(1 for r in sensors if cmb.mechanisms(r))
+    check("Fix 2 · mechanisms are read for most parts, and UNKNOWN is left unknown",
+          0 < n_mech < len(sensors),
+          f"{n_mech}/{len(sensors)} sensors have an identified mechanism; "
+          f"{len(sensors) - n_mech} are unknown and can never earn differential credit")
+
+    # Fix 4 — tau confidence attenuation
+    bad_tf = [r["ids"] for r in rows
+              if abs(r["time"]["score"] - r["time"]["raw"]
+                     * r["time"]["confidence_factor"]) > 2e-4]   # both are round(_, 4)
+    check("Fix 4 · the time component equals raw x tau-confidence factor", not bad_tf,
+          str(bad_tf[:3]) if bad_tf else f"{len(rows):,} rows")
+    atten = [r for r in rows if r["time"]["raw"] > 0
+             and r["time"]["confidence_factor"] < 1.0]
+    check("Fix 4 · the attenuation actually bites", bool(atten),
+          f"{len(atten):,} rows scored below their raw time value")
+    lb = [r["id"] for r in sensors if cmb.estimate_tau(r, with_bound=True)[3]]
+    check("Fix 4 · rate-derived taus are flagged as LOWER BOUNDS", bool(lb),
+          f"{len(lb)} of {len(sensors)} sensors")
+    bad_lb = [r["id"] for r in sensors
+              if cmb.estimate_tau(r, with_bound=True)[3]
+              and "LOWER BOUND" not in cmb.estimate_tau(r)[1]]
+    check("Fix 4 · every lower-bound tau says so in its basis string", not bad_lb,
+          str(bad_lb[:3]) if bad_lb else "")
+
+    # Fix 5 — family dedup keeps the best of the family
+    by_ids = {tuple(r["ids"]): r for r in rows}
+    bad_dd = []
+    for r in rows:
+        tgt = r.get("deduped_into")
+        if not tgt:
+            continue
+        t = by_ids.get(tuple(tgt))
+        if t is None:
+            bad_dd.append((r["ids"], "target not in the run"))
+        elif t["total"] < r["total"]:
+            bad_dd.append((r["ids"], "collapsed into a WORSE row"))
+        elif t["family_signature"] != r["family_signature"]:
+            bad_dd.append((r["ids"], "different family"))
+        elif sorted(t["synergy"]["keys"]) != sorted(r["synergy"]["keys"]):
+            bad_dd.append((r["ids"], "different synergy claim"))
+    n_dd = sum(1 for r in rows if r.get("deduped_into"))
+    check("Fix 5 · dedup keeps the best row of each family+claim", not bad_dd,
+          str(bad_dd[:2]) if bad_dd else
+          f"{n_dd:,} of {len(rows):,} rows collapsed, "
+          f"{len({v['family'] for v in prep.values()})} families")
+    check("Fix 5 · dedup collapses something but not everything",
+          0 < n_dd < len(rows), f"{n_dd:,}")
+
+    # Fix 6 — co-location
+    doubt = [c for s2 in full for c in s2["compensation"]["channels"]
+             if c["co_location"] == "doubtful"]
+    bad_cl = [c for c in doubt if c["weight"] >= 1.0]
+    check("Fix 6 · a doubtful co-location always attenuates its channel", not bad_cl,
+          f"{len(doubt)} doubtful channels in the top 60 rows"
+          if not bad_cl else str(bad_cl[:1]))
+    ncl = sum(1 for a, b in combinations(sensors[:150], 2)
+              if cmb.co_location(a, b)[0] == "doubtful")
+    check("Fix 6 · the co-location test fires on the real catalog", ncl > 0,
+          f"{ncl:,} doubtful orderings among the first 150 sensors")
+
+    # Fix 7 — per-k percentile
+    bad_p = [r["ids"] for r in rows
+             if not isinstance(r.get("percentile_within_k"), float)
+             or not (0.0 <= r["percentile_within_k"] <= 100.0)]
+    check("Fix 7 · every row carries a percentile_within_k in [0, 100]", not bad_p,
+          str(bad_p[:3]) if bad_p else f"{len(rows):,} rows")
+    bad_mono = [rows[i]["ids"] for i in range(len(rows) - 1)
+                if rows[i]["percentile_within_k"] < rows[i + 1]["percentile_within_k"]]
+    check("Fix 7 · percentile is monotone with total", not bad_mono,
+          str(bad_mono[:3]) if bad_mono else "")
+    bad_k = [r["ids"] for r in rows if r.get("k") != len(r["ids"])]
+    check("Fix 7 · every row states its own k", not bad_k, "")
+
+    # -- 4c · THE PHYSICS-LAYER GATE --------------------------------------
+    # The px_* preference chain is designed against a schema on another branch.
+    # Nothing here may quietly depend on it: this run must have come out of the
+    # prose fallback path end to end. If this check starts failing because the
+    # fields have landed, that is NOT a bug — it means the ranking must be
+    # re-read as a px run, and this assertion should be updated deliberately.
+    PX = ("px_status", "px_measurand", "px_units", "px_effect", "px_chain", "px_cross",
+          "px_cross_note", "px_range", "px_resolution", "px_bandwidth", "px_drift",
+          "px_implies", "px_ref", "px_ref_kind")
+    have_px = [r["id"] for r in records if any((r.get(f) or "") for f in PX)]
+    check("px gate · no record carries a physics-layer field today", not have_px,
+          f"{len(records)} records, none with any of {len(PX)} px_* fields"
+          if not have_px else f"{len(have_px)} records DO: {have_px[:5]} — the ranking "
+          f"is no longer a pure prose run and the report must say so")
+    check("px gate · every tau came from the prose path",
+          all(v["tau_source"] == "prose" for v in prep.values()),
+          f"{len(prep)} sensors")
+    check("px gate · every incidental verdict came from the prose path",
+          all(v["incidental_source"] == "prose" for v in prep.values()))
+    check("px gate · every mechanism came from the prose path",
+          all(v["mechanism_source"] == "prose" for v in prep.values()))
+    srcs = {c["source"] for s2 in full for c in s2["compensation"]["channels"]}
+    check("px gate · every compensation channel came from the prose lexicon",
+          srcs <= {"prose"}, f"sources seen: {sorted(srcs) or ['none']}")
+    check("px gate · has_physics_layer() agrees",
+          not any(cmb.has_physics_layer(r) for r in records))
+    check("px gate · the PHYSQTY bridge is wired to real PHENOMENON keys",
+          all(p in vocab.PHENOMENON
+              for v in cmb.PHYSQTY_OBSERVED_BY.values() for p in v),
+          f"{len(cmb.PHYSQTY_OBSERVED_BY)} PHYSQTY tokens mapped")
+
     # -- 5 · the --explain path agrees with the ranked row -----------------
     ids = ",".join(top["ids"])
     out = subprocess.run([sys.executable, str(HERE / "combine.py"), "--explain", ids],

@@ -95,13 +95,17 @@ def _cell(vals, n=4):
     return out + (f" +{len(vals) - n}" if len(vals) > n else "")
 
 
-def report(rows, k, title, constraints, top, n_considered, elapsed, triples_meta=None):
+def report(rows, k, title, constraints, top, n_considered, elapsed, triples_meta=None,
+           diverse=True, n_all=None, meta=None):
     L = [f"# {title}", ""]
     L.append(f"- **Search space** — {n_considered:,} "
              + ("combinations, EXHAUSTIVE — every C(405,2) pair" if k == 2
                 else "candidates, NOT exhaustive — see the note below"))
     L.append(f"- **Constraints** — {constraints}")
-    L.append(f"- **Surviving the filters** — {len(rows):,}")
+    L.append(f"- **Surviving the filters** — "
+             + (f"{n_all:,}" if n_all is not None else f"{len(rows):,}")
+             + (f" ({len(rows):,} after family dedup)" if n_all is not None
+                and n_all != len(rows) else ""))
     L.append(f"- **Scored in** — {elapsed:.1f}s")
     L.append("- **Weights** — " + ", ".join(f"{k2} {v:g}" for k2, v in cmb.WEIGHTS.items()))
     if k == 3 and triples_meta:
@@ -111,17 +115,35 @@ def report(rows, k, title, constraints, top, n_considered, elapsed, triples_meta
                  f"parts at or under ${triples_meta['params']['extra_pool_max_usd']:g}. "
                  f"C(405,3) = 11,042,570 was not searched.")
     L.append("- **! Scores are comparable within a k, not across it** — the normalisation "
-             "caps are pair-calibrated, so triples saturate more components.")
+             "caps are pair-calibrated, so triples saturate more components. Read "
+             "`%ile` (percentile within this k), not `Score`, and note that a 99th "
+             "percentile triple is the best of the triples searched, NOT a claim that "
+             "it is 99% likely to work.")
+    if diverse and n_all is not None:
+        L.append(f"- **Family dedup is ON** — {n_all - len(rows):,} of {n_all:,} rows "
+                 f"collapsed into a better row making the same claim with an "
+                 f"interchangeable part (`--no-diverse` to see them all)")
+    elif n_all is not None:
+        L.append(f"- **Family dedup is OFF** (`--no-diverse`) — near-duplicate parts "
+                 f"appear as separate rows")
+    if meta:
+        px = meta["physics_layer"]
+        L.append(f"- **Evidence path** — {px['path']}; compensation, incidental "
+                 f"capabilities and tau all came from prose "
+                 f"({px['sensors_with_px_fields']}/{meta['n_sensors']} records carry "
+                 f"`px_*` fields)")
     if not rows:
         L += ["", "✗ Nothing survived those constraints."]
         return "\n".join(L)
 
     L += ["", f"## Top {min(top, len(rows))}", "",
-          "| # | Score | $ | Parts | Gained (emergent · routes) | Compensation | Shared | τ | New? | ESP32 |",
-          "|--:|--:|--:|---|---|---|---|---|---|---|"]
+          "| # | Score | %ile | $ | Parts | Gained (emergent · routes) | Compensation "
+          "| Shared | τ | New? | ESP32 |",
+          "|--:|--:|--:|--:|---|---|---|---|---|---|---|"]
     for i, r in enumerate(rows[:top], 1):
         syn = r["synergy"]
-        mo = set(syn["multiplicity_only_keys"])
+        mo = (set(syn["multiplicity_only_keys"])
+              | set(syn.get("multiplicity_incidental_keys") or []))
         gained = _cell([k2 for k2 in syn["emergent_keys"] if k2 not in mo], 3)
         routes = _cell([k2 for k2 in syn["new_route_keys"] if k2 not in mo], 2)
         comp = r["compensation"]
@@ -130,10 +152,14 @@ def report(rows, k, title, constraints, top, n_considered, elapsed, triples_meta
                           for c in comp["channels"][:2])
                 + (f" +{len(comp['channels']) - 2}" if len(comp["channels"]) > 2 else ""))
         d = r["time"]["decades"]
-        tau = "unknown" if d is None else f"{d:.1f}dec {r['time']['mode']}"
+        tau = ("unknown" if d is None else
+               f"{d:.1f}dec {r['time']['mode']} ({r['time'].get('confidence', '?')}"
+               + (", lower bound)" if r["time"].get("lower_bound") else ")"))
         mark = {"single-board": "✓", "single-board-with-caveats": "!",
                 "needs-glue": "!", "not-single-board": "✗"}.get(r.get("esp32_verdict"), "?")
-        L.append(f"| {i} | {r['total']:.3f} | {r['usd']:g} | "
+        pct = r.get("percentile_within_k")
+        L.append(f"| {i} | {r['total']:.3f} | "
+                 + (f"{pct:.2f}" if pct is not None else "—") + f" | {r['usd']:g} | "
                  + " + ".join(f"{n} `{i2}`" for n, i2 in zip(r["names"], r["ids"]))
                  + f" | {gained} · {routes} | {cstr} | {_cell(r['shared_measurand']['keys'], 3)} "
                  f"| {tau} | {'✓' if r['novelty'] == 'unexplored' else '·'} | "
@@ -154,13 +180,50 @@ def why(rows, prep, boards, by_id, top):
         L.append(f"{s['reasoning']}")
         L.append("")
         for c in s["compensation"]["channels"]:
-            L.append(f"- ✓ **{c['corrector']}** measures `{'`, `'.join(c['phenomena'])}`, "
-                     f"which corrects **{c['fooled']}** for *{c['interferent_label'].lower()}* — "
-                     f"its own `fools` says: “{c['evidence']}”")
+            mark = "✓" if c["weight"] >= 1.0 else "!"
+            L.append(f"- {mark} **{c['corrector']}** measures `{'`, `'.join(c['phenomena'])}`, "
+                     f"which corrects **{c['fooled']}** for *{c['interferent_label'].lower()}* "
+                     f"[{c['source']}, weight {c['weight']:g}, co-location "
+                     f"{c['co_location']}] — its own `fools` says: “{c['evidence']}”")
+            for n in c["notes"]:
+                L.append(f"  - ! {n}")
+        for x in s["shared_measurand"]["shared"]:
+            if x["kind"] == "differential":
+                L.append(f"- ✓ `{x['phenomenon']}` read two ways — {x['a']} by "
+                         f"{'/'.join(x['mechanism_a'])} (cue “{x['cue_a']}”) vs {x['b']} by "
+                         f"{'/'.join(x['mechanism_b'])} (cue “{x['cue_b']}”)")
+            elif x["kind"] == "incidental":
+                L.append(f"- ! `{x['phenomenon']}` is shared on paper only — "
+                         f"{x['incidental_reason']}")
+            elif x["kind"] == "unverified":
+                L.append(f"- ! `{x['phenomenon']}` shared, but the mechanism is unreadable "
+                         f"for "
+                         + (x["a"] if not x["mechanism_a"] else x["b"])
+                         + " — scored as redundancy, not a differential pair")
         for t in s["time"]["taus"]:
             L.append(f"- τ({t['id']}) = "
-                     + (f"{t['tau']:g}s ({t['confidence']}) — {t['basis']}"
+                     + (f"{t['tau']:g}s ({t['confidence']}"
+                        + (", LOWER BOUND" if t["lower_bound"] else "")
+                        + f") — {t['basis']}"
                         if t["tau"] is not None else f"unknown — {t['basis']}"))
+        if s["time"]["confidence_factor"] < 1.0 and s["time"]["raw"]:
+            L.append(f"- ! time component scaled {s['time']['raw']:.3f} → "
+                     f"{s['time']['score']:.3f} for `{s['time']['confidence']}` tau "
+                     f"confidence")
+        if s["synergy"]["multiplicity_incidental_keys"]:
+            L.append("- ! discounted to near zero — the multiplicity is only reached by "
+                     "counting a capability that is INCIDENTAL for the part supplying it: "
+                     + ", ".join(f"`{k}`" for k in
+                                 s["synergy"]["multiplicity_incidental_keys"]))
+        if s["synergy"]["multiplicity_assisted_keys"]:
+            L.append("- ! partly multiplicity-driven (one half is real synergy, the other "
+                     "half is two parts carrying the same register): "
+                     + ", ".join(f"`{k}`" for k in
+                                 s["synergy"]["multiplicity_assisted_keys"]))
+        if r.get("equivalent_swaps"):
+            L.append(f"- · {len(r['equivalent_swaps'])} equivalent swap(s) collapsed into "
+                     f"this row: "
+                     + "; ".join("+".join(x) for x in r["equivalent_swaps"][:4]))
         if s["synergy"]["multiplicity_only_keys"]:
             L.append("- ! discounted as multiplicity-only (two copies of one part would do "
                      "the same): " + ", ".join(f"`{k}`" for k in
@@ -230,6 +293,10 @@ def explain(ids, prep, boards, by_id):
                  f"`{'`, `'.join(c['phenomena'])}` → corrects **{c['fooled']}** "
                  f"(`{c['fooled_id']}`) for **{c['interferent_label']}**")
         L.append(f"  - evidence from `{c['fooled_id']}`'s own `fools`: “{c['evidence']}”")
+        L.append(f"  - source `{c['source']}` · co-location **{c['co_location']}** · "
+                 f"weight {c['weight']:g}")
+        for n in c["notes"]:
+            L.append(f"  - ! {n}")
     if s["compensation"]["self_compensated"]:
         L.append(f"- ({s['compensation']['self_compensated']} further channel(s) discarded: "
                  f"the fooled part already measures that interferent itself)")
@@ -238,8 +305,16 @@ def explain(ids, prep, boards, by_id):
     if not s["shared_measurand"]["shared"]:
         L.append("No phenomenon in common.")
     for x in s["shared_measurand"]["shared"]:
-        L.append(f"- `{x['phenomenon']}` — {x['a']} ({x['modality_a']}) vs {x['b']} "
-                 f"({x['modality_b']}) → **{x['kind']}**, weight {x['weight']:g}")
+        L.append(f"- `{x['phenomenon']}` — {x['a']} by "
+                 f"{'/'.join(x['mechanism_a'] or ['UNKNOWN mechanism'])} vs {x['b']} by "
+                 f"{'/'.join(x['mechanism_b'] or ['UNKNOWN mechanism'])} → "
+                 f"**{x['kind']}**, weight {x['weight']:g}")
+        if x["cue_a"] or x["cue_b"]:
+            L.append(f"  - cues: {x['a']} “{x['cue_a']}”, {x['b']} “{x['cue_b']}” "
+                     f"(modality labels for reference: {x['modality_a']} / "
+                     f"{x['modality_b']})")
+        if x["incidental_reason"]:
+            L.append(f"  - ! {x['incidental_reason']}")
 
     L += ["", "## Failure independence", ""]
     for p in s["failure_independence"]["pairs"]:
@@ -292,7 +367,40 @@ def explain(ids, prep, boards, by_id):
              + (", ".join(f"{b['name']} (`{b['id']}`, {b['pins']} pins)"
                           for b in f["boards_that_fit"]) or "none"))
 
-    L += ["", "## Novelty", "", f"**{s['novelty']}**"]
+    L += ["", "## Incidental capabilities", "",
+          "A phenomenon the record lists but never says it is FOR. These earn no "
+          "shared-measurand credit and near-zero multiplicity credit.", ""]
+    any_inc = False
+    for rec in recs:
+        inc, why_inc = cmb.incidental_capabilities(rec, with_reason=True)
+        if not inc:
+            L.append(f"- **{rec['n']}** (`{rec['id']}`) — none; every phenomenon it lists "
+                     f"appears in its own `meas`/`cat`/`sub`")
+            continue
+        any_inc = True
+        L.append(f"- **{rec['n']}** (`{rec['id']}`)")
+        for k2 in sorted(inc):
+            L.append(f"  - `{k2}` — {why_inc[k2]}")
+    if not any_inc:
+        L.append("")
+
+    L += ["", "## Transduction mechanisms", ""]
+    for rec in recs:
+        m = cmb.mechanisms(rec)
+        L.append(f"- **{rec['n']}** (`{rec['id']}`) — "
+                 + (", ".join(f"{k2} (cue “{v}”)" for k2, v in sorted(m.items()))
+                    or "NONE identified — every shared measurand involving it is scored "
+                       "as redundancy, never as a differential pair"))
+
+    L += ["", "## Family", "",
+          f"family signature `{s['family_signature']}` — parts that are interchangeable "
+          f"for this claim collapse onto one row in `--diverse` (the default)."]
+
+    L += ["", "## Novelty", "", f"**{s['novelty']}**",
+          "",
+          "! This component carries almost no information: virtually every combination "
+          "comes out `unexplored`, because the catalog's `pair` prose names a handful of "
+          "partners per part and nothing more. It is a 0.04-weight tiebreaker."]
     for e in s["novelty_evidence"]:
         L.append(f"- {e}")
     L += ["", "## Confound", "", s["confound"]]
@@ -303,22 +411,47 @@ def explain(ids, prep, boards, by_id):
 
 def _row(rank, r):
     syn, comp = r["synergy"], r["compensation"]
-    return [rank, "|".join(r["ids"]), "|".join(r["names"]), r["usd"], round(r["total"], 5),
+    t = r["time"]
+    return [rank, r.get("k", len(r["ids"])), "|".join(r["ids"]), "|".join(r["names"]),
+            r["usd"], round(r["total"], 5), r.get("percentile_within_k", ""),
             round(syn["raw"], 3), "|".join(syn["emergent_keys"]),
-            "|".join(syn["new_route_keys"]), "|".join(r["shared_measurand"]["keys"]),
+            "|".join(syn["new_route_keys"]),
+            "|".join(syn.get("multiplicity_incidental_keys") or []),
+            "|".join(r["shared_measurand"]["keys"]),
+            "|".join(r["shared_measurand"].get("kinds") or []),
             "|".join(f"{c['corrector_id']}>{c['fooled_id']}:{c['interferent']}"
+                     f"@{c['weight']:g}{'' if c['co_location'] == 'plausible' else '?'}"
                      for c in comp["channels"]),
+            "|".join(sorted({c["source"] for c in comp["channels"]})),
+            comp.get("doubtful", 0),
             r["failure_independence"]["score"],
-            "" if r["time"]["decades"] is None else round(r["time"]["decades"], 3),
-            r["time"]["mode"], r["novelty"], r.get("esp32_verdict", ""),
+            "" if t["decades"] is None else round(t["decades"], 3),
+            t["mode"], t.get("confidence", ""),
+            "yes" if t.get("lower_bound") else "no",
+            r["novelty"], r.get("esp32_verdict", ""),
             "|".join(r.get("boards_that_fit") or []),
+            r.get("family_signature", ""),
+            "|".join(r.get("deduped_into") or []),
+            "|".join("+".join(x) for x in (r.get("equivalent_swaps") or [])[:8]),
             r.get("reasoning", ""), r.get("confound", "")]
 
 
-HEADER = ["rank", "ids", "parts", "usd", "total", "synergy", "emergent_keys",
-          "new_route_keys", "shared_phenomena", "compensation_channels",
-          "failure_independence", "tau_decades", "time_mode", "novelty",
-          "esp32_verdict", "boards_that_fit", "reasoning", "confound"]
+# `total` is calibrated PER k — see percentile_within_k, and the note the export
+# writes into the first line of the file.
+HEADER = ["rank", "k", "ids", "parts", "usd", "total", "percentile_within_k",
+          "synergy", "emergent_keys", "new_route_keys", "multiplicity_incidental_keys",
+          "shared_phenomena", "shared_kinds", "compensation_channels",
+          "compensation_source", "compensation_doubtful",
+          "failure_independence", "tau_decades", "time_mode", "tau_confidence",
+          "tau_lower_bound", "novelty", "esp32_verdict", "boards_that_fit",
+          "family_signature", "deduped_into", "equivalent_swaps",
+          "reasoning", "confound"]
+
+CSV_NOTE = ("# total is calibrated WITHIN k (the normalisation caps are pair-fitted); "
+            "compare rows by percentile_within_k, never a triple's total against a "
+            "pair's. deduped_into names the better combination that makes the same "
+            "claim with an interchangeable part; blank means this row is the family "
+            "representative.")
 
 
 def export(pairs, triples, meta, prep, boards, by_id, n_rows):
@@ -327,6 +460,7 @@ def export(pairs, triples, meta, prep, boards, by_id, n_rows):
     def write(name, rows):
         with open(EXPORTS / name, "w", newline="") as f:
             w = csv.writer(f)
+            w.writerow([CSV_NOTE])
             w.writerow(HEADER)
             for i, r in enumerate(rows[:n_rows], 1):
                 full = cmb.score_combo([by_id[x] for x in r["ids"]], prep, boards)
@@ -351,8 +485,23 @@ def export(pairs, triples, meta, prep, boards, by_id, n_rows):
             csv_rows_written=n_rows,
             seconds=dict(pairs=round(meta["t_pairs"], 2), triples=round(meta["t_triples"], 2)),
             weights=cmb.WEIGHTS, normalisation_caps=cmb.NORM,
-            multiplicity_discount=cmb.SYNERGY_MULTIPLICITY_ONLY,
+            score_scale="total is calibrated WITHIN k; percentile_within_k is the "
+                        "only cross-comparable number, and even it is a rank inside "
+                        "this k's search space, not a probability that the "
+                        "combination works",
+            multiplicity_discount=dict(
+                only=cmb.SYNERGY_MULTIPLICITY_ONLY,
+                assisted=cmb.SYNERGY_MULTIPLICITY_ASSISTED,
+                incidental=cmb.SYNERGY_MULTIPLICITY_INCIDENTAL),
             multiplicity_only_edges=sorted(cmb.MULTIPLICITY_ONLY_EDGES),
+            multiplicity_assisted_edges=sorted(cmb.MULTIPLICITY_ASSISTED_EDGES),
+            tau_confidence_factor=cmb.TAU_CONFIDENCE_FACTOR,
+            co_location_attenuation=cmb.CO_LOCATION_ATTENUATION,
+            transduction_mechanisms=len(cmb.TRANSDUCTION_CUES),
+            families=meta["n_families"],
+            pairs_deduped=meta["n_pairs_deduped"],
+            triples_deduped=triples.get("n_deduped"),
+            physics_layer=meta["physics_layer"],
             interferents=len(cmb.INTERFERENTS),
             caveats=[
                 "Pairs are exhaustive; TRIPLES ARE NOT — see triple_strategy.",
@@ -364,6 +513,15 @@ def export(pairs, triples, meta, prep, boards, by_id, n_rows):
                 "Interferents are regex-extracted from free prose. Every one carries the "
                 "matched snippet; read it before trusting the key.",
                 "A tau of `unknown` is carried through, never treated as favourable.",
+                "TOTALS ARE PER-k. `percentile_within_k` is beside every total for "
+                "exactly this reason: no triple should be read as '99% good'.",
+                "`novelty` carries almost no information — 99%+ of combinations come "
+                "out `unexplored` because the catalog's prose names only a handful of "
+                "partners per part. It is a tiebreaker at weight 0.04, nothing more.",
+                "Every compensation channel carries `source`: `prose` means it came "
+                "from the regex lexicon over `fools`, `px` means it came from the "
+                "physics layer's `px_cross`. This run is " + meta["physics_layer"]["path"]
+                + ".",
             ]),
         interferent_lexicon={k: dict(label=v["label"], measured_by=v["measured_by"],
                                      patterns=v["patterns"])
@@ -385,7 +543,11 @@ def _dictrow(r):
                 novelty=r["novelty"], esp32_verdict=r.get("esp32_verdict"),
                 boards_that_fit=r.get("boards_that_fit"), max_diff=r["max_diff"],
                 hazard=r["hazard"], privacy=r["privacy"], pwr_ua=r["pwr_ua"],
-                per_dollar=r["per_dollar"])
+                per_dollar=r["per_dollar"], k=r.get("k", len(r["ids"])),
+                percentile_within_k=r.get("percentile_within_k"),
+                family_signature=r.get("family_signature"),
+                deduped_into=r.get("deduped_into"),
+                equivalent_swaps=(r.get("equivalent_swaps") or [])[:8])
 
 
 # ------------------------------------------------------------------------ main
@@ -405,6 +567,12 @@ def main():
     p.add_argument("--require", help="combination must yield this inference/emergent key")
     p.add_argument("--explain", help="ID1,ID2[,ID3] — the full evidence dump for one "
                                      "combination, and the audit path for any ranked row")
+    p.add_argument("--diverse", dest="diverse", action="store_true", default=None,
+                   help="one row per family per claim (DEFAULT for --top): collapse "
+                        "combinations that differ only by an interchangeable part")
+    p.add_argument("--no-diverse", dest="diverse", action="store_false",
+                   help="show every row, including the nine digital thermometers that "
+                        "make the same claim")
     p.add_argument("--no-why", action="store_true", help="table only, skip the evidence prose")
     p.add_argument("--export", action="store_true", help="write exports/ and exit")
     p.add_argument("--json", action="store_true", help="emit this run as JSON")
@@ -438,9 +606,23 @@ def main():
                                    predicate=pred, postfilter=post)
         t_triples = time.time() - t1
 
+    n_px = sum(1 for r in sensors if cmb.has_physics_layer(r))
     meta = dict(n_sensors=len(sensors), n_boards=len(boards), n_pairs=len(pairs),
                 n_pairs_possible=n_pairs_possible, n_triples_possible=n_triples_possible,
-                t_pairs=t_pairs, t_triples=t_triples)
+                t_pairs=t_pairs, t_triples=t_triples,
+                n_families=len({v["family"] for v in prep.values()}),
+                n_pairs_deduped=sum(1 for r in pairs if r.get("deduped_into")),
+                physics_layer=dict(
+                    sensors_with_px_fields=n_px,
+                    path=("the PROSE fallback path — no record carries px_* fields"
+                          if not n_px else
+                          f"MIXED — {n_px} records carry px_* fields"),
+                    tau_from_px=sum(1 for v in prep.values()
+                                    if v["tau_source"] == "px_bandwidth"),
+                    incidental_from_px=sum(1 for v in prep.values()
+                                           if v["incidental_source"] == "px_measurand"),
+                    mechanism_from_px=sum(1 for v in prep.values()
+                                          if v["mechanism_source"] == "px_effect")))
 
     if a.export:
         n_rows = a.top or EXPORT_ROWS
@@ -451,6 +633,10 @@ def main():
         return
 
     rows = pairs if a.k == 2 else triples["rows"]
+    n_all = len(rows)
+    diverse = True if a.diverse is None else a.diverse
+    if diverse:
+        rows = [r for r in rows if not r.get("deduped_into")]
     top = a.top or 30
     if a.json:
         print(json.dumps(dict(meta=meta, weights=cmb.WEIGHTS, norm=cmb.NORM,
@@ -463,7 +649,8 @@ def main():
                  f"Combination ranker — {'pairs' if a.k == 2 else 'triples'}",
                  constraint_label(a), top, considered,
                  t_pairs if a.k == 2 else t_triples,
-                 triples if a.k == 3 else None))
+                 triples if a.k == 3 else None,
+                 diverse=diverse, n_all=n_all, meta=meta))
     if not a.no_why and rows:
         print(why(rows, prep, boards, by_id, min(top, 12)))
 
