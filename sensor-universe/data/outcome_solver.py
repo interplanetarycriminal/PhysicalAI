@@ -313,7 +313,10 @@ I2C_RANGE_RE = re.compile(r"0x([0-9A-Fa-f]{2})\s*[-–—]\s*0x([0-9A-Fa-f]{2})"
 # while calling a flexible part rigid throws away a buildable set.
 I2C_FLEX_WORDS = (" or ", "/", "jumper", "selectable", "strap", "addr", "add0",
                   "solder", "reprogram", "eeprom", "resistor", "mux", "default",
-                  "pulled", "tied", "variant", "settable", "configurable")
+                  "pulled", "tied", "variant", "settable", "configurable",
+                  # an XSHUT line IS the VL53/VL6180 re-addressing mechanism, so
+                  # naming it means the address moves even when no other word does
+                  "xshut")
 
 
 def i2c_addresses(text):
@@ -350,6 +353,9 @@ def esp32_unusable(record):
 # negator this close in front of a keyword cancels the hit.
 NEGATORS = ("no ", "not ", "nothing", "without", "never", "n't", "free of")
 NEG_WINDOW = 48
+# Clause boundary, which a negator does not reach across. Requires the trailing
+# space so that "3.3V" and "0.5s" are not read as two clauses.
+CLAUSE_END_RE = re.compile(r"[.;:]\s")
 
 
 def compat_flags(record):
@@ -365,7 +371,11 @@ def compat_flags(record):
         for w in words:
             i = low.find(w)
             while i >= 0:
-                if not any(g in low[max(0, i - NEG_WINDOW):i] for g in NEGATORS):
+                # only the clause the keyword sits in can negate it — "cannot
+                # host it at all. PSRAM is mandatory" is a requirement, not a
+                # denial, and the sentence before it must not cancel the flag
+                win = CLAUSE_END_RE.split(low[max(0, i - NEG_WINDOW):i])[-1]
+                if not any(g in win for g in NEGATORS):
                     hit.add(key)
                     break
                 i = low.find(w, i + 1)
