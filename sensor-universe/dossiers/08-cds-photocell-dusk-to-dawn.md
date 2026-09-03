@@ -109,8 +109,9 @@ and cannot tell you it has gone blind.
 - **New drift mechanisms.** `G027` `fools`: "Backup batteries do die, and a node that silently
   reverts to 1 January 2000 corrupts a dataset quietly" — and here it would compute sunset for the
   wrong day. `S157` is `EOL` with `Clone-risk`-grade counterfeits.
-- **A gap.** There is no outdoor-rated presence sensor in this dataset. Every presence part in area
-  `d` is `Indoor`. The housing is your problem and the dataset gives you nothing to copy.
+- **A gap.** There is no outdoor-rated presence sensor in this dataset. All 16 records in the
+  `Presence & Occupancy` category are `environment: ['Indoor']` — none carries `Outdoor`. The
+  housing is your problem and the dataset gives you nothing to copy.
 
 ## Verdict
 Strong on the sun term, strong on the presence term, moderate overall. Computing sunset removes the

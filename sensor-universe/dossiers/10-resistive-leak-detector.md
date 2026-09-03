@@ -43,8 +43,9 @@ optical pickup on the utility meter's disc.
 **A pipe that stays cold.** A leak keeps mains-temperature water moving through a pipe that should be
 static, so the pipe surface sits several degrees below the cabinet air and stays there.
 `Thermal → Electrical · Thermoresistive` on a clamped probe, or `Thermal → Radiant · Blackbody
-emission` for the no-contact version — the atlas maps that effect to area `e` explicitly as "pipe
-surface".
+emission` for the no-contact version — the atlas's entry for that effect names the MLX90614 as its
+example part, and `S007`'s `spark` field already aims it at a pipe: "Point one at your shower drain
+pipe to detect showers (hot water = occupancy + usage) with zero camera/privacy concerns."
 
 **Structure-borne hiss.** A pressurised leak jets into the pipe wall and the pipe is a waveguide.
 `Mechanical → Electrical · Piezoelectric` picks it up at two points and cross-correlation locates it.
