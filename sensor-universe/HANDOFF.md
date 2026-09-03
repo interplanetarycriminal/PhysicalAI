@@ -31,7 +31,7 @@ Plus known data debt: 126/151 outcomes lack "what fools it" notes; ~100 records 
    ```
 7. **Excel constraints (openpyxl 3.1.5):** no pivot tables, no sparklines, no `XLOOKUP/FILTER/UNIQUE`; `_xlfn.` prefix for `TEXTJOIN/IFS/SWITCH`; never a native Table + `ws.auto_filter` on one sheet; never merge cells inside a filter/table range or among formula rows; `column_dimensions.group()` before `set_widths`; formula-bearing sheets need ASCII names; formulas are raw `"="` strings and `wb.calculation.fullCalcOnLoad` is already set.
 8. **Style:** follow `patch_v50.py`'s `add_*` pattern (`_banner` → `S.section` → hand-rolled header row → data rows; yellow `FFF3C4` = editable, blue `EAF0F6` = computed; tab colours per topic; `freeze_panes` row 4). Helpers live in `sheet_lib.py` (`S.cell`, `S.section`, `S.price_bars`, `S.flag_text`, `S.DataBarRule`, `S.FormulaRule`).
-9. **Commit per task** with a descriptive message; push to `claude/tender-euler-1e2bss`. One version bump per phase, not per task.
+9. **Commit per task** with a descriptive message; push to a **fresh branch cut from `origin/main`** (`git fetch origin && git checkout -b claude/<short-topic>-<suffix> origin/main`) and open a PR against `main`. One version bump per phase, not per task. *(This rule used to say "push to `claude/tender-euler-1e2bss`". That is stale: PR #1 from that branch was merged into `main` at 8dfc613 and the branch is gone. Never push to a merged branch.)*
 10. **When a task is ambiguous, do the bounded interpretation and log the ambiguity** in the commit message. Do not widen scope.
 
 ### Codebase map (read these first, in this order)
@@ -119,12 +119,39 @@ Rules: `bom` must satisfy the edge's `requires` under `fusion.covers()` (validat
 
 ## Phase 4 — Executable physics: `physlib`  [H]  → no version bump (repo only)
 
+> **Status — Task 4.3 IMPLEMENTED, in firmware.**
+> **→ `sensor-universe/firmware/physlib/physlib.h`**
+>
+> The C++ header exists and is header-only, allocation-free, `float`-only and free of
+> `Arduino.h` / `Wire.h`, with every function citing the fusion edge key it implements and
+> quoting the atlas's own `math` string verbatim. It covers the three formulas the first
+> firmware needs — `dew_point_magnus(T, RH)`, `ach_from_co2_decay(c1, c2, dt_h, c_out=420)`
+> and `air_density(P, T, RH)`, plus the Magnus saturation vapour pressure the first and third
+> share — and it goes beyond Task 4.3 in one respect: each edge returns a small result struct
+> carrying the inferred quantity, its units, a validity flag and the edge's **confound as
+> data** (the verbatim `fusion.py` string, plus a flag for the machine-detectable instances).
+> Every function returns an explicit NaN rather than a plausible number when fed nonsense.
+>
+> Its host test is `sensor-universe/firmware/test/test_physlib/test_physlib.cpp` — 27 Unity
+> cases run with `pio test -e native` against published psychrometric tables, the ICAO
+> standard atmosphere and hand-computed ACH values. That replaces Task 4.3's "tiny host test
+> compiled with `gcc`"; it is the same idea with a test runner attached.
+>
+> Consumers: `sensor-universe/firmware/src/{condensation_watch,ach_co2_decay,air_density_live}.cpp`,
+> built for both `esp32-s3-devkitc-1` and `esp32dev`. See `sensor-universe/firmware/README.md`.
+>
+> **Still open in this phase:** Tasks 4.1 and 4.2 (the Python `physlib.py` and its known-answer
+> tests) and the fourteen further formulas Task 4.1 lists, which the first firmware does not
+> use. When they land, keep the Python and the header in agreement to 1e-3 — the header is now
+> the reference implementation for the three formulas it already carries, because it is the one
+> with tests that run.
+
 **Why:** an atlas whose formulas run is one the owner can trust and reuse in firmware.
 
 **Task 4.1** Create `sensor-universe/physlib/physlib.py` implementing every formula named in `FUSION_EDGES[*].math` and `derived_instruments.py` as pure functions with docstrings citing the edge key: `dew_point_magnus(T, RH)`, `ach_from_co2_decay(c1, c2, dt_h, c_out=420)`, `hydronic_power_w(flow_lpm, dT)`, `wet_bulb_stull(T, RH)` *(mark: Stull 2011 approximation)*, `air_density(P, T, RH)`, `sound_speed(T)`, `tdoa_bearing(dt, d, c=343)`, `leak_position(L, dt, v)`, `helmholtz_f(A, V, L, c=343)`, `dphp_theta(q_per_m, r, dT_max, C_dry)`, `pv_performance_ratio(P, G, P_rated)`, `heat_index_rothfusz(T, RH)` *(guard: T≥27°C, RH≥40%)*, `wind_chill_ec2001(T, v)`, `ua_w_per_k(P, dT)`, `thermal_tau(...)`, `nernst_slope_mv(T)`, `muon_pressure_correct(rate, P, P0, beta=0.002)`.
 **Task 4.2** `physlib/test_physlib.py` (pytest or plain asserts): known-answer tests — e.g. Magnus dew point of 20°C/50% RH ≈ 9.3°C; 4186×ΔT sanity; `sound_speed(20) ≈ 343.4`; Rothfusz refuses out-of-domain inputs; ACH of a decay from 1400→800 ppm in 1 h with 420 ppm outside ≈ 0.95 h⁻¹.
 **Task 4.3** `physlib/physlib.h` — a C header port of the same functions (no allocation, `float` only) for ESP32 use, plus a tiny host test compiled with `gcc` comparing against the Python results to 1e-3.
-**Done when:** `python3 physlib/test_physlib.py` passes and `gcc -o /tmp/t physlib/test_physlib.c && /tmp/t` passes. Commit.
+**Done when:** `python3 physlib/test_physlib.py` passes and the host test for the C header passes (now: `cd sensor-universe/firmware && pio test -e native`). Commit.
 
 ---
 
@@ -164,7 +191,7 @@ Previously deferred by the owner ("later — get the xlsx right first"). Only if
 3. `python3 verify_build.py <OUT>` → all pass.
 4. `python3 audit_workbook.py <OUT>` → **exit 0**.
 5. `python3 solve.py --export` regenerates `exports/` without error; `python3 solve.py --budget 25 --fusion` runs.
-6. Phase 4 only: `python3 physlib/test_physlib.py` and the C host test pass.
+6. Phase 4 only: `python3 physlib/test_physlib.py` (not yet written) and the host test for the C header pass — the latter is `cd sensor-universe/firmware && pio test -e native`, which also requires `pio run` to succeed for all six embedded environments.
 7. Open the xlsx: no repair prompt; new sheet renders; formulas populate on load.
 8. Commit + push; deliver the xlsx and `exports/SOLVER.md` in chat.
 
