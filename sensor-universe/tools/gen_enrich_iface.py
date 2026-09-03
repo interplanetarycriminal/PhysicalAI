@@ -98,7 +98,8 @@ def emit_pair(field, val):
     if len(head) + len(lit) + 1 <= MAX_LINE or not isinstance(val, str):
         return [f"{head}{lit},"]
     width = MAX_LINE - len(head) - 4
-    chunks = textwrap.wrap(val, width=max(width, 20), break_long_words=False)
+    chunks = textwrap.wrap(val, width=max(width, 20), break_long_words=False,
+                           break_on_hyphens=False)
     lines = [f"{head}{json.dumps(chunks[0] + ' ', ensure_ascii=False)}"]
     for c in chunks[1:-1]:
         lines.append(" " * len(head) + json.dumps(c + " ", ensure_ascii=False))
