@@ -715,7 +715,7 @@ def best_groups(S, edges=None, records=None, min_k=2, max_k=6, max_usd=None,
                 keep[tuple(g["ids"])] = g
         return [keep[k] for k in sorted(keep)]
 
-    # ---- k = 2, exhaustive: 405 parts is 81,810 pairs, which is affordable
+    # ---- k = 2, exhaustive: 401 parts is 80,200 pairs, which is affordable
     ids = sorted(pool)
     level = []
     for i, a in enumerate(ids):
