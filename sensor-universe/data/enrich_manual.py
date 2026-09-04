@@ -48,7 +48,8 @@ ENRICH_MANUAL = {
  requires="A voltage divider or level shift if run at 5V; RMS maths in software for AC",
  substitutes="INA226 for far better DC resolution when isolation is not needed; SCT-013 clamp for "
              "non-invasive mains; LEM closed-loop Hall for accuracy",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.allegromicro.com/en/products/sense/current-sensor-ics/integrated-current-sensors/acs712",
+ confidence="Verified", as_of="2026-09",
  fools="Its zero point drifts with temperature and its noise floor is large relative to small "
        "currents — a ±30A part cannot usefully see 200mA, and people routinely buy the wrong range "
        "and conclude the sensor is broken. The offset must be re-zeroed at the operating "
@@ -70,7 +71,7 @@ ENRICH_MANUAL = {
           "conductor only",
  substitutes="A flashable smart plug for a single appliance with no wiring at all; SCT-013 plus "
              "EmonLib if you want the raw waveform; ATM90E32 for polyphase",
- link="", confidence="High", as_of="2026-07",
+ link="https://en.peacefair.cn/product/772.html", confidence="High", as_of="2026-09",
  fools="Energy accumulates in the module's own non-volatile memory, not in your code, so a reset "
        "does not zero it and a replacement module starts from a different total. Clamping around "
        "both conductors of a cable reads zero because the fields cancel — the single most common "
@@ -189,7 +190,8 @@ ENRICH_MANUAL = {
  requires="A pull-down resistor for membrane types so an untouched strip reads a defined value",
  substitutes="Draw-wire encoder for long travel; VL53L0X for contactless linear position; magnetic "
              "linear encoder for harsh environments",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.spectrasymbol.com/linear-position-sensors/soft-membrane-linear-pots-softpot",
+ confidence="High", as_of="2026-09",
  fools="A membrane SoftPot reads garbage when nothing is touching it — you must detect 'touched' "
        "separately, usually with a second sensing line, or you will act on meaningless values. "
        "Mechanical sliders develop dead spots and crackle as the track wears, and the failure is "
@@ -228,7 +230,7 @@ ENRICH_MANUAL = {
           "exactly mid-scale",
  substitutes="TLV493D 3D magnetic sensor for a sealed, wear-free joystick; a capacitive touch strip "
              "for flat panels",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.adafruit.com/product/512", confidence="High", as_of="2026-09",
  fools="The mechanical centre is not the electrical centre, and it differs per unit and drifts with "
        "temperature — without a deadband a robot will creep constantly. The two axes interact "
        "slightly at the extremes. The push-button switch bounces and shares ground with the "
@@ -308,7 +310,7 @@ ENRICH_MANUAL = {
  requires="A GNSS module that exposes PPS, plus NMEA parsing to know which second the pulse marks",
  substitutes="A chip-scale atomic clock or a GPSDO for genuine metrology; NTP over Wi-Fi for "
              "millisecond-class sync at zero hardware cost",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.adafruit.com/product/746", confidence="High", as_of="2026-09",
  fools="The nanosecond figure belongs to the pulse edge, not to anything the ESP32 can timestamp — "
        "GPIO interrupt latency and FreeRTOS scheduling add microseconds of jitter, and Wi-Fi "
        "activity makes it worse. The pulse also keeps arriving when the module has lost its fix "
@@ -365,7 +367,8 @@ ENRICH_MANUAL = {
  "many builds use the ESP32 for control and hand video to a host.",
  requires="A breakout with the correct 2.8V/1.2V rails and a socket; VoSPI timing is unforgiving",
  substitutes="MLX90640 for a tenth of the price if 32x24 suffices; InfiRay P2 Pro as a phone module",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.sparkfun.com/purethermal-mini-pro-jst-sr-with-flir-lepton-3-5.html",
+ confidence="Verified", as_of="2026-09",
  fools="A microbolometer needs periodic flat-field correction — the shutter clicks and the image "
        "freezes briefly, which will interrupt any real-time loop that does not expect it. The "
        "8.7Hz limit is regulatory, not technical, and higher-rate variants are export controlled. "
@@ -384,7 +387,8 @@ ENRICH_MANUAL = {
           "people-detection out of 16 pixels",
  substitutes="AMG8833 gives 64 pixels for less money; LD2410 mmWave detects stillness better and "
              "costs a tenth",
- link="", confidence="Estimate", as_of="2026-07",
+ link="https://www.components.omron.com/product-detail?partId=396", confidence="Verified",
+ as_of="2026-09",
  fools="Sixteen pixels is very few: two people standing close merge into one blob, and a person at "
        "the edge of the field is a fraction of a pixel. It was tuned to separate humans from warm "
        "backgrounds, but sunlit floors, radiators and recently-vacated chairs still produce false "
@@ -404,7 +408,8 @@ ENRICH_MANUAL = {
           "PSRAM enabled in the build",
  substitutes="OV5640 for autofocus and resolution; XIAO ESP32S3 Sense for a far nicer package; "
              "Person Sensor if you want faces detected without ever handling an image",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.digikey.com/en/products/detail/universal-solder-electronics-ltd/Ai-Thinker-ESP32-CAM-WiFi-BT-BLE/14319899",
+ confidence="High", as_of="2026-09",
  fools="Camera initialisation draws a current spike that browns out marginal supplies, and the "
        "resulting failure looks like a dead board rather than a power problem — this wastes more "
        "beginner time than anything else in the catalog. The fixed-focus lens is often badly set "
@@ -423,7 +428,8 @@ ENRICH_MANUAL = {
  requires="PSRAM, a solid 5V supply, and autofocus firmware upload at initialisation",
  substitutes="OV2640 when resolution does not matter; Arducam Mega for an SPI camera that frees "
              "GPIO; a dedicated vision module if you only need detections",
- link="", confidence="Estimate", as_of="2026-07",
+ link="https://www.seeedstudio.com/OV5640-Camera-for-XIAO-ESP32S3-Sense-With-Heat-Sink-p-5739.html",
+ confidence="Verified", as_of="2026-09",
  fools="Autofocus does not work until the AF firmware is uploaded to the module at startup, and a "
        "camera that returns permanently blurry images is almost always this rather than a fault. "
        "Full-resolution frames are large enough that PSRAM is mandatory and Wi-Fi upload takes "
@@ -443,7 +449,8 @@ ENRICH_MANUAL = {
  requires="Dry or gel electrodes with good skin contact, and a stable mechanical mounting",
  substitutes="MAX30102 for PPG alone; AD8232 for ECG alone; MAX30001 for a cleaner clinical-grade "
              "front end",
- link="", confidence="Estimate", as_of="2026-07",
+ link="https://www.analog.com/en/products/max86150.html", confidence="Verified",
+ as_of="2026-09",
  fools="Motion artefacts dominate both channels and are far larger than the signals you want — "
        "this is the central problem of wearable physiology, not sensor accuracy. Pulse transit "
        "time is a genuine research route to cuffless blood-pressure TRENDS, but it requires "
@@ -544,7 +551,8 @@ ENRICH_MANUAL = {
  requires="A separate 12V heater supply, and an ADC that can resolve tens of millivolts",
  substitutes="A wideband LSU plus a CJ125 controller if you need an actual linear O2 reading; an "
              "electrochemical O2 cell for ambient air rather than exhaust",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.bosch-mobility.com/en/solutions/sensors/switching-type-lambda-sensor/",
+ confidence="Verified", as_of="2026-09",
  fools="A narrowband sensor is a switch, not a meter — its output is steeply non-linear and only "
        "meaningful within a hair of stoichiometric, so using it to 'measure' combustion efficiency "
        "across a range is a category error. It only works hot, and it reads garbage during warm-up. "
@@ -563,7 +571,7 @@ ENRICH_MANUAL = {
           "starting point",
  substitutes="A commercial aftermarket TPMS display if you only want the numbers; a direct "
              "pressure sensor if you can plumb into the system",
- link="", confidence="Estimate", as_of="2026-07",
+ link="https://www.ti.com/product/CC1101", confidence="Estimate", as_of="2026-09",
  fools="Sender protocols are manufacturer-specific and undocumented, and some are now encrypted or "
        "rolling-coded, so there is no guarantee your particular wheels are readable at all. Senders "
        "sleep when stationary and only transmit while rolling, so bench testing gives you nothing. "
@@ -583,7 +591,7 @@ ENRICH_MANUAL = {
  requires="A stable concentric probe geometry, shielded cabling, and a temperature sensor — "
           "dielectric constant is strongly temperature dependent",
  substitutes="Send a sample to a lab for real oil analysis; a particle counter for wear debris",
- link="", confidence="Estimate", as_of="2026-07",
+ link="https://www.ti.com/product/FDC1004", confidence="Estimate", as_of="2026-09",
  fools="Dielectric constant moves with temperature far more than with mild contamination, so "
        "without temperature compensation you are mostly plotting how warm the oil is. It cannot "
        "distinguish water ingress from oxidation from metal particles — all raise the reading, so "
@@ -605,7 +613,7 @@ ENRICH_MANUAL = {
           "e-textiles always fail",
  substitutes="Velostat for pressure matrices; EeonTex for repeatable piezoresistive fabric; "
              "conductive fabric tape for larger areas",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.adafruit.com/product/640", confidence="Verified", as_of="2026-09",
  fools="Stainless thread has meaningful resistance per metre, so a long run behaves like a resistor "
        "in series with your sensor and shifts the reading. Washing raises resistance permanently "
        "and repeated flexing eventually breaks strands, producing intermittent faults that are "
@@ -646,7 +654,7 @@ ENRICH_MANUAL = {
           "geometry between sensor, sample and light",
  substitutes="AS7341 for spectral resolution rather than three broad channels; a dedicated "
              "colorimeter for anything quantitative",
- link="", confidence="Estimate", as_of="2026-07",
+ link="https://www.adafruit.com/product/1334", confidence="Estimate", as_of="2026-09",
  fools="Everything about this technique is geometry and illumination: change the distance, the "
        "angle or the ambient light and the numbers move more than the chemistry does. Indicator "
        "media age, are batch-variable and are usually temperature dependent. Most strips are "
@@ -687,7 +695,7 @@ ENRICH_MANUAL = {
           "temperature and what the board is sitting on",
  substitutes="MPR121 for twelve properly-conditioned pads; TTP223 for a single reliable button; "
              "BLE RSSI (ESPresense) for room-level phone presence",
- link="", confidence="High", as_of="2026-07",
+ link="https://www.espressif.com/en/products/socs/esp32", confidence="High", as_of="2026-09",
  fools="Of the four 'free sensors' this promises, three are effectively gone: the hall sensor was "
        "removed from the SDK, the internal temperature sensor reads self-heated die temperature "
        "and is useless as an ambient reading, and RSSI is a link metric rather than a calibrated "
@@ -717,4 +725,264 @@ ENRICH_MANUAL = {
        "Readings must be compensated for temperature, salinity and altitude; uncompensated numbers "
        "can be tens of percent out. The membrane fouls with biofilm within weeks in a real pond. "
        "Calibration drifts and needs redoing monthly for data you intend to act on."),
+
+# ------------------------------------------------- 2026-09 sourcing pass
+# Purchase and datasheet links, and vendor SKU / library-name corrections,
+# from the September 2026 sourcing pass. Every URL below was fetched and
+# named the part. The evidence for each line — and the reason each sensor
+# still without a link was left null rather than guessed — is in
+# ../SOURCING_LOG.md.
+"S004": dict(lib="Adafruit-MAX31855-library"),
+"S007": dict(lib="Adafruit-MLX90614-Library"),
+"S015": dict(
+ brd="Adafruit 4099 weatherproof (ships an SHT30 element), cable probe versions"),
+"S022": dict(link="https://cfsensor.com/product/xgzp6897d/", confidence="Verified",
+ as_of="2026-09"),
+"S025": dict(link="https://www.adafruit.com/product/5606", confidence="Verified",
+ as_of="2026-09"),
+"S026": dict(link="https://www.sparkfun.com/smoke-sensor-mq-2.html", as_of="2026-09"),
+"S027": dict(link="https://www.sparkfun.com/products/8880", as_of="2026-09"),
+"S028": dict(link="https://www.sparkfun.com/carbon-monoxide-sensor-mq-7.html",
+ as_of="2026-09"),
+"S029": dict(link="https://www.winsen-sensor.com/sensors/voc-sensor/mq135.html",
+ as_of="2026-09"),
+"S030": dict(link="https://www.adafruit.com/product/3199", confidence="Verified",
+ as_of="2026-09"),
+"S031": dict(
+ link="https://www.digikey.com/en/products/detail/amphenol-sgx-sensortech/MICS-6814/15816395",
+ as_of="2026-09"),
+"S032": dict(link="https://www.adafruit.com/product/3709", confidence="Verified",
+ as_of="2026-09"),
+"S034": dict(link="https://www.winsen-sensor.com/sensors/ch2o-gas-sensor/ze08-ch2o.html",
+ as_of="2026-09"),
+"S035": dict(link="https://www.winsen-sensor.com/product/mh-741a.html", as_of="2026-09"),
+"S038": dict(link="https://www.winsen-sensor.com/sensors/co2-sensor/mh-z19c.html",
+ as_of="2026-09"),
+"S039": dict(link="https://senseair.com/product/s8/", confidence="Verified",
+ as_of="2026-09"),
+"S044": dict(link="https://www.dfrobot.com/product-531.html", as_of="2026-09"),
+"S046": dict(link="https://www.adafruit.com/product/4831", as_of="2026-09"),
+"S047": dict(link="https://www.adafruit.com/product/1918", confidence="Verified",
+ as_of="2026-09"),
+"S049": dict(link="https://www.sparkfun.com/products/9088", as_of="2026-09"),
+"S050": dict(link="https://www.sparkfun.com/sparkfun-spectral-uv-sensor-as7331-qwiic.html",
+ confidence="Verified", as_of="2026-09"),
+"S051": dict(brd="Adafruit 1334 (white LED, no STEMMA QT; discontinued)"),
+"S052": dict(link="https://www.adafruit.com/product/4698", as_of="2026-09"),
+"S053": dict(
+ link="https://www.sparkfun.com/sparkfun-spectral-sensor-breakout-as7263-nir-qwiic.html",
+ as_of="2026-09"),
+"S054": dict(link="https://www.adafruit.com/product/3595", as_of="2026-09"),
+"S056": dict(link="https://www.sparkfun.com/ultrasonic-distance-sensor-3-3v-hc-sr04.html",
+ confidence="Verified", as_of="2026-09"),
+"S061": dict(link="https://en.benewake.com/TFLuna/index.html", as_of="2026-09"),
+"S062": dict(link="https://www.slamtec.com/en/c1", as_of="2026-09"),
+"S063": dict(
+ link="https://www.sparkfun.com/infrared-proximity-sensor-sharp-gp2y0a21yk.html",
+ confidence="Verified", as_of="2026-09"),
+"S064": dict(link="https://www.dfrobot.com/product-1935.html", as_of="2026-09"),
+"S067": dict(link="https://www.hlktech.net/index.php?id=1094", as_of="2026-09"),
+"S068": dict(link="https://www.hlktech.com/en/Goods-226.html", as_of="2026-09"),
+"S069": dict(
+ link="https://www.mouser.com/en/new/seeed-studio/seeed-studio-mr60bha2-sensor-kit",
+ as_of="2026-09"),
+"S071": dict(link="https://www.adafruit.com/product/3538", confidence="Verified",
+ as_of="2026-09"),
+"S072": dict(
+ link="https://www.digikey.com/en/products/detail/tdk-invensense/MPU-6050/4038009",
+ confidence="Verified", as_of="2026-09"),
+"S081": dict(link="https://www.qstcorp.com/en_comp_prod/QMC5883L", confidence="Verified",
+ as_of="2026-09"),
+"S082": dict(link="https://www.adafruit.com/product/5579", confidence="Verified",
+ as_of="2026-09"),
+"S083": dict(
+ lib="Infineon TLV493D-A1B6-3DMagnetic-Sensor Arduino library (archived Sep 2024; successor "
+     "XENSIV TLx493D); Adafruit ships a CircuitPython driver only",
+ link="https://www.adafruit.com/product/4366", confidence="Verified", as_of="2026-09"),
+"S084": dict(
+ link="https://automation.honeywell.com/us/en/products/sensing-solutions/sensors/magnetic-sensors/ss39et-ss49e-ss59et-linear-sensor-ics",
+ as_of="2026-09"),
+"S085": dict(link="https://www.adafruit.com/product/375", as_of="2026-09"),
+"S086": dict(link="https://www.adafruit.com/product/4022", confidence="Verified",
+ as_of="2026-09"),
+"S087": dict(
+ link="https://product.tdk.com/en/search/sw_piezo/mic/mems-mic/info?part_no=INMP441",
+ as_of="2026-09"),
+"S088": dict(link="https://www.adafruit.com/product/6049", as_of="2026-09"),
+"S089": dict(link="https://www.adafruit.com/product/1713", confidence="Verified",
+ as_of="2026-09"),
+"S090": dict(link="https://www.adafruit.com/product/3421", confidence="Verified",
+ as_of="2026-09"),
+"S091": dict(link="https://www.sparkfun.com/piezo-element.html", as_of="2026-09"),
+"S092": dict(link="https://www.dfrobot.com/product-1663.html", confidence="Verified",
+ as_of="2026-09"),
+"S094": dict(link="https://www.seeedstudio.com/Grove-Vibration-Sensor-SW-420.html",
+ as_of="2026-09"),
+"S096": dict(link="https://www.sparkfun.com/products/11744", confidence="Verified",
+ as_of="2026-09"),
+"S097": dict(link="https://www.sparkfun.com/products/9197", confidence="Verified",
+ as_of="2026-09"),
+"S100": dict(link="https://www.adafruit.com/product/1361", confidence="Verified",
+ as_of="2026-09"),
+"S101": dict(link="https://www.sparkfun.com/sparkfun-load-cell-amplifier-hx711.html",
+ as_of="2026-09"),
+"S102": dict(link="https://www.sparkfun.com/mini-load-cell-100g-straight-bar-tal221.html",
+ as_of="2026-09"),
+"S107": dict(link="https://bela.io/products/trill-touch-sensors/", confidence="Verified",
+ as_of="2026-09"),
+"S108": dict(link="https://www.dfrobot.com/product-1493.html", as_of="2026-09"),
+"S109": dict(link="https://www.sparkfun.com/products/10264", as_of="2026-09"),
+"S111": dict(
+ link="https://www.digikey.com/en/products/detail/bend-labs-inc/100080101-01-EVAL/10484572",
+ as_of="2026-09"),
+"S112": dict(
+ brd="GY-MAX30102, generic MAX30102 breakout (SparkFun sells MAX30101, not MAX30102)"),
+"S115": dict(link="https://www.sparkfun.com/myoware-2-muscle-sensor.html",
+ confidence="Verified", as_of="2026-09"),
+"S116": dict(link="https://wiki.seeedstudio.com/Grove-GSR_Sensor/", as_of="2026-09"),
+"S117": dict(lib="Adafruit-MLX90614-Library"),
+"S120": dict(link="https://www.adafruit.com/product/4651", confidence="Verified",
+ as_of="2026-09"),
+"S121": dict(link="https://www.sparkfun.com/products/15901", as_of="2026-09"),
+"S122": dict(link="https://www.sparkfun.com/weather-meter-kit.html", as_of="2026-09"),
+"S123": dict(link="https://www.sparkfun.com/rain-gauge.html", as_of="2026-09"),
+"S125": dict(link="https://www.sparkfun.com/products/12705", confidence="Verified",
+ as_of="2026-09"),
+"S129": dict(link="https://www.dfrobot.com/product-1385.html", confidence="Verified",
+ as_of="2026-09"),
+"S130": dict(link="https://www.jxct-iot.com/product/showproduct.php?id=197",
+ confidence="Verified", as_of="2026-09"),
+"S131": dict(link="https://www.adafruit.com/product/1965", as_of="2026-09"),
+"S132": dict(link="https://www.adafruit.com/product/3846", as_of="2026-09"),
+"S133": dict(link="https://www.adafruit.com/product/381", as_of="2026-09"),
+"S138": dict(link="https://www.dfrobot.com/product-1517.html", as_of="2026-09"),
+"S140": dict(link="https://www.adafruit.com/product/464", confidence="Verified",
+ as_of="2026-09"),
+"S142": dict(
+ link="https://www.dypcn.com/integrated-waterproof-ultrasonic-liquid-level-sensor-ds1603-v1-0-product/",
+ as_of="2026-09"),
+"S167": dict(link="https://www.sparkfun.com/person-sensor-by-useful-sensors.html",
+ confidence="Verified", as_of="2026-09"),
+"S168": dict(link="https://www.dfrobot.com/product-1989.html", confidence="Verified",
+ as_of="2026-09"),
+"S171": dict(link="https://ecosense.io/products/radoneye", as_of="2026-09"),
+"S177": dict(link="https://www.sparkfun.com/products/18768", confidence="Verified",
+ as_of="2026-09"),
+"S179": dict(link="https://www.dfrobot.com/product-2282.html", as_of="2026-09"),
+"S180": dict(link="https://www.dfrobot.com/product-195.html", as_of="2026-09"),
+"S181": dict(
+ link="https://www.infineon.com/cms/en/product/sensor/radar-sensors/radar-sensors-for-iot/60ghz-radar/bgt60tr13c/",
+ as_of="2026-09"),
+"S183": dict(link="https://sensirion.com/products/catalog/SDP810-500Pa", as_of="2026-09"),
+"S184": dict(link="https://www.winsen-sensor.com/product/mq-8.html", as_of="2026-09"),
+"S186": dict(link="https://www.irrometer.com/200ss.html", as_of="2026-09"),
+"S189": dict(link="https://www.adafruit.com/product/4566", as_of="2026-09"),
+"S196": dict(
+ link="https://www.sparkfun.com/sparkfun-proximity-sensor-breakout-20cm-vcnl4040-qwiic.html",
+ confidence="Verified", as_of="2026-09"),
+"S197": dict(link="https://www.adafruit.com/product/4019", as_of="2026-09"),
+"S198": dict(link="https://maxbotix.com/products/mb7389", as_of="2026-09"),
+"S199": dict(link="https://www.winsen-sensor.com/sensors/combustible-sensor/mq4.html",
+ as_of="2026-09"),
+"S200": dict(link="https://www.winsen-sensor.com/product/mq-6.html", as_of="2026-09"),
+"S201": dict(link="https://www.winsen-sensor.com/sensors/o3-gas-sensor/mq131-l.html",
+ as_of="2026-09"),
+"S202": dict(link="https://www.adafruit.com/product/5593", confidence="Verified",
+ as_of="2026-09"),
+"S203": dict(
+ link="https://industrial.panasonic.com/ww/products/pt/papirs/models/EKMC1603111",
+ confidence="Verified", as_of="2026-09"),
+"S206": dict(
+ link="https://product.tdk.com/en/search/sensor/mortion-inertial/imu/info?part_no=MPU-9250",
+ confidence="Verified", as_of="2026-09"),
+"S207": dict(
+ link="https://www.sparkfun.com/sparkfun-triple-axis-accelerometer-breakout-kx132-qwiic.html",
+ confidence="Verified", as_of="2026-09"),
+"S208": dict(link="https://www.adafruit.com/product/1063", confidence="Verified",
+ as_of="2026-09"),
+"S210": dict(link="https://www.adafruit.com/product/381", as_of="2026-09"),
+"S211": dict(
+ link="https://mouser.com/ProductDetail/SST-Sensing/LLC200D3SH?qs=3jNSNtuqJTJkvCfMBevuGw%3D%3D",
+ confidence="Verified", as_of="2026-09"),
+"S216": dict(link="https://www.murata.com/en-us/products/sensor/overview/item/scl3300-d01",
+ as_of="2026-09"),
+"S230": dict(link="https://www.sparkfun.com/products/14351", confidence="Verified",
+ as_of="2026-09"),
+"S233": dict(link="https://www.vernier.com/product/nitrate-ion-selective-electrode/",
+ confidence="Verified", as_of="2026-09"),
+"S236": dict(link="https://www.sparkfun.com/ultrasonic-distance-sensor-3-3v-hc-sr04.html",
+ as_of="2026-09"),
+"S255": dict(link="https://www.dfrobot.com/product-1863.html", confidence="Verified",
+ as_of="2026-09"),
+"S258": dict(link="https://www.sparkfun.com/obd-ii-to-db9-cable.html",
+ confidence="Verified", as_of="2026-09"),
+"S260": dict(link="https://automation.omron.com/en/us/products/family/E3Z/e3z-r61",
+ as_of="2026-09"),
+"S261": dict(
+ link="https://www.digikey.com/en/products/detail/omron-automation-and-safety/E3Z-T61/408006",
+ confidence="Verified", as_of="2026-09"),
+"S262": dict(
+ link="https://www.bannerengineering.com/us/en/products/machine-safety/safety-light-curtains/simple-rugged-safety-light-curtains-ls-series.html",
+ as_of="2026-09"),
+"S267": dict(
+ link="https://www.sparkfun.com/sparkfun-simultaneous-rfid-reader-m6e-nano.html",
+ as_of="2026-09"),
+"S269": dict(link="https://www.nxp.com/products/PN5180A0HN", confidence="Verified",
+ as_of="2026-09"),
+"S271": dict(
+ link="https://www.nxp.com/products/rfid-nfc/nfc-hf/connected-nfc-tags/ntag-ic-plus-2k-nfc-forum-type-2-tag-with-ic-interface:NTAG_I2C",
+ confidence="Verified", as_of="2026-09"),
+"S272": dict(link="https://www.priority1design.com.au/animal_tag_rfid_reader.html",
+ as_of="2026-09"),
+"S273": dict(link="https://www.hidglobal.com/products/proxpoint-plus", as_of="2026-09"),
+"S274": dict(link="https://www.dfrobot.com/product-2051.html", confidence="Verified",
+ as_of="2026-09"),
+"S318": dict(
+ link="https://ams-osram.com/products/sensor-solutions/ambient-light-color-spectral-proximity-sensors/ams-tcs3200-color-sensor",
+ as_of="2026-09"),
+"S323": dict(link="https://www.adafruit.com/product/2748", as_of="2026-09"),
+"S331": dict(
+ lib="ST VL53L4CD ULD driver (official portable C), vendor Arduino wrapper library"),
+"S332": dict(lib="ST VL53L4CX ULD driver (official C), stm32duino VL53L4CX (Arduino)"),
+"S334": dict(
+ link="https://shop.pimoroni.com/en-us/products/pmw3901-optical-flow-sensor-breakout",
+ confidence="Verified", as_of="2026-09"),
+"S335": dict(
+ link="https://shop.pimoroni.com/en-us/products/paa5100je-optical-tracking-spi-breakout",
+ confidence="Verified", as_of="2026-09"),
+"S340": dict(link="https://en.ai-thinker.com/pro_view-140.html", as_of="2026-09"),
+"S341": dict(link="https://hlktech.net/index.php?cateid=755&id=1076", confidence="Verified",
+ as_of="2026-09"),
+"S349": dict(link="https://www.dfrobot.com/product-1797.html", confidence="Verified",
+ as_of="2026-09"),
+"S350": dict(
+ link="https://www.gfps.com/int/en/products-solutions.catalog.html/measurement/flow/paddlewheel-sensors/~108393.html",
+ as_of="2026-09"),
+"S354": dict(
+ link="https://www.vega.com/en-us/products/product-catalog/level/guided-wave-radar",
+ as_of="2026-09"),
+"S360": dict(link="https://implexx.io/products/implexx-sap-flow-sensor", as_of="2026-09"),
+"S389": dict(link="https://www.microchip.com/en-us/product/at42qt1070", as_of="2026-09"),
+"S390": dict(link="https://www.goodix.com/en/product/touch/touch_screen_controller",
+ as_of="2026-09"),
+"S392": dict(link="https://www.sparkfun.com/load-cell-200kg-s-type-tas501.html",
+ as_of="2026-09"),
+"S393": dict(link="https://www.sparkfun.com/products/13332", confidence="Verified",
+ as_of="2026-09"),
+"S394": dict(link="https://www.futek.com/store/torque-sensors/reaction-torque-sensor",
+ as_of="2026-09"),
+"S395": dict(link="https://www.adafruit.com/product/1361", as_of="2026-09"),
+"S396": dict(link="https://www.adafruit.com/product/3669", as_of="2026-09"),
+"S398": dict(link="https://www.adafruit.com/product/1168", confidence="Verified",
+ as_of="2026-09"),
+"S400": dict(link="https://www.st.com/en/mems-and-sensors/mp34dt05-a.html",
+ as_of="2026-09"),
+"S401": dict(link="https://www.cetaceanresearch.com/hydrophones/c57-hydrophone/index.html",
+ as_of="2026-09"),
+"S405": dict(link="https://www.semtech.com/products/wireless-rf/lora-connect/sx1262",
+ as_of="2026-09"),
+"S406": dict(
+ link="https://www.digikey.com/en/products/detail/onsemi/MICROFC-SMA-60035-GEVB/9744738",
+ as_of="2026-09"),
+"S407": dict(link="https://www.vishay.com/en/product/81521/", as_of="2026-09"),
 }
