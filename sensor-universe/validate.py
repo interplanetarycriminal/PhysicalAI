@@ -234,6 +234,30 @@ def validate_fusion(records):
                                        + ", ".join(missing))
 
 
+def validate_notes():
+    """Task 5.3's gate on data/inference_notes.py.
+
+    Route-level commentary is keyed off the outcome vocabulary, so a typo'd or
+    renamed key would silently attach a note to nothing. Outcomes that simply do
+    not have a note yet are a known, counted gap — a warning, not an error."""
+    try:
+        import inference_notes
+    except ImportError:
+        warn("notes", "data/inference_notes.py not present — note checks skipped")
+        return
+    notes = inference_notes.NOTES
+    for key, note in notes.items():
+        if key not in vocab.INFERENCE:
+            err(f"notes:{key}", "not an outcome in vocab.INFERENCE")
+        for f in ("fools", "unlocks", "market"):
+            if not str(note.get(f) or "").strip():
+                err(f"notes:{key}", f"missing/empty {f!r}")
+    gap = len(set(vocab.INFERENCE) - set(notes))
+    if gap:
+        warn("notes", f"{gap} of {len(vocab.INFERENCE)} outcomes still have no "
+                      "{fools, unlocks, market} note")
+
+
 def main():
     records, seeds = load_all()
     seen_ids, seen_pns = {}, {}
@@ -241,6 +265,7 @@ def main():
         validate_record(r, seen_ids, seen_pns)
     validate_seeds(records, seeds)
     validate_fusion(records)
+    validate_notes()
 
     collisions = validate_i2c(records)
 

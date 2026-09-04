@@ -287,11 +287,11 @@ Every ranking above scores parts one at a time. This one scores SETS, which is w
 | Constraint | Eligible | Reachable | % | Kit cost | Lost entirely |
 |---|--:|--:|--:|--:|---|
 | 🔒 No privacy footprint | 350 | 150/151 | 99% | 63 parts, $903 | Did they blink or move their eyes? |
-| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is new furniture or flooring off-gassing? · Is something emitting ozone? · Is there carbon monoxide? · How polluted is the air right now? · Is radon accumulating? · Is there a flammable gas leak? |
-| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | How stressed or recovered is this body? · Are they likely dehydrated? · Which muscle is working, and how hard? · How is this person walking? · How much have they moved today? · Is this person's arousal or stress rising? |
-| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | Is new furniture or flooring off-gassing? · Is something emitting ozone? · How polluted is the air right now? · Is radon accumulating? · How stressed or recovered is this body? · Which muscle is working, and how hard? |
-| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · What is transmitting nearby, and how strongly? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is making noise above human hearing? |
-| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is radon accumulating? · Is new furniture or flooring off-gassing? · Did they blink or move their eyes? · Has breathing become irregular or stopped? · How stressed or recovered is this body? · What is the heart rate? |
+| 🔋 Battery, µA-class | 109 | 120/151 | 79% | 42 parts, $324 | Is new furniture or flooring off-gassing? · Is there carbon monoxide? · How polluted is the air right now? · Is there a flammable gas leak? · Is something emitting ozone? · Is radon accumulating? |
+| 🚫 Never touches the subject | 236 | 131/151 | 87% | 55 parts, $852 | Which muscle is working, and how hard? · How much have they moved today? · Did they blink or move their eyes? · Is this person's arousal or stress rising? · What is the blood oxygen saturation? · How is this person walking? |
+| 💵 Nothing over $5 | 75 | 110/151 | 73% | 34 parts, $73 | Is new furniture or flooring off-gassing? · How polluted is the air right now? · Is something emitting ozone? · Is radon accumulating? · What is the heart rate? · Which muscle is working, and how hard? |
+| 🧑‍🔧 Beginner-buildable | 216 | 139/151 | 92% | 48 parts, $346 | Is radon accumulating? · Did they blink or move their eyes? · What is making noise above human hearing? · Which radioactive isotope is this? · Is the atmosphere electrically charged? · What is transmitting nearby, and how strongly? |
+| 🌦 Survives outdoors | 173 | 133/151 | 88% | 49 parts, $1073 | Is radon accumulating? · Is new furniture or flooring off-gassing? · What is the heart rate? · How stressed or recovered is this body? · Which muscle is working, and how hard? · Is this person's arousal or stress rising? |
 
 ## Every outcome, and what buys it
 
@@ -758,8 +758,8 @@ Hubs cover many outcomes and are replaceable. Keys cover few and are the only ro
 | Rotary torque sensor | 180.0 | 3 outcomes | High-range EC probe for salinity (K=10) | 70.0 | 0.06 |
 | PDM MEMS microphone | 3.0 | 4 outcomes | ADS1292R 2-channel ECG + respiration front end | 70.0 | 0.06 |
 | MLX90641 thermal (16x12) | 60 | 5 outcomes | ZED-X20P all-band centimetre GNSS | 90.0 | 0.06 |
-| VL53L0X ToF laser | 5 | 8 outcomes | ANT-B10 Bluetooth angle-of-arrival anchor | 90.0 | 0.06 |
-| HC-SR04 ultrasonic | 1.5 | 8 outcomes | Vibrating-fork level switch | 90.0 | 0.06 |
+| HC-SR04 ultrasonic | 1.5 | 8 outcomes | ANT-B10 Bluetooth angle-of-arrival anchor | 90.0 | 0.06 |
+| VL53L0X ToF laser | 5 | 8 outcomes | Vibrating-fork level switch | 90.0 | 0.06 |
 | OPT4048 tristimulus color | 9 | 4 outcomes | ORP (redox) probe | 110 | 0.05 |
 | SX1262 sub-GHz transceiver | 8.0 | 2 outcomes | ADXL1002 wideband analog vibration sensor | 95.0 | 0.05 |
 | RV4145A ground-fault / residual current detector | 2.0 | 3 outcomes | SenXor MI0801 CMOS thermal imager | 95.0 | 0.05 |
