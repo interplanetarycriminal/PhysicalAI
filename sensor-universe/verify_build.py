@@ -6,11 +6,12 @@ Runs after patch_v50.py and before audit_workbook.py. Exit 1 on any failure.
 See HANDOFF.md, operating rule 6. Every check here caught a real defect once.
 """
 import csv
+import itertools
 import json
 import re
 import sys
 import zipfile
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -25,6 +26,7 @@ import fusion  # noqa: E402
 import loader  # noqa: E402
 import outcome_solver as osv  # noqa: E402
 import patch_v50  # noqa: E402
+import solve  # noqa: E402
 import vocab  # noqa: E402
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else str(patch_v50.OUT)
@@ -175,6 +177,167 @@ with open(HERE / "exports" / "fusion_edges.csv") as f:
     check("fusion_edges.csv rows", sum(1 for _ in f) == len(fusion.FUSION_EDGES) + 1)
 j = json.load(open(HERE / "exports" / "solver_run.json"))
 check("solver_run.json fusion object", j.get("fusion", {}).get("n_edges") == len(fusion.FUSION_EDGES))
+
+
+# 8 · best_groups sanity — the set ranker, re-derived rather than re-called
+GR = sol.get("groups")
+by_id = {r["id"]: r for r in records}
+RANKINGS = [n for n, _o, _l in solve.GROUP_RANKINGS]
+OBJ_OF = {n: o for n, o, _l in solve.GROUP_RANKINGS}
+SHARED2 = {"I2C": (2, 0), "SPI": (3, 1), "1-Wire": (1, 0), "I2S": (3, 0)}
+
+
+def pin_cost2(recs):
+    """Independent re-implementation of the set pin model: a shared bus is paid
+    once for the set then per device, and a multi-interface part takes whatever
+    is cheapest given which buses the set has opened. Enumerated with
+    combinations rather than a bitmask, so it is a genuine second opinion."""
+    buses = sorted({i for r in recs for i in (r.get("iface") or []) if i in SHARED2})
+    best = None
+    for n in range(len(buses) + 1):
+        for combo in itertools.combinations(buses, n):
+            total, ok = sum(SHARED2[b][0] for b in combo), True
+            for r in recs:
+                ifc = r.get("iface") or []
+                opts = [SHARED2[b][1] for b in combo if b in ifc]
+                if "UART" in ifc:
+                    opts.append(2)
+                if not ifc or any(i not in SHARED2 and i != "UART" for i in ifc):
+                    opts.append(int(r.get("pins") or 0))
+                if not opts:
+                    ok = False
+                    break
+                total += min(opts)
+            if ok and (best is None or total < best):
+                best = total
+    return best if best is not None else sum(int(r.get("pins") or 0) for r in recs)
+
+
+def fixed_addr2(r):
+    """The one I2C address a part cannot be moved off, or None. Ranges are
+    expanded, so '0x18-0x1F' is eight addresses and therefore not fixed."""
+    if "I2C" not in (r.get("iface") or []) or len(r.get("iface") or []) > 1:
+        return None
+    t = r.get("i2c_addr") or ""
+    got = set()
+    for m in re.finditer(r"0x([0-9A-Fa-f]{2})\s*[-\u2013\u2014]\s*0x([0-9A-Fa-f]{2})", t):
+        a, b = int(m.group(1), 16), int(m.group(2), 16)
+        if a <= b and b - a <= 32:
+            got |= set(range(a, b + 1))
+    got |= {int(x, 16) for x in re.findall(r"0x([0-9A-Fa-f]{2})", t)}
+    low = t.lower()
+    if len(got) != 1 or any(w in low for w in osv.I2C_FLEX_WORDS):
+        return None
+    return got.pop()
+
+
+check("groups block present", bool(GR) and all(k in GR for k in RANKINGS + ["groups"]))
+GG = GR["groups"] if GR else []
+kmax = GR["params"]["max_k"] if GR else 0
+
+bad = [g["ids"] for g in GG
+       if not (2 <= g["n_parts"] <= kmax)
+       or len(set(g["ids"])) != g["n_parts"]
+       or any(i not in by_id for i in g["ids"])]
+check("groups are 2..k distinct catalog sensors", not bad,
+      str(bad[:3]) if bad else f"{len(GG)} groups, k<={kmax}")
+
+bad = [(g["ids"], g["usd"], round(sum(by_id[i].get("usd") or 0 for i in g["ids"]), 2))
+       for g in GG if abs(g["usd"] - sum(by_id[i].get("usd") or 0 for i in g["ids"])) > 0.005]
+check("group usd equals the sum of its members", not bad, str(bad[:3]) if bad else f"{len(GG)} ok")
+
+bad = [(g["ids"], g["pins"], pin_cost2([by_id[i] for i in g["ids"]]))
+       for g in GG if g["pins"] != pin_cost2([by_id[i] for i in g["ids"]])]
+check("pin model independently reproduced", not bad,
+      str(bad[:3]) if bad else f"{len(GG)} groups repriced")
+
+bad = []
+for g in GG:
+    fixed = [a for a in (fixed_addr2(by_id[i]) for i in g["ids"]) if a is not None]
+    if len(fixed) != len(set(fixed)):
+        bad.append(g["ids"])
+check("no group collides two rigid I2C addresses", not bad,
+      str(bad[:3]) if bad else f"{len(GG)} groups clean")
+
+# ...but that check alone has no teeth: every rigid collision scores far too low
+# to reach a top-30 ranking, so GG is clean whether or not `outcome_solver`
+# enforces the rule. Give it an oracle. Re-derive the colliding pairs from the
+# catalog here, then make the ranker prove it rejects each one, on a two-part
+# universe where no better set can crowd it out of the answer.
+gp = GR["params"] if GR else {}
+gpool = {}
+for sid, (r, inf) in osv.index(records, vocab.INFERENCE).items():
+    usd = r.get("usd") if isinstance(r.get("usd"), (int, float)) else 1e9
+    if gp.get("max_usd") is not None and usd > gp["max_usd"]:
+        continue
+    if int(r.get("pins") or 0) > osv.MAX_PART_PINS or osv.esp32_unusable(r):
+        continue
+    gpool[sid] = (r, inf)
+
+rigid = defaultdict(list)
+for sid, (r, _inf) in gpool.items():
+    a = fixed_addr2(r)
+    if a is not None:
+        rigid[a].append(sid)
+rigid_pairs = sorted((a, x, y) for a, ids in rigid.items()
+                     for x, y in itertools.combinations(sorted(ids), 2))
+# a named pair to anchor the oracle: two thermal arrays welded to 0x33, one
+# interface each, no jumper word anywhere in either address string
+anchor = [(a, x, y) for a, x, y in rigid_pairs
+          if "MLX90640" in gpool[x][0]["n"] and "MLX90641" in gpool[y][0]["n"]]
+check("MLX90640 + MLX90641 re-derive as a rigid 0x33 collision",
+      len(gpool) == gp.get("pool") and len(anchor) == 1 and anchor[0][0] == 0x33,
+      f"pool {len(gpool)} vs {gp.get('pool')}, {len(rigid_pairs)} rigid pairs, "
+      f"anchor {[(x, y) for _a, x, y in anchor]}")
+
+survived = []
+for a, x, y in rigid_pairs:
+    res = osv.best_groups({x: gpool[x], y: gpool[y]},
+                          records=[gpool[x][0], gpool[y][0]], min_k=2, max_k=2)
+    if res["groups"] or res["params"]["rejected"] != 1:
+        survived.append((f"0x{a:02x}", x, y, len(res["groups"]),
+                         res["params"]["rejected"]))
+check("the ranker really rejects every rigid I2C collision",
+      bool(rigid_pairs) and not survived,
+      str(survived[:3]) if survived else
+      f"{len(rigid_pairs)} pairs, each rejected 1-for-1 on its own universe")
+
+hit = [(name, g["ids"]) for name in RANKINGS for g in GR[name]
+       for _a, x, y in anchor if x in g["ids"] and y in g["ids"]]
+check("no ranking row contains the rigid 0x33 pair", not hit,
+      str(hit[:3]) if hit else f"{sum(len(GR[n]) for n in RANKINGS)} rows scanned")
+
+bad = []
+for name in RANKINGS:
+    vals = [g[OBJ_OF[name]] for g in GR[name]]
+    if vals != sorted(vals, reverse=True):
+        bad.append(name)
+check("every ranking is monotone in its objective", not bad,
+      str(bad) or f"{len(RANKINGS)} rankings")
+
+bad = []
+for name in RANKINGS:
+    g = GR[name][0]
+    recs_g = [by_id[i] for i in g["ids"]]
+    fired, granted = closure2(recs_g)
+    declared = len({k for r in recs_g for k in (r.get("inferences") or [])
+                    if k in vocab.INFERENCE})
+    em = len({x for x in granted if x in fusion.EMERGENT})
+    if (declared, em, declared + em) != (g["declared"], g["emergent"], g["score"]):
+        bad.append((name, g["ids"], declared, em, g["declared"], g["emergent"], g["score"]))
+check("top row of each ranking recounted from scratch", not bad,
+      str(bad[:2]) if bad else f"{len(RANKINGS)} top rows")
+
+gcsv = HERE / "exports" / "best_groups.csv"
+check("best_groups.csv exists", gcsv.exists())
+if gcsv.exists():
+    with open(gcsv) as f:
+        grows = list(csv.reader(f))
+    check("best_groups.csv header matches the writer", grows[0] == solve.GROUP_COLS,
+          str(grows[0][:4]))
+    want = sum(len(GR[n]) for n in RANKINGS)
+    check("best_groups.csv row count equals the rankings", len(grows) - 1 == want,
+          f"{len(grows) - 1} rows vs {want}")
 
 print()
 if fails:
